@@ -184,7 +184,7 @@ La decisión clínica seguirá correspondiendo siempre al profesional sanitario.
 - [x] Definición del proyecto
 - [x] Definición del MVP
 - [x] Arquitectura inicial
-- [ ] Configuración del proyecto KMP
+- [x] Configuración del proyecto KMP
 - [ ] Entrenamiento del modelo IA
 - [ ] Integración IA
 - [ ] Firebase
