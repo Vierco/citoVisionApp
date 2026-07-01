@@ -40,6 +40,13 @@ Desarrollar una aplicación multiplataforma basada en IA capaz de asistir al pro
 - Mostrar el resultado de forma visual e intuitiva.
 - Almacenar análisis asociados a pacientes mediante Firebase.
 
+
+<p align="center">
+  <img src="external/muestra_a.png" alt="Imagen 1" width="250" hspace="10">
+  <img src="external/muestra_b.png" alt="Imagen 2" width="250" hspace="10">
+  <img src="external/muestra_c.png" alt="Imagen 3" width="220" hspace="10">
+</p>
+
 ---
 
 # Alcance del MVP
