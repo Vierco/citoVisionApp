@@ -1,6 +1,11 @@
+<p align="center">
+  <img src="external/citoVision.png" alt="citoVision Logo" width="300">
+</p>
+
+
 # 🔬 citoVision
 
-> Aplicación de apoyo al análisis microscópico basada en Visión por Computador e Inteligencia Artificial para la detección, conteo y clasificación automática de células sanguíneas.
+> Aplicación de apoyo al análisis microscópico basada en visión e Inteligencia Artificial para la detección, conteo y clasificación automática de células sanguíneas.
 
 > ⚠️ **Estado del proyecto:** MVP en desarrollo.
 
@@ -8,14 +13,14 @@
 
 # Descripción
 
-citoVision es un proyecto desarrollado como Trabajo Fin de Máster cuyo objetivo es demostrar cómo la Inteligencia Artificial puede utilizarse como herramienta de apoyo en tareas del ámbito sanitario, sin sustituir el criterio del profesional.
+citoVision es un proyecto desarrollado como TFM cuyo objetivo es demostrar cómo la Inteligencia Artificial puede utilizarse como herramienta de apoyo en tareas del ámbito sanitario, sin sustituir el criterio del profesional.
 
 La aplicación analiza imágenes microscópicas de muestras sanguíneas para:
 
-- Detectar células.
-- Contarlas automáticamente.
-- Clasificarlas según su tipo.
-- Mostrar estadísticas del análisis.
+- Detección celular.
+- Conteo seleccionado.
+- Clasificación según tipo y estado.
+- Estadísticas del análisis y segimuiento de muestras de fuente común.
 
 El proyecto está concebido como un MVP (Minimum Viable Product), priorizando un alcance realista y técnicamente sólido.
 
