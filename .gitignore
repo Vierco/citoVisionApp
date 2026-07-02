@@ -13,3 +13,10 @@
 .externalNativeBuild
 .cxx
 local.properties
+.gradle/
+.kotlin/
+**/build/
+.idea/artifacts/
+.idea/git_toolbox_prj.xml
+*.class
+*.kotlin_module

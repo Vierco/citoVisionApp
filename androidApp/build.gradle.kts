@@ -2,18 +2,19 @@ import io.gitlab.arturbosch.detekt.Detekt
 
 plugins {
     alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ktlint)
     alias(libs.plugins.detekt)
-
 }
 
 android {
     namespace = "dev.lovelace.citovision"
     compileSdk {
-        version = release(36) {
-            minorApiLevel = 1
-        }
+        version =
+            release(36) {
+                minorApiLevel = 1
+            }
     }
 
     defaultConfig {
@@ -37,16 +38,21 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+    kotlinOptions {
+        jvmTarget = "11"
+    }
     buildFeatures {
         compose = true
     }
-
 }
 
 ktlint {
     android.set(true)
     outputToConsole.set(true)
     ignoreFailures.set(false)
+    filter {
+        exclude { it.file.path.contains("build/") }
+    }
 }
 
 detekt {
@@ -60,12 +66,11 @@ tasks.withType<Detekt>().configureEach {
         xml.required.set(true)
         html.required.set(true)
         txt.required.set(false)
-
     }
 }
 
-
 dependencies {
+    implementation(project(":shared"))
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.material3)

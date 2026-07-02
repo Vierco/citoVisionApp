@@ -38,7 +38,12 @@ jobs:
               env:
                   REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               run: |
-                  cat app/build/reports/detekt/detekt.xml | reviewdog \
+                  REPORTS=$(find . -path "*/build/reports/detekt/detekt.xml")
+                  if [ -z "$REPORTS" ]; then
+                    echo "No Detekt reports found."
+                    exit 0
+                  fi
+                  cat $REPORTS | reviewdog \
                     -f=checkstyle \
                     -name="detekt" \
                     -reporter=github-pr-review \
@@ -73,7 +78,12 @@ jobs:
               env:
                   REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               run: |
-                  find . -path "*/build/reports/ktlint/*.xml" -print -exec cat {} \; | reviewdog \
+                  REPORTS=$(find . -path "*/build/reports/ktlint/*.xml")
+                  if [ -z "$REPORTS" ]; then
+                    echo "No Ktlint reports found."
+                    exit 0
+                  fi
+                  cat $REPORTS | reviewdog \
                     -f=checkstyle \
                     -name="ktlint" \
                     -reporter=github-pr-review \
