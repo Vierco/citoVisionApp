@@ -17,6 +17,7 @@ kotlin {
                 implementation(project(":shared"))
                 implementation(compose.desktop.currentOs)
                 implementation(compose.material3)
+                implementation(libs.kotlinx.coroutines.swing)
             }
         }
     }
