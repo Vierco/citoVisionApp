@@ -1,22 +1,69 @@
 package dev.lovelace.citovision.presentation.screens
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.scale
+import androidx.compose.ui.unit.dp
+import citovision.shared.generated.resources.Res
+import citovision.shared.generated.resources.celula
+import citovision.shared.generated.resources.splash_initializing
+import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun SplashScreen() {
     Box(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .drawBehind {
+                // Fondo blanco base
+                drawRect(Color.White)
+
+                // Efecto de resplandor azul horizontal (rectángulo desenfocado)
+                val primaryColor = Color(0xFF2FA7F0)
+                scale(scaleX = 2.2f, scaleY = 1.6f, pivot = center) {
+                    drawCircle(
+                        brush = Brush.radialGradient(
+                            colors = listOf(
+                                primaryColor.copy(alpha = 0.25f),
+                                Color.Transparent,
+                            ),
+                            center = center,
+                            radius = size.width * 0.4f,
+                        ),
+                        radius = size.width * 0.4f,
+                        center = center,
+                    )
+                }
+            },
         contentAlignment = Alignment.Center,
     ) {
-        Text(
-            text = "citoVision",
-            style = MaterialTheme.typography.displayLarge,
-        )
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Image(
+                painter = painterResource(Res.drawable.celula),
+                contentDescription = null,
+                modifier = Modifier.size(200.dp)
+            )
+            Spacer(modifier = Modifier.height(24.dp))
+            Text(
+                text = stringResource(Res.string.splash_initializing),
+                style = MaterialTheme.typography.headlineMedium,
+            )
+        }
     }
 }

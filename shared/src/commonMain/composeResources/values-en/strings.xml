@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">citoVision</string>
+    <string name="splash_initializing">Initializing system…</string>
+
+    <!-- Login -->
+    <string name="login_secure_access">Secure access to clinical environment</string>
+    <string name="login_email_label">Email Address</string>
+    <string name="login_email_placeholder">doctor@clinic.com</string>
+    <string name="login_password_label">Password</string>
+    <string name="login_password_placeholder">••••••••</string>
+    <string name="login_forgot_password">Forgot your password?</string>
+    <string name="login_button_sign_in">Sign In</string>
+    <string name="login_or_separator">or</string>
+    <string name="login_google_button">Login with Google</string>
+    <string name="login_guest_button">Continue as guest</string>
+    <string name="login_show_password">Show password</string>
+    <string name="login_hide_password">Hide password</string>
+    <string name="login_error_email_format">Invalid email format</string>
+    <string name="login_error_password_chars">Invalid characters</string>
+    <string name="login_error_password_desc">Only uppercase, lowercase letters and numbers are allowed.</string>
+    <string name="common_close">Close</string>
+
+    <!-- Main Navigation -->
+    <string name="nav_analysis">Analysis</string>
+    <string name="nav_history">History</string>
+    <string name="nav_patients">Patients</string>
+    <string name="nav_settings">Settings</string>
+
+    <!-- History -->
+    <string name="history_empty_title">No previous analysis</string>
+    <string name="history_empty_desc">Saved analysis will appear here.</string>
+
+    <!-- Patients -->
+    <string name="patients_search_title">Patient Search</string>
+    <string name="patients_search_desc_default">Quickly find clinical records and analysis results.</string>
+    <string name="patients_close_file">Close record</string>
+    <string name="patients_no_results_title">No active results</string>
+    <string name="patients_no_results_desc">Enter the patient ID or full name in the search bar above to access clinical history.</string>
+    <string name="common_back">Back</string>
+    <string name="patients_id_name_label">Patient ID / Name</string>
+    <string name="patients_search_placeholder">E.g.: PAC-2023-8942 or John Doe</string>
+    <string name="patients_button_search">Search</string>
+    <string name="patients_error_empty_title">Empty search</string>
+    <string name="patients_error_empty_desc">Please enter a patient ID or name to search.</string>
+
+    <!-- Analysis -->
+    <string name="analysis_upload_title">Upload Sample</string>
+    <string name="analysis_upload_desc">Select or take a photograph of the cytological sample for analysis</string>
+    <string name="analysis_select_image">Select Image</string>
+    <string name="analysis_supported_formats">Supported formats: JPG, PNG, DICOM</string>
+    <string name="analysis_button_scan">Start Scanner</string>
+    <string name="analysis_scan_hint">*Requires loading a valid image to start</string>
+
+    <!-- Components -->
+    <string name="card_metadata">Date: %1$s | Patient: %2$s</string>
+    <string name="card_view_detail">View Detail</string>
+    <string name="dialog_patient_label">Patient</string>
+    <string name="dialog_date_label">Analysis Date</string>
+    <string name="dialog_cell_count_label">Cell Count (Summary)</string>
+</resources>

@@ -91,7 +91,7 @@ error: "#F53A63"        # Rojo principal
 errorPressed: "#C71C43" # Rojo de card pulsado
 info: "#2FA7F0"         # Azul (coincide con primary)
 ```
-
+- Nota sobre el color: el nombre de la aplicación, siempre que aparezca, irá en el color terciario.
 ---
 
 # Elevation
@@ -116,13 +116,13 @@ fontFamily: Dongle (regular and bold)
 ## Scale
 
 ```yaml
-  displayLarge: 40sp
-  headlineLarge: 32sp
-  headlineMedium: 28sp
-  titleLarge: 22sp
-  bodyLarge: 18sp
-  bodyMedium: 16sp
-  labelLarge: 16sp
+  displayLarge: 72sp
+  headlineLarge: 56sp
+  headlineMedium: 48sp
+  titleLarge: 40sp
+  bodyLarge: 32sp
+  bodyMedium: 28sp
+  labelLarge: 28sp
 ```
 
 ---

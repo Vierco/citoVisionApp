@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">citoVision</string>
+    <string name="splash_initializing">Iniciando sistema…</string>
+
+    <!-- Login -->
+    <string name="login_secure_access">Acceso seguro al entorno clínico</string>
+    <string name="login_email_label">Correo Electrónico</string>
+    <string name="login_email_placeholder">doctor@clinica.com</string>
+    <string name="login_password_label">Contraseña</string>
+    <string name="login_password_placeholder">••••••••</string>
+    <string name="login_forgot_password">¿Olvidaste tu contraseña?</string>
+    <string name="login_button_sign_in">Iniciar Sesión</string>
+    <string name="login_or_separator">o</string>
+    <string name="login_google_button">Login con Google</string>
+    <string name="login_guest_button">Continuar como invitado</string>
+    <string name="login_show_password">Mostrar contraseña</string>
+    <string name="login_hide_password">Ocultar contraseña</string>
+    <string name="login_error_email_format">Formato de correo electrónico incorrecto</string>
+    <string name="login_error_password_chars">Caracteres no admitidos</string>
+    <string name="login_error_password_desc">Solo se admiten mayúsculas, minúsculas y números.</string>
+    <string name="common_close">Cerrar</string>
+
+    <!-- Main Navigation -->
+    <string name="nav_analysis">Análisis</string>
+    <string name="nav_history">Historial</string>
+    <string name="nav_patients">Pacientes</string>
+    <string name="nav_settings">Ajustes</string>
+
+    <!-- History -->
+    <string name="history_empty_title">No hay análisis previos</string>
+    <string name="history_empty_desc">Los análisis guardados aparecerán aquí.</string>
+
+    <!-- Patients -->
+    <string name="patients_search_title">Búsqueda de Pacientes</string>
+    <string name="patients_search_desc_default">Encuentre rápidamente historiales clínicos y resultados de análisis.</string>
+    <string name="patients_close_file">Cerrar ficha</string>
+    <string name="patients_no_results_title">Sin resultados activos</string>
+    <string name="patients_no_results_desc">Ingrese el ID de paciente o su nombre completo en el buscador superior para acceder al historial clínico.</string>
+    <string name="common_back">Volver</string>
+    <string name="patients_id_name_label">ID de Paciente / Nombre</string>
+    <string name="patients_search_placeholder">Ej: PAC-2023-8942 o Juan Pérez</string>
+    <string name="patients_button_search">Buscar</string>
+    <string name="patients_error_empty_title">Búsqueda vacía</string>
+    <string name="patients_error_empty_desc">Por favor, introduzca un ID de paciente o nombre para realizar la búsqueda.</string>
+
+    <!-- Analysis -->
+    <string name="analysis_upload_title">Subir Muestra</string>
+    <string name="analysis_upload_desc">Selecciona o toma una fotografía de la muestra citológica para su análisis</string>
+    <string name="analysis_select_image">Seleccionar Imagen</string>
+    <string name="analysis_supported_formats">Formatos soportados: JPG, PNG, DICOM</string>
+    <string name="analysis_button_scan">Iniciar Escáner</string>
+    <string name="analysis_scan_hint">*Requiere cargar una imagen válida para iniciar</string>
+
+    <!-- Components -->
+    <string name="card_metadata">Fecha: %1$s | Paciente: %2$s</string>
+    <string name="card_view_detail">Ver Detalle</string>
+    <string name="dialog_patient_label">Paciente</string>
+    <string name="dialog_date_label">Fecha de análisis</string>
+    <string name="dialog_cell_count_label">Conteo Celular (Resumen)</string>
+</resources>
