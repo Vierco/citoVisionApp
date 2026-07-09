@@ -10,3 +10,6 @@ trim_trailing_whitespace = true
 
 [*.{kt,kts}]
 max_line_length = 120
+# Las funciones @Composable de UI usan PascalCase por convención de Compose (LoginScreen, AnalysisScreen).
+# Sin esta excepción ktlint exige camelCase y obligaría a romper esa convención.
+ktlint_function_naming_ignore_when_annotated_with = Composable

@@ -19,7 +19,24 @@
     <string name="login_error_email_format">Invalid email format</string>
     <string name="login_error_password_chars">Invalid characters</string>
     <string name="login_error_password_desc">Only uppercase, lowercase letters and numbers are allowed.</string>
+    <string name="login_error_title">Sign-in failed</string>
+    <string name="login_error_password_length">Password must be at least 6 characters.</string>
+    <string name="login_error_invalid_credentials">Incorrect email or password.</string>
+    <string name="login_error_network">No connection. Check your network and try again.</string>
+    <string name="login_error_too_many_requests">Too many attempts. Please wait and try again.</string>
+    <string name="login_error_desktop_unsupported">Account sign-in is not available on desktop yet.</string>
+    <string name="login_error_generic">Could not sign in. Please try again.</string>
+    <string name="forgot_dialog_title">Reset password</string>
+    <string name="forgot_dialog_desc">Enter your email and we'll send you a link to reset your password.</string>
+    <string name="forgot_send_button">Send link</string>
+    <string name="reset_sent_title">Check your email</string>
+    <string name="reset_sent_desc">If the email is registered, we've sent you a link to reset your password.</string>
+    <string name="common_cancel">Cancel</string>
     <string name="common_close">Close</string>
+
+    <!-- Settings -->
+    <string name="settings_login">Sign in with an account</string>
+    <string name="settings_logout">Sign out</string>
 
     <!-- Main Navigation -->
     <string name="nav_analysis">Analysis</string>
@@ -46,11 +63,17 @@
 
     <!-- Analysis -->
     <string name="analysis_upload_title">Upload Sample</string>
-    <string name="analysis_upload_desc">Select or take a photograph of the cytological sample for analysis</string>
+    <string name="analysis_upload_desc">Select an image of the cytological sample for analysis</string>
     <string name="analysis_select_image">Select Image</string>
-    <string name="analysis_supported_formats">Supported formats: JPG, PNG, DICOM</string>
+    <string name="analysis_change_image">Change Image</string>
+    <string name="analysis_remove_image">Remove image</string>
+    <string name="analysis_supported_formats">Supported formats: JPG, PNG</string>
     <string name="analysis_button_scan">Start Scanner</string>
     <string name="analysis_scan_hint">*Requires loading a valid image to start</string>
+    <string name="analysis_error_unsupported_format">Unsupported format. Use a JPG or PNG image.</string>
+    <string name="analysis_error_too_large">The image is too large (10 MB maximum).</string>
+    <string name="analysis_error_read_failed">The image could not be read. Please try again.</string>
+    <string name="analysis_error_generic">The image could not be selected.</string>
 
     <!-- Components -->
     <string name="card_metadata">Date: %1$s | Patient: %2$s</string>

@@ -26,38 +26,41 @@ import org.jetbrains.compose.resources.stringResource
 @Composable
 fun SplashScreen() {
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .drawBehind {
-                // Fondo blanco base
-                drawRect(Color.White)
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .drawBehind {
+                    // Fondo blanco base
+                    drawRect(Color.White)
 
-                // Efecto de resplandor azul horizontal (rectángulo desenfocado)
-                val primaryColor = Color(0xFF2FA7F0)
-                scale(scaleX = 2.2f, scaleY = 1.6f, pivot = center) {
-                    drawCircle(
-                        brush = Brush.radialGradient(
-                            colors = listOf(
-                                primaryColor.copy(alpha = 0.25f),
-                                Color.Transparent,
-                            ),
-                            center = center,
+                    // Efecto de resplandor azul horizontal (rectángulo desenfocado)
+                    val primaryColor = Color(0xFF2FA7F0)
+                    scale(scaleX = 2.2f, scaleY = 1.6f, pivot = center) {
+                        drawCircle(
+                            brush =
+                                Brush.radialGradient(
+                                    colors =
+                                        listOf(
+                                            primaryColor.copy(alpha = 0.25f),
+                                            Color.Transparent,
+                                        ),
+                                    center = center,
+                                    radius = size.width * 0.4f,
+                                ),
                             radius = size.width * 0.4f,
-                        ),
-                        radius = size.width * 0.4f,
-                        center = center,
-                    )
-                }
-            },
+                            center = center,
+                        )
+                    }
+                },
         contentAlignment = Alignment.Center,
     ) {
         Column(
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Image(
                 painter = painterResource(Res.drawable.celula),
                 contentDescription = null,
-                modifier = Modifier.size(200.dp)
+                modifier = Modifier.size(200.dp),
             )
             Spacer(modifier = Modifier.height(24.dp))
             Text(

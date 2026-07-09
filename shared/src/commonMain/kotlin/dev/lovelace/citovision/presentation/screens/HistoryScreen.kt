@@ -31,7 +31,9 @@ import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import citovision.shared.generated.resources.*
+import citovision.shared.generated.resources.Res
+import citovision.shared.generated.resources.history_empty_desc
+import citovision.shared.generated.resources.history_empty_title
 import dev.lovelace.citovision.presentation.components.AnalysisCard
 import dev.lovelace.citovision.presentation.components.AnalysisDetailDialog
 import org.jetbrains.compose.resources.stringResource
@@ -41,7 +43,7 @@ private data class AnalysisItem(
     val date: String,
     val patient: String,
     val description: String,
-    val cellCount: String
+    val cellCount: String,
 )
 
 @Composable
@@ -49,22 +51,23 @@ fun HistoryScreen() {
     var hasData by remember { mutableStateOf(false) }
     var selectedAnalysis by remember { mutableStateOf<AnalysisItem?>(null) }
 
-    val tempData = listOf(
-        AnalysisItem(
-            title = "Análisis de Sangre - Muestra A",
-            date = "01/11/2023",
-            patient = "PAC-2023-001",
-            description = "Detección de glóbulos blancos completada satisfactoriamente.",
-            cellCount = "Leucocitos: 7.500/µL, Neutrófilos: 60%, Linfocitos: 30%"
-        ),
-        AnalysisItem(
-            title = "Análisis de Sangre - Muestra B",
-            date = "02/11/2023",
-            patient = "PAC-2023-002",
-            description = "Presencia de anomalías en el conteo de plaquetas detectada.",
-            cellCount = "Plaquetas: 120.000/µL (Bajo), Hematíes: 4.8M/µL"
+    val tempData =
+        listOf(
+            AnalysisItem(
+                title = "Análisis de Sangre - Muestra A",
+                date = "01/11/2023",
+                patient = "PAC-2023-001",
+                description = "Detección de glóbulos blancos completada satisfactoriamente.",
+                cellCount = "Leucocitos: 7.500/µL, Neutrófilos: 60%, Linfocitos: 30%",
+            ),
+            AnalysisItem(
+                title = "Análisis de Sangre - Muestra B",
+                date = "02/11/2023",
+                patient = "PAC-2023-002",
+                description = "Presencia de anomalías en el conteo de plaquetas detectada.",
+                cellCount = "Plaquetas: 120.000/µL (Bajo), Hematíes: 4.8M/µL",
+            ),
         )
-    )
 
     Box(modifier = Modifier.fillMaxSize()) {
         if (!hasData) {
@@ -74,16 +77,17 @@ fun HistoryScreen() {
                 contentAlignment = Alignment.Center,
             ) {
                 Column(
-                    modifier = Modifier
-                        .padding(horizontal = 64.dp)
-                        .verticalScroll(rememberScrollState()),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                    modifier =
+                        Modifier
+                            .padding(horizontal = 64.dp)
+                            .verticalScroll(rememberScrollState()),
+                    horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     Icon(
                         imageVector = Icons.Default.History,
                         contentDescription = null,
                         modifier = Modifier.size(120.dp),
-                        tint = Color(0xFFD1D5DB)
+                        tint = Color(0xFFD1D5DB),
                     )
 
                     Spacer(modifier = Modifier.height(32.dp))
@@ -93,7 +97,7 @@ fun HistoryScreen() {
                         style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Bold,
                         color = Color(0xFF6F6F6F),
-                        textAlign = TextAlign.Center
+                        textAlign = TextAlign.Center,
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
@@ -102,7 +106,7 @@ fun HistoryScreen() {
                         text = stringResource(Res.string.history_empty_desc),
                         style = MaterialTheme.typography.bodyLarge,
                         color = Color(0xFF6F6F6F).copy(alpha = 0.8f),
-                        textAlign = TextAlign.Center
+                        textAlign = TextAlign.Center,
                     )
                 }
             }
@@ -111,7 +115,7 @@ fun HistoryScreen() {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 items(tempData) { item ->
                     AnalysisCard(
@@ -120,7 +124,7 @@ fun HistoryScreen() {
                         patient = item.patient,
                         description = item.description,
                         image = ColorPainter(if (item.patient.endsWith("1")) Color.LightGray else Color.Gray),
-                        onClick = { selectedAnalysis = item }
+                        onClick = { selectedAnalysis = item },
                     )
                 }
             }
@@ -133,7 +137,7 @@ fun HistoryScreen() {
                 patient = analysis.patient,
                 date = analysis.date,
                 cellCount = analysis.cellCount,
-                onDismissRequest = { selectedAnalysis = null }
+                onDismissRequest = { selectedAnalysis = null },
             )
         }
 
@@ -141,9 +145,10 @@ fun HistoryScreen() {
         Switch(
             checked = hasData,
             onCheckedChange = { hasData = it },
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(16.dp)
+            modifier =
+                Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(16.dp),
         )
     }
 }

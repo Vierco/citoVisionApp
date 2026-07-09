@@ -47,7 +47,21 @@ import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import citovision.shared.generated.resources.*
+import citovision.shared.generated.resources.Res
+import citovision.shared.generated.resources.common_back
+import citovision.shared.generated.resources.common_close
+import citovision.shared.generated.resources.login_error_password_chars
+import citovision.shared.generated.resources.login_error_password_desc
+import citovision.shared.generated.resources.patients_button_search
+import citovision.shared.generated.resources.patients_close_file
+import citovision.shared.generated.resources.patients_error_empty_desc
+import citovision.shared.generated.resources.patients_error_empty_title
+import citovision.shared.generated.resources.patients_id_name_label
+import citovision.shared.generated.resources.patients_no_results_desc
+import citovision.shared.generated.resources.patients_no_results_title
+import citovision.shared.generated.resources.patients_search_desc_default
+import citovision.shared.generated.resources.patients_search_placeholder
+import citovision.shared.generated.resources.patients_search_title
 import dev.lovelace.citovision.presentation.components.AnalysisCard
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.stringResource
@@ -56,7 +70,7 @@ private data class PatientAnalysisItem(
     val title: String,
     val date: String,
     val patient: String,
-    val description: String
+    val description: String,
 )
 
 @Composable
@@ -70,20 +84,21 @@ fun PatientsScreen() {
 
     val alphanumericRegex = "^[A-Za-z0-9]*$".toRegex()
 
-    val mockResults = listOf(
-        PatientAnalysisItem(
-            title = "Análisis de Sangre - Muestra A",
-            date = "01/11/2023",
-            patient = searchQuery,
-            description = "Detección de glóbulos blancos completada."
-        ),
-        PatientAnalysisItem(
-            title = "Análisis de Sangre - Muestra B",
-            date = "02/11/2023",
-            patient = searchQuery,
-            description = "Presencia de anomalías en el conteo de plaquetas."
+    val mockResults =
+        listOf(
+            PatientAnalysisItem(
+                title = "Análisis de Sangre - Muestra A",
+                date = "01/11/2023",
+                patient = searchQuery,
+                description = "Detección de glóbulos blancos completada.",
+            ),
+            PatientAnalysisItem(
+                title = "Análisis de Sangre - Muestra B",
+                date = "02/11/2023",
+                patient = searchQuery,
+                description = "Presencia de anomalías en el conteo de plaquetas.",
+            ),
         )
-    )
 
     LaunchedEffect(isLoading) {
         if (isLoading) {
@@ -98,11 +113,12 @@ fun PatientsScreen() {
     }
 
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 24.dp),
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .padding(horizontal = 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = androidx.compose.foundation.layout.Arrangement.Top
+        verticalArrangement = androidx.compose.foundation.layout.Arrangement.Top,
     ) {
         // Título y Subtítulo/Nombre Paciente
         Column(modifier = Modifier.fillMaxWidth()) {
@@ -110,7 +126,7 @@ fun PatientsScreen() {
                 text = stringResource(Res.string.patients_search_title),
                 style = MaterialTheme.typography.headlineLarge,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF282828)
+                color = Color(0xFF282828),
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -118,13 +134,13 @@ fun PatientsScreen() {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = androidx.compose.foundation.layout.Arrangement.SpaceBetween
+                horizontalArrangement = androidx.compose.foundation.layout.Arrangement.SpaceBetween,
             ) {
                 Text(
                     text = if (showResults) searchQuery else stringResource(Res.string.patients_search_desc_default),
                     style = MaterialTheme.typography.bodyMedium,
                     color = Color(0xFF6F6F6F),
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
                 )
 
                 if (showResults) {
@@ -136,7 +152,7 @@ fun PatientsScreen() {
                             text = stringResource(Res.string.patients_close_file),
                             color = Color(0xFF2FA7F0),
                             style = MaterialTheme.typography.labelLarge,
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Bold,
                         )
                     }
                 }
@@ -152,35 +168,39 @@ fun PatientsScreen() {
         } else if (noResultsFound) {
             // Vista de Sin Resultados
             Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 16.dp)
-                    .drawBehind {
-                        val stroke = Stroke(
-                            width = 2.dp.toPx(),
-                            pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f)
-                        )
-                        drawRoundRect(
-                            color = Color.LightGray,
-                            style = stroke,
-                            cornerRadius = androidx.compose.ui.geometry.CornerRadius(28.dp.toPx())
-                        )
-                    }
-                    .padding(24.dp),
-                contentAlignment = Alignment.Center
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(top = 16.dp)
+                        .drawBehind {
+                            val stroke =
+                                Stroke(
+                                    width = 2.dp.toPx(),
+                                    pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f),
+                                )
+                            drawRoundRect(
+                                color = Color.LightGray,
+                                style = stroke,
+                                cornerRadius =
+                                    androidx.compose.ui.geometry
+                                        .CornerRadius(28.dp.toPx()),
+                            )
+                        }.padding(24.dp),
+                contentAlignment = Alignment.Center,
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Box(
-                        modifier = Modifier
-                            .size(100.dp)
-                            .background(Color(0xFFF3F4F6), CircleShape),
-                        contentAlignment = Alignment.Center
+                        modifier =
+                            Modifier
+                                .size(100.dp)
+                                .background(Color(0xFFF3F4F6), CircleShape),
+                        contentAlignment = Alignment.Center,
                     ) {
                         Icon(
                             imageVector = Icons.Default.Folder,
                             contentDescription = null,
                             modifier = Modifier.size(48.dp),
-                            tint = Color(0xFF6B7280)
+                            tint = Color(0xFF6B7280),
                         )
                     }
 
@@ -190,7 +210,7 @@ fun PatientsScreen() {
                         text = stringResource(Res.string.patients_no_results_title),
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF282828)
+                        color = Color(0xFF282828),
                     )
 
                     Spacer(modifier = Modifier.height(12.dp))
@@ -199,7 +219,7 @@ fun PatientsScreen() {
                         text = stringResource(Res.string.patients_no_results_desc),
                         style = MaterialTheme.typography.bodyMedium,
                         textAlign = TextAlign.Center,
-                        color = Color(0xFF6F6F6F)
+                        color = Color(0xFF6F6F6F),
                     )
 
                     Spacer(modifier = Modifier.height(32.dp))
@@ -210,7 +230,7 @@ fun PatientsScreen() {
                             showResults = false
                         },
                         modifier = Modifier.fillMaxWidth().height(56.dp),
-                        shape = RoundedCornerShape(16.dp)
+                        shape = RoundedCornerShape(16.dp),
                     ) {
                         Text(stringResource(Res.string.common_back), style = MaterialTheme.typography.labelLarge)
                     }
@@ -220,7 +240,9 @@ fun PatientsScreen() {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(bottom = 16.dp),
-                verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(16.dp)
+                verticalArrangement =
+                    androidx.compose.foundation.layout.Arrangement
+                        .spacedBy(16.dp),
             ) {
                 items(mockResults) { item ->
                     AnalysisCard(
@@ -229,7 +251,7 @@ fun PatientsScreen() {
                         patient = item.patient,
                         description = item.description,
                         image = ColorPainter(Color.LightGray),
-                        onClick = { /* TODO */ }
+                        onClick = { /* TODO */ },
                     )
                 }
             }
@@ -239,16 +261,17 @@ fun PatientsScreen() {
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(28.dp),
                 elevation = CardDefaults.cardElevation(defaultElevation = 12.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = Color.White.copy(alpha = 0.85f)
-                )
+                colors =
+                    CardDefaults.cardColors(
+                        containerColor = Color.White.copy(alpha = 0.85f),
+                    ),
             ) {
                 Column(modifier = Modifier.padding(24.dp)) {
                     Text(
                         text = stringResource(Res.string.patients_id_name_label),
                         style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF282828)
+                        color = Color(0xFF282828),
                     )
 
                     Spacer(modifier = Modifier.height(12.dp))
@@ -267,7 +290,7 @@ fun PatientsScreen() {
                         leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
                         shape = RoundedCornerShape(12.dp),
                         singleLine = true,
-                        maxLines = 1
+                        maxLines = 1,
                     )
 
                     Spacer(modifier = Modifier.height(24.dp))
@@ -282,18 +305,18 @@ fun PatientsScreen() {
                         },
                         modifier = Modifier.fillMaxWidth().height(56.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2FA7F0)),
-                        shape = RoundedCornerShape(16.dp)
+                        shape = RoundedCornerShape(16.dp),
                     ) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = androidx.compose.foundation.layout.Arrangement.Center
+                            horizontalArrangement = androidx.compose.foundation.layout.Arrangement.Center,
                         ) {
                             Icon(Icons.Default.Search, contentDescription = null)
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
                                 text = stringResource(Res.string.patients_button_search),
                                 style = MaterialTheme.typography.labelLarge,
-                                color = Color.White
+                                color = Color.White,
                             )
                         }
                     }
@@ -314,17 +337,17 @@ fun PatientsScreen() {
                 Text(
                     stringResource(Res.string.patients_error_empty_title),
                     style = MaterialTheme.typography.titleMedium,
-                    color = Color(0xFF282828)
+                    color = Color(0xFF282828),
                 )
             },
             text = {
                 Text(
                     stringResource(Res.string.patients_error_empty_desc),
-                    style = MaterialTheme.typography.bodyMedium
+                    style = MaterialTheme.typography.bodyMedium,
                 )
             },
             containerColor = Color.White,
-            shape = RoundedCornerShape(28.dp)
+            shape = RoundedCornerShape(28.dp),
         )
     }
 
@@ -340,17 +363,17 @@ fun PatientsScreen() {
                 Text(
                     stringResource(Res.string.login_error_password_chars),
                     color = Color(0xFF282828),
-                    style = MaterialTheme.typography.titleMedium
+                    style = MaterialTheme.typography.titleMedium,
                 )
             },
             text = {
                 Text(
                     stringResource(Res.string.login_error_password_desc),
-                    style = MaterialTheme.typography.bodyMedium
+                    style = MaterialTheme.typography.bodyMedium,
                 )
             },
             containerColor = Color.White,
-            shape = RoundedCornerShape(28.dp)
+            shape = RoundedCornerShape(28.dp),
         )
     }
 }

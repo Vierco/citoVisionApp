@@ -1,0 +1,21 @@
+package dev.lovelace.citovision.composition.di
+
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import dev.lovelace.citovision.application.ports.AuthService
+import dev.lovelace.citovision.application.ports.GoogleSignInLauncher
+import dev.lovelace.citovision.infrastructure.auth.StubAuthService
+import dev.lovelace.citovision.infrastructure.auth.StubGoogleSignInLauncher
+import dev.lovelace.citovision.infrastructure.persistence.preferences.createDataStore
+import dev.lovelace.citovision.infrastructure.persistence.preferences.dataStorePath
+import org.koin.core.module.Module
+import org.koin.core.module.dsl.singleOf
+import org.koin.dsl.bind
+import org.koin.dsl.module
+
+actual val platformModule: Module =
+    module {
+        singleOf(::StubAuthService) bind AuthService::class
+        singleOf(::StubGoogleSignInLauncher) bind GoogleSignInLauncher::class
+        single<DataStore<Preferences>> { createDataStore { dataStorePath() } }
+    }

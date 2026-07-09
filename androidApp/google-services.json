@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "661374449110",
+    "project_id": "citovision-cf661",
+    "storage_bucket": "citovision-cf661.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:661374449110:android:83bd460e777a4562dea077",
+        "android_client_info": {
+          "package_name": "dev.lovelace.citovision"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "661374449110-fhlltueeu11gu6od4id5n2toe50klg4g.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "dev.lovelace.citovision",
+            "certificate_hash": "3a8687243f2d01e91c46114ed977b436a1e31d5c"
+          }
+        },
+        {
+          "client_id": "661374449110-npjnmfka7geupmbm468ro5ke8mo29ade.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDkgd8lqsiJrFcJf3uqx8q9B-oz1lvYlw8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "661374449110-npjnmfka7geupmbm468ro5ke8mo29ade.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

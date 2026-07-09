@@ -8,6 +8,7 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ktlint)
     alias(libs.plugins.detekt)
+    alias(libs.plugins.mokkery)
 }
 
 kotlin {
@@ -50,11 +51,19 @@ kotlin {
             implementation(libs.navigation.compose)
             implementation(libs.ktor.client.core)
             implementation(libs.napier)
+            // Persistencia local no sensible (flag de sesión de invitado) — DataStore multiplataforma.
+            implementation(libs.androidx.datastore)
+            implementation(libs.androidx.datastore.preferences)
+            // Selección de imagen (SPEC-0003): FileKit (selector nativo KMP) + Coil 3 (previsualización).
+            implementation(libs.filekit.core)
+            implementation(libs.filekit.dialogs)
+            implementation(libs.coil.compose)
         }
 
         val commonTest by getting {
             dependencies {
                 implementation(kotlin("test"))
+                implementation(libs.kotlinx.coroutines.test)
             }
         }
 
@@ -62,6 +71,16 @@ kotlin {
             implementation(libs.androidx.core.ktx)
             implementation(libs.koin.android)
             implementation(libs.ktor.client.okhttp)
+            // Firebase (GitLive) solo tiene variante Android/iOS/JS, no Desktop-JVM.
+            // El BOM fija las versiones de los artefactos com.google.firebase:* que
+            // GitLive declara sin versión (p.ej. firebase-common-ktx).
+            implementation(project.dependencies.platform(libs.firebase.bom))
+            implementation(libs.firebase.kmp.app)
+            implementation(libs.firebase.kmp.auth)
+            // Google Sign-In nativo: Credential Manager (GoogleSignInClient está deprecada).
+            implementation(libs.androidx.credentials)
+            implementation(libs.androidx.credentials.play.services.auth)
+            implementation(libs.google.identity.googleid)
         }
 
         val desktopMain by getting {

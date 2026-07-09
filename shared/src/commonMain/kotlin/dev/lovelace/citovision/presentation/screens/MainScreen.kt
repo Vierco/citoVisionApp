@@ -3,10 +3,10 @@ package dev.lovelace.citovision.presentation.screens
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -28,18 +28,24 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.scale
-import androidx.compose.ui.graphics.vector.ImageVector
-import citovision.shared.generated.resources.*
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.unit.dp
+import citovision.shared.generated.resources.Res
+import citovision.shared.generated.resources.microsc
+import citovision.shared.generated.resources.nav_analysis
+import citovision.shared.generated.resources.nav_history
+import citovision.shared.generated.resources.nav_patients
+import citovision.shared.generated.resources.nav_settings
 import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
 private enum class MainTab(
     val labelRes: StringResource,
-    val icon: ImageVector,
 ) {
-    ANALYSIS(Res.string.nav_analysis, Icons.Default.Search),
-    HISTORY(Res.string.nav_history, Icons.Default.List),
-    PATIENTS(Res.string.nav_patients, Icons.Default.Person),
+    ANALYSIS(Res.string.nav_analysis),
+    HISTORY(Res.string.nav_history),
+    PATIENTS(Res.string.nav_patients),
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -60,9 +66,10 @@ fun MainScreen(onNavigateToSettings: () -> Unit) {
                         )
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.White
-                )
+                colors =
+                    TopAppBarDefaults.topAppBarColors(
+                        containerColor = Color.White,
+                    ),
             )
         },
         bottomBar = {
@@ -71,42 +78,58 @@ fun MainScreen(onNavigateToSettings: () -> Unit) {
                     NavigationBarItem(
                         selected = selectedTabIndex == tab.ordinal,
                         onClick = { selectedTabIndex = tab.ordinal },
-                        icon = { Icon(tab.icon, contentDescription = stringResource(tab.labelRes)) },
+                        icon = {
+                            val painter =
+                                when (tab) {
+                                    MainTab.ANALYSIS -> painterResource(Res.drawable.microsc)
+                                    MainTab.HISTORY -> rememberVectorPainter(Icons.Default.List)
+                                    MainTab.PATIENTS -> rememberVectorPainter(Icons.Default.Person)
+                                }
+                            Icon(
+                                painter = painter,
+                                contentDescription = stringResource(tab.labelRes),
+                                modifier = Modifier.size(24.dp),
+                            )
+                        },
                         label = { Text(stringResource(tab.labelRes)) },
-                        colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = Color.White,
-                            indicatorColor = Color(0xFF2FD38A) // Secondary
-                        )
+                        colors =
+                            NavigationBarItemDefaults.colors(
+                                selectedIconColor = Color.White,
+                                indicatorColor = Color(0xFF2FD38A), // Secondary
+                            ),
                     )
                 }
             }
         },
     ) { innerPadding ->
         Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .drawBehind {
-                    // Fondo blanco base
-                    drawRect(Color.White)
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+                    .drawBehind {
+                        // Fondo blanco base
+                        drawRect(Color.White)
 
-                    // Efecto de resplandor azul horizontal (rectángulo desenfocado)
-                    val primaryColor = Color(0xFF2FA7F0)
-                    scale(scaleX = 2.2f, scaleY = 1.6f, pivot = center) {
-                        drawCircle(
-                            brush = Brush.radialGradient(
-                                colors = listOf(
-                                    primaryColor.copy(alpha = 0.25f),
-                                    Color.Transparent,
-                                ),
-                                center = center,
+                        // Efecto de resplandor azul horizontal (rectángulo desenfocado)
+                        val primaryColor = Color(0xFF2FA7F0)
+                        scale(scaleX = 2.2f, scaleY = 1.6f, pivot = center) {
+                            drawCircle(
+                                brush =
+                                    Brush.radialGradient(
+                                        colors =
+                                            listOf(
+                                                primaryColor.copy(alpha = 0.25f),
+                                                Color.Transparent,
+                                            ),
+                                        center = center,
+                                        radius = size.width * 0.4f,
+                                    ),
                                 radius = size.width * 0.4f,
-                            ),
-                            radius = size.width * 0.4f,
-                            center = center,
-                        )
-                    }
-                },
+                                center = center,
+                            )
+                        }
+                    },
         ) {
             when (selectedTab) {
                 MainTab.ANALYSIS -> AnalysisScreen()

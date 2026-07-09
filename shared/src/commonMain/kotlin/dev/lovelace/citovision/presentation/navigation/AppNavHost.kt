@@ -2,6 +2,8 @@ package dev.lovelace.citovision.presentation.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -14,6 +16,7 @@ import dev.lovelace.citovision.presentation.screens.MainScreen
 import dev.lovelace.citovision.presentation.screens.SettingsScreen
 import dev.lovelace.citovision.presentation.screens.SplashScreen
 import dev.lovelace.citovision.presentation.viewmodels.LoginViewModel
+import dev.lovelace.citovision.presentation.viewmodels.SettingsViewModel
 import dev.lovelace.citovision.presentation.viewmodels.SplashViewModel
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -29,10 +32,13 @@ fun AppNavHost() {
             val viewModel = koinViewModel<SplashViewModel>()
             LaunchedEffect(Unit) {
                 viewModel.navigationEvents.collect { event ->
-                    if (event == NavigationEvent.ToLogin) {
-                        navController.navigate(LoginRoute) {
-                            popUpTo<SplashRoute> { inclusive = true }
+                    val destination =
+                        when (event) {
+                            NavigationEvent.ToMain -> MainRoute
+                            else -> LoginRoute
                         }
+                    navController.navigate(destination) {
+                        popUpTo<SplashRoute> { inclusive = true }
                     }
                 }
             }
@@ -41,6 +47,7 @@ fun AppNavHost() {
 
         composable<LoginRoute> {
             val viewModel = koinViewModel<LoginViewModel>()
+            val uiState by viewModel.uiState.collectAsStateWithLifecycle()
             LaunchedEffect(Unit) {
                 viewModel.navigationEvents.collect { event ->
                     if (event == NavigationEvent.ToMain) {
@@ -51,9 +58,8 @@ fun AppNavHost() {
                 }
             }
             LoginScreen(
-                onLoginClick = viewModel::onLoginClick,
-                onGoogleLoginClick = viewModel::onGoogleLoginClick,
-                onGuestClick = viewModel::onGuestClick,
+                uiState = uiState,
+                onEvent = viewModel::onEvent,
             )
         }
 
@@ -64,7 +70,21 @@ fun AppNavHost() {
         }
 
         composable<SettingsRoute> {
-            SettingsScreen()
+            val viewModel = koinViewModel<SettingsViewModel>()
+            val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+            LaunchedEffect(Unit) {
+                viewModel.navigationEvents.collect { event ->
+                    if (event == NavigationEvent.ToLogin) {
+                        navController.navigate(LoginRoute) {
+                            popUpTo<MainRoute> { inclusive = true }
+                        }
+                    }
+                }
+            }
+            SettingsScreen(
+                uiState = uiState,
+                onEvent = viewModel::onEvent,
+            )
         }
     }
 }

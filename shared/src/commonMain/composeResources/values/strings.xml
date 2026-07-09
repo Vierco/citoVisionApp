@@ -19,7 +19,24 @@
     <string name="login_error_email_format">Formato de correo electrónico incorrecto</string>
     <string name="login_error_password_chars">Caracteres no admitidos</string>
     <string name="login_error_password_desc">Solo se admiten mayúsculas, minúsculas y números.</string>
+    <string name="login_error_title">No se pudo iniciar sesión</string>
+    <string name="login_error_password_length">La contraseña debe tener al menos 6 caracteres.</string>
+    <string name="login_error_invalid_credentials">Correo o contraseña incorrectos.</string>
+    <string name="login_error_network">Sin conexión. Comprueba tu red e inténtalo de nuevo.</string>
+    <string name="login_error_too_many_requests">Demasiados intentos. Espera un momento e inténtalo de nuevo.</string>
+    <string name="login_error_desktop_unsupported">El inicio de sesión con cuenta aún no está disponible en escritorio.</string>
+    <string name="login_error_generic">No se ha podido iniciar sesión. Inténtalo de nuevo.</string>
+    <string name="forgot_dialog_title">Recuperar contraseña</string>
+    <string name="forgot_dialog_desc">Introduce tu correo y te enviaremos un enlace para restablecer la contraseña.</string>
+    <string name="forgot_send_button">Enviar enlace</string>
+    <string name="reset_sent_title">Revisa tu correo</string>
+    <string name="reset_sent_desc">Si el correo está registrado, te enviaremos un enlace para restablecer la contraseña.</string>
+    <string name="common_cancel">Cancelar</string>
     <string name="common_close">Cerrar</string>
+
+    <!-- Settings -->
+    <string name="settings_login">Iniciar sesión con una cuenta</string>
+    <string name="settings_logout">Cerrar sesión</string>
 
     <!-- Main Navigation -->
     <string name="nav_analysis">Análisis</string>
@@ -46,11 +63,17 @@
 
     <!-- Analysis -->
     <string name="analysis_upload_title">Subir Muestra</string>
-    <string name="analysis_upload_desc">Selecciona o toma una fotografía de la muestra citológica para su análisis</string>
+    <string name="analysis_upload_desc">Selecciona una imagen de la muestra citológica para su análisis</string>
     <string name="analysis_select_image">Seleccionar Imagen</string>
-    <string name="analysis_supported_formats">Formatos soportados: JPG, PNG, DICOM</string>
+    <string name="analysis_change_image">Cambiar Imagen</string>
+    <string name="analysis_remove_image">Quitar imagen</string>
+    <string name="analysis_supported_formats">Formatos soportados: JPG, PNG</string>
     <string name="analysis_button_scan">Iniciar Escáner</string>
     <string name="analysis_scan_hint">*Requiere cargar una imagen válida para iniciar</string>
+    <string name="analysis_error_unsupported_format">Formato no soportado. Usa una imagen JPG o PNG.</string>
+    <string name="analysis_error_too_large">La imagen es demasiado grande (máximo 10 MB).</string>
+    <string name="analysis_error_read_failed">No se pudo leer la imagen. Inténtalo de nuevo.</string>
+    <string name="analysis_error_generic">No se pudo seleccionar la imagen.</string>
 
     <!-- Components -->
     <string name="card_metadata">Fecha: %1$s | Paciente: %2$s</string>
