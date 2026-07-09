@@ -2,11 +2,18 @@ package dev.lovelace.citovision.composition.di
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import androidx.room.Room
+import dev.lovelace.citovision.application.ports.AnalysisImageStore
 import dev.lovelace.citovision.application.ports.AuthService
 import dev.lovelace.citovision.application.ports.GoogleSignInLauncher
 import dev.lovelace.citovision.infrastructure.auth.AndroidGoogleSignInLauncher
 import dev.lovelace.citovision.infrastructure.auth.FirebaseAuthService
 import dev.lovelace.citovision.infrastructure.auth.GOOGLE_WEB_CLIENT_ID_PROPERTY
+import dev.lovelace.citovision.infrastructure.image.ANALYSIS_IMAGES_DIRECTORY
+import dev.lovelace.citovision.infrastructure.image.OkioAnalysisImageStore
+import dev.lovelace.citovision.infrastructure.persistence.database.AppDatabase
+import dev.lovelace.citovision.infrastructure.persistence.database.DATABASE_NAME
+import dev.lovelace.citovision.infrastructure.persistence.database.createAppDatabase
 import dev.lovelace.citovision.infrastructure.persistence.preferences.PREFERENCES_FILE_NAME
 import dev.lovelace.citovision.infrastructure.persistence.preferences.createDataStore
 import dev.lovelace.citovision.infrastructure.platform.ActivityProvider
@@ -30,5 +37,19 @@ actual val platformModule: Module =
             createDataStore {
                 androidContext().filesDir.resolve(PREFERENCES_FILE_NAME).absolutePath
             }
+        }
+        single<AppDatabase> {
+            createAppDatabase(
+                Room.databaseBuilder<AppDatabase>(
+                    context = androidContext(),
+                    name = androidContext().getDatabasePath(DATABASE_NAME).absolutePath,
+                ),
+            )
+        }
+        single { get<AppDatabase>().analysisDao() }
+        single<AnalysisImageStore> {
+            OkioAnalysisImageStore(
+                baseDirectory = androidContext().filesDir.resolve(ANALYSIS_IMAGES_DIRECTORY).absolutePath,
+            )
         }
     }

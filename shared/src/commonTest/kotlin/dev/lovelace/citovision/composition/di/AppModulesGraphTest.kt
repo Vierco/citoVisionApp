@@ -2,17 +2,23 @@ package dev.lovelace.citovision.composition.di
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import dev.lovelace.citovision.application.ports.AnalysisImageStore
+import dev.lovelace.citovision.application.ports.AnalysisRepository
 import dev.lovelace.citovision.application.ports.AuthService
 import dev.lovelace.citovision.application.ports.GoogleSignInLauncher
 import dev.lovelace.citovision.application.ports.SessionRepository
+import dev.lovelace.citovision.application.usecases.DeleteAnalysisUseCase
 import dev.lovelace.citovision.application.usecases.HasActiveSessionUseCase
+import dev.lovelace.citovision.application.usecases.ObserveAnalysesUseCase
 import dev.lovelace.citovision.application.usecases.ObserveSessionStatusUseCase
 import dev.lovelace.citovision.application.usecases.PickImageUseCase
+import dev.lovelace.citovision.application.usecases.SaveMockAnalysisUseCase
 import dev.lovelace.citovision.application.usecases.SendPasswordResetUseCase
 import dev.lovelace.citovision.application.usecases.SignInAsGuestUseCase
 import dev.lovelace.citovision.application.usecases.SignInWithEmailUseCase
 import dev.lovelace.citovision.application.usecases.SignInWithGoogleUseCase
 import dev.lovelace.citovision.application.usecases.SignOutUseCase
+import dev.lovelace.citovision.infrastructure.persistence.database.AnalysisDao
 import dev.mokkery.mock
 import org.koin.dsl.koinApplication
 import org.koin.dsl.module
@@ -30,6 +36,8 @@ class AppModulesGraphTest {
             single<AuthService> { mock() }
             single<GoogleSignInLauncher> { mock() }
             single<DataStore<Preferences>> { mock() }
+            single<AnalysisDao> { mock() }
+            single<AnalysisImageStore> { mock() }
         }
 
     @Test
@@ -50,7 +58,11 @@ class AppModulesGraphTest {
         assertNotNull(koin.get<HasActiveSessionUseCase>())
         assertNotNull(koin.get<ObserveSessionStatusUseCase>())
         assertNotNull(koin.get<PickImageUseCase>())
+        assertNotNull(koin.get<ObserveAnalysesUseCase>())
+        assertNotNull(koin.get<DeleteAnalysisUseCase>())
+        assertNotNull(koin.get<SaveMockAnalysisUseCase>())
         assertNotNull(koin.get<SessionRepository>())
+        assertNotNull(koin.get<AnalysisRepository>())
 
         app.close()
     }

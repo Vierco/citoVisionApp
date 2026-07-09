@@ -10,4 +10,12 @@ sealed interface AnalysisUiEvent {
 
     /** Cerrar el mensaje de error. */
     data object DismissError : AnalysisUiEvent
+
+    /**
+     * ⚠️ TEMPORAL (SPEC-0004 RF-7): persiste un análisis mock a partir de la imagen cargada.
+     * Se sustituirá por la invocación real a la IA.
+     */
+    data object StartScan : AnalysisUiEvent
+
+    data object DismissSavedConfirmation : AnalysisUiEvent
 }

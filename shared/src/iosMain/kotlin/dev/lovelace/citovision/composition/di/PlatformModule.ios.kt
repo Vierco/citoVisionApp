@@ -2,10 +2,16 @@ package dev.lovelace.citovision.composition.di
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import dev.lovelace.citovision.application.ports.AnalysisImageStore
 import dev.lovelace.citovision.application.ports.AuthService
 import dev.lovelace.citovision.application.ports.GoogleSignInLauncher
 import dev.lovelace.citovision.infrastructure.auth.StubAuthService
 import dev.lovelace.citovision.infrastructure.auth.StubGoogleSignInLauncher
+import dev.lovelace.citovision.infrastructure.image.OkioAnalysisImageStore
+import dev.lovelace.citovision.infrastructure.image.analysisImagesPath
+import dev.lovelace.citovision.infrastructure.persistence.database.AppDatabase
+import dev.lovelace.citovision.infrastructure.persistence.database.appDatabaseBuilder
+import dev.lovelace.citovision.infrastructure.persistence.database.createAppDatabase
 import dev.lovelace.citovision.infrastructure.persistence.preferences.createDataStore
 import dev.lovelace.citovision.infrastructure.persistence.preferences.dataStorePath
 import org.koin.core.module.Module
@@ -19,4 +25,7 @@ actual val platformModule: Module =
         singleOf(::StubAuthService) bind AuthService::class
         singleOf(::StubGoogleSignInLauncher) bind GoogleSignInLauncher::class
         single<DataStore<Preferences>> { createDataStore { dataStorePath() } }
+        single<AppDatabase> { createAppDatabase(appDatabaseBuilder()) }
+        single { get<AppDatabase>().analysisDao() }
+        single<AnalysisImageStore> { OkioAnalysisImageStore(baseDirectory = analysisImagesPath()) }
     }

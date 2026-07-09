@@ -47,6 +47,11 @@
     <!-- History -->
     <string name="history_empty_title">No hay análisis previos</string>
     <string name="history_empty_desc">Los análisis guardados aparecerán aquí.</string>
+    <string name="history_delete_title">Eliminar análisis</string>
+    <string name="history_delete_message">Esta acción no se puede deshacer. ¿Quieres eliminar este análisis?</string>
+    <string name="history_delete_confirm">Eliminar</string>
+    <string name="history_error_delete">No se pudo eliminar el análisis.</string>
+    <string name="analysis_card_title">Análisis</string>
 
     <!-- Patients -->
     <string name="patients_search_title">Búsqueda de Pacientes</string>
@@ -74,6 +79,8 @@
     <string name="analysis_error_too_large">La imagen es demasiado grande (máximo 10 MB).</string>
     <string name="analysis_error_read_failed">No se pudo leer la imagen. Inténtalo de nuevo.</string>
     <string name="analysis_error_generic">No se pudo seleccionar la imagen.</string>
+    <string name="analysis_saved">Análisis guardado en el historial</string>
+    <string name="analysis_error_save">No se pudo guardar el análisis.</string>
 
     <!-- Components -->
     <string name="card_metadata">Fecha: %1$s | Paciente: %2$s</string>

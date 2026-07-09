@@ -13,7 +13,6 @@ detekt = "1.23.8"
 compose-multiplatform = "1.10.3"
 koin = "4.0.0"
 ktor = "3.0.1"
-sqlDelight = "2.0.2"
 napier = "2.7.1"
 datastore = "1.1.1"
 jetbrains-lifecycle = "2.9.6"
@@ -31,6 +30,15 @@ mokkery = "2.9.0"
 # el compilador 2.2) y la 3.5.0 usa 2.4.0 → rechazo de metadata "actual 2.4.0, compilador lee hasta 2.3.0".
 filekit = "0.11.0"
 coil = "3.3.0"
+# Persistencia (SPEC-0004). KSP DEBE casar con el Kotlin efectivo del proyecto (2.2.10, el que trae AGP),
+# no con el `kotlin = "2.1.0"` del catálogo. Room 2.8.4 no fija stdlib → seguro con 2.2.10.
+# kotlinx-datetime 0.7.1: NO bajar a 0.6.2. `org.jetbrains.compose.material3:material3` (el artefacto que
+# usa Desktop, no Android) exige 0.7.1; con 0.6.2 el runtime de Desktop rompe. En 0.7.x `Instant` y `Clock`
+# son typealias de `kotlin.time.*` (ya presentes en el stdlib 2.2.10), por eso se importan desde kotlin.time.
+room = "2.8.4"
+androidx-sqlite = "2.6.2"
+ksp = "2.2.10-2.0.2"
+kotlinx-datetime = "0.7.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -58,6 +66,10 @@ google-identity-googleid = { group = "com.google.android.libraries.identity.goog
 filekit-core = { module = "io.github.vinceglb:filekit-core", version.ref = "filekit" }
 filekit-dialogs = { module = "io.github.vinceglb:filekit-dialogs", version.ref = "filekit" }
 coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }
+room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
+room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
+androidx-sqlite-bundled = { module = "androidx.sqlite:sqlite-bundled", version.ref = "androidx-sqlite" }
+kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinx-datetime" }
 
 # KMP Libraries
 koin-core = { group = "io.insert-koin", name = "koin-core", version.ref = "koin" }
@@ -87,3 +99,5 @@ detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 google-services = { id = "com.google.gms.google-services", version.ref = "google-services" }
 mokkery = { id = "dev.mokkery", version.ref = "mokkery" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+room = { id = "androidx.room", version.ref = "room" }

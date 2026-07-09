@@ -49,6 +49,7 @@ import citovision.shared.generated.resources.Res
 import citovision.shared.generated.resources.analysis_button_scan
 import citovision.shared.generated.resources.analysis_change_image
 import citovision.shared.generated.resources.analysis_remove_image
+import citovision.shared.generated.resources.analysis_saved
 import citovision.shared.generated.resources.analysis_scan_hint
 import citovision.shared.generated.resources.analysis_select_image
 import citovision.shared.generated.resources.analysis_supported_formats
@@ -175,12 +176,22 @@ private fun AnalysisContent(
             )
         }
 
+        if (uiState.savedConfirmationVisible) {
+            Spacer(modifier = Modifier.height(12.dp))
+            Text(
+                text = stringResource(Res.string.analysis_saved),
+                style = MaterialTheme.typography.bodyMedium,
+                textAlign = TextAlign.Center,
+                color = MaterialTheme.colorScheme.secondary,
+            )
+        }
+
         Spacer(modifier = Modifier.height(32.dp))
 
         // Botón de escáner: habilitado y en verde secundario solo cuando hay imagen (SPEC-0003 RF-5).
-        // La acción real de escanear se implementa en una spec posterior.
+        // ⚠️ TEMPORAL (SPEC-0004 RF-7): por ahora persiste un análisis mock; luego invocará a la IA.
         Button(
-            onClick = { /* TODO: acción de escáner (spec futura) */ },
+            onClick = { onEvent(AnalysisUiEvent.StartScan) },
             modifier =
                 Modifier
                     .fillMaxWidth()

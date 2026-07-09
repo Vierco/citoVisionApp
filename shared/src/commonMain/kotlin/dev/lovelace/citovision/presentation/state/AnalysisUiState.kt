@@ -10,7 +10,9 @@ import org.jetbrains.compose.resources.StringResource
 data class AnalysisUiState(
     val selectedImage: SelectedImage? = null,
     val isPicking: Boolean = false,
+    val isSaving: Boolean = false,
+    val savedConfirmationVisible: Boolean = false,
     val error: StringResource? = null,
 ) {
-    val canScan: Boolean get() = selectedImage != null
+    val canScan: Boolean get() = selectedImage != null && !isSaving
 }

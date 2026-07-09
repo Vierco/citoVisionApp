@@ -1,15 +1,19 @@
 package dev.lovelace.citovision.presentation.components
 
-import androidx.compose.foundation.Image
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -19,11 +23,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.ColorPainter
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -34,16 +34,19 @@ import citovision.shared.generated.resources.common_close
 import citovision.shared.generated.resources.dialog_cell_count_label
 import citovision.shared.generated.resources.dialog_date_label
 import citovision.shared.generated.resources.dialog_patient_label
+import coil3.compose.AsyncImage
+import dev.lovelace.citovision.domain.entities.CellCount
 import dev.lovelace.citovision.ui.theme.getTypography
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
+/** Diálogo de detalle de un análisis: paciente, fecha/hora y conteo celular completo (SPEC-0004 RF-4). */
 @Composable
 fun AnalysisDetailDialog(
     title: String,
     patient: String,
     date: String,
-    cellCount: String,
+    cellCounts: List<CellCount>,
     onDismissRequest: () -> Unit,
 ) {
     AlertDialog(
@@ -55,19 +58,13 @@ fun AnalysisDetailDialog(
                 modifier = Modifier.fillMaxWidth(),
                 colors =
                     ButtonDefaults.outlinedButtonColors(
-                        contentColor = Color(0xFF2FA7F0), // Primary
+                        contentColor = MaterialTheme.colorScheme.primary,
                     ),
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center,
-                ) {
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = stringResource(Res.string.common_close),
-                        style = MaterialTheme.typography.labelLarge,
-                    )
-                }
+                Text(
+                    text = stringResource(Res.string.common_close),
+                    style = MaterialTheme.typography.labelLarge,
+                )
             }
         },
         title = {
@@ -75,57 +72,160 @@ fun AnalysisDetailDialog(
                 text = title,
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF282828),
+                color = MaterialTheme.colorScheme.onBackground,
             )
         },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Column {
-                    Text(
-                        text = stringResource(Res.string.dialog_patient_label),
-                        style = MaterialTheme.typography.labelLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFF6F6F6F),
-                    )
-                    Text(
-                        text = patient,
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = Color(0xFF282828),
-                    )
-                }
+            // El conteo celular tiene longitud variable: el contenido debe poder desplazarse.
+            Column(
+                modifier =
+                    Modifier
+                        .heightIn(max = 400.dp)
+                        .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                LabelledValue(stringResource(Res.string.dialog_patient_label), patient)
+                LabelledValue(stringResource(Res.string.dialog_date_label), date)
 
                 Column {
-                    Text(
-                        text = stringResource(Res.string.dialog_date_label),
-                        style = MaterialTheme.typography.labelLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFF6F6F6F),
-                    )
-                    Text(
-                        text = date,
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = Color(0xFF282828),
-                    )
-                }
-
-                Column {
-                    Text(
-                        text = stringResource(Res.string.dialog_cell_count_label),
-                        style = MaterialTheme.typography.labelLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFF6F6F6F),
-                    )
-                    Text(
-                        text = cellCount,
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = Color(0xFF282828),
-                    )
+                    SectionLabel(stringResource(Res.string.dialog_cell_count_label))
+                    cellCounts.forEach { cellCount ->
+                        Text(
+                            text = "${cellCount.name}: ${cellCount.value}",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onBackground,
+                        )
+                    }
                 }
             }
         },
         shape = RoundedCornerShape(28.dp),
-        containerColor = Color.White,
+        containerColor = MaterialTheme.colorScheme.surface,
     )
+}
+
+@Composable
+private fun SectionLabel(text: String) {
+    Text(
+        text = text,
+        style = MaterialTheme.typography.labelLarge,
+        fontWeight = FontWeight.Bold,
+        color = MaterialTheme.colorScheme.onSurface,
+    )
+}
+
+@Composable
+private fun LabelledValue(
+    label: String,
+    value: String,
+) {
+    Column {
+        SectionLabel(label)
+        Text(
+            text = value,
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onBackground,
+        )
+    }
+}
+
+/**
+ * Card de un análisis del historial. [onLongClick] ofrece el borrado (SPEC-0004 RF-5).
+ * Si [imagePath] es nulo o el fichero no existe, se muestra un placeholder gris (RN-5).
+ */
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun AnalysisCard(
+    title: String,
+    date: String,
+    patient: String,
+    description: String,
+    imagePath: String?,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    onLongClick: (() -> Unit)? = null,
+) {
+    Card(
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .combinedClickable(onClick = onClick, onLongClick = onLongClick),
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 12.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+    ) {
+        Column {
+            AnalysisCardImage(imagePath = imagePath, contentDescription = title)
+
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onBackground,
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(
+                    text = stringResource(Res.string.card_metadata, date, patient),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Text(
+                    text = description,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onBackground,
+                )
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Button(
+                    onClick = onClick,
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .height(56.dp),
+                    colors =
+                        ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = MaterialTheme.colorScheme.onPrimary,
+                        ),
+                    shape = RoundedCornerShape(16.dp),
+                ) {
+                    Text(
+                        text = stringResource(Res.string.card_view_detail),
+                        style = MaterialTheme.typography.labelLarge,
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun AnalysisCardImage(
+    imagePath: String?,
+    contentDescription: String,
+) {
+    val imageModifier =
+        Modifier
+            .fillMaxWidth()
+            .height(180.dp)
+
+    if (imagePath == null) {
+        Box(modifier = imageModifier.background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f)))
+    } else {
+        AsyncImage(
+            model = "file://$imagePath",
+            contentDescription = contentDescription,
+            modifier = imageModifier,
+            contentScale = ContentScale.Crop,
+        )
+    }
 }
 
 @Composable
@@ -135,98 +235,12 @@ fun AnalysisCardPreview() {
         "Conteo celular completado. Se han detectado neutrófilos y linfocitos según el patrón estándar."
     MaterialTheme(typography = getTypography()) {
         AnalysisCard(
-            title = "Análisis de Sangre - Muestra B",
-            date = "24/10/2023",
+            title = "Análisis",
+            date = "24/10/2023 18:43",
             patient = "PAC-2023-8942",
             description = sampleDescription,
-            image = ColorPainter(Color.LightGray),
+            imagePath = null,
             onClick = {},
         )
-    }
-}
-
-@Composable
-fun AnalysisCard(
-    title: String,
-    date: String,
-    patient: String,
-    description: String,
-    image: Painter,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp), // medium radius
-        elevation = CardDefaults.cardElevation(defaultElevation = 12.dp), // high elevation
-        colors =
-            CardDefaults.cardColors(
-                containerColor = Color.White,
-            ),
-    ) {
-        Column {
-            // Imagen de la muestra
-            Image(
-                painter = image,
-                contentDescription = title,
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .height(180.dp),
-                contentScale = ContentScale.Crop,
-            )
-
-            Column(
-                modifier = Modifier.padding(16.dp),
-            ) {
-                // Título del análisis
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFF282828), // onBackground
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                // Meta información: Fecha y Paciente
-                Text(
-                    text = stringResource(Res.string.card_metadata, date, patient),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = Color(0xFF6F6F6F), // onSurface
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // Descripción o resultados breves
-                Text(
-                    text = description,
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = Color(0xFF282828),
-                )
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                // Botón de acción
-                Button(
-                    onClick = onClick,
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .height(56.dp),
-                    colors =
-                        ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFF2FA7F0), // Primary
-                        ),
-                    shape = RoundedCornerShape(16.dp), // medium
-                ) {
-                    Text(
-                        text = stringResource(Res.string.card_view_detail),
-                        style = MaterialTheme.typography.labelLarge,
-                        color = Color.White,
-                    )
-                }
-            }
-        }
     }
 }

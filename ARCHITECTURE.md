@@ -43,7 +43,7 @@
 │   │   │   │   │   └── errors/
 │   │   │   │   │
 │   │   │   │   ├── infrastructure/
-│   │   │   │   │   ├── persistence/     ← Lógica común + `expect class Driver`
+│   │   │   │   │   ├── persistence/     ← Room común: AppDatabase, @Entity, @Dao
 │   │   │   │   │   ├── network/         ← Cliente Ktor común (sin engine)
 │   │   │   │   │   ├── mappers/
 │   │   │   │   │   ├── datasources/
@@ -66,7 +66,7 @@
 │   │   ├── androidMain/
 │   │   │   └── kotlin/.../shared/
 │   │   │       ├── infrastructure/
-│   │   │       │   ├── persistence/     ← `actual` SQLDelight Driver Android
+│   │   │       │   ├── persistence/     ← `actual` Room Builder Android
 │   │   │       │   └── network/         ← `actual` Engine OkHttp
 │   │   │       └── composition/
 │   │   │           └── di/              ← Proveedores Android (Context, etc.)
@@ -74,7 +74,7 @@
 │   │   ├── iosMain/
 │   │   │   └── kotlin/.../shared/
 │   │   │       ├── infrastructure/
-│   │   │       │   ├── persistence/     ← `actual` SQLDelight Native Driver
+│   │   │       │   ├── persistence/     ← `actual` Room Builder iOS
 │   │   │       │   └── network/         ← `actual` Engine Darwin
 │   │   │       └── composition/
 │   │   │           └── di/              ← Dependencias Apple (Keychain, etc.)
@@ -159,7 +159,7 @@ El dominio:
 - No conoce Android.
 - No conoce iOS.
 - No conoce Ktor.
-- No conoce SQLDelight.
+- No conoce Room.
 - No conoce librerías externas.
 
 Debe ser completamente multiplataforma.
@@ -207,7 +207,7 @@ Contiene:
 
 - Implementaciones de los Ports.
 - Clientes Ktor.
-- SQLDelight.
+- Room (AppDatabase, `@Entity`, `@Dao`).
 - DataSources.
 - Repositorios concretos.
 - Mappers.
@@ -368,7 +368,7 @@ ViewModel
     → Retrofit
 
 ViewModel
-    → SQLDelight
+    → Room
 
 Composable
     → Repository
@@ -415,7 +415,7 @@ androidMain      iosMain     desktopMain
 (actuals)        (actuals)   (actuals)
      │               │            │
 Android SDK      Apple APIs   JVM/Desktop APIs
-Room/SQLDelight  Keychain     SQLDelight JVM
+Room             Keychain     Room (JVM)
 OkHttp           Darwin       CIO/OkHttp
 DataStore        Native FS    Desktop FS
 

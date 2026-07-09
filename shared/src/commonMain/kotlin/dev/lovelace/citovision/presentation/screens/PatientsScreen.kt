@@ -43,7 +43,6 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -250,7 +249,7 @@ fun PatientsScreen() {
                         date = item.date,
                         patient = item.patient,
                         description = item.description,
-                        image = ColorPainter(Color.LightGray),
+                        imagePath = null,
                         onClick = { /* TODO */ },
                     )
                 }

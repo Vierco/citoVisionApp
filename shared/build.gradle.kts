@@ -9,6 +9,13 @@ plugins {
     alias(libs.plugins.ktlint)
     alias(libs.plugins.detekt)
     alias(libs.plugins.mokkery)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.room)
+}
+
+// Esquema versionado de Room, para poder escribir migraciones (SPEC-0004 RNF-9).
+room {
+    schemaDirectory("$projectDir/schemas")
 }
 
 kotlin {
@@ -32,6 +39,11 @@ kotlin {
     }
 
     sourceSets {
+        // `kotlin.time.Instant`/`Clock` siguen marcados como experimentales en Kotlin 2.2.x.
+        all {
+            languageSettings.optIn("kotlin.time.ExperimentalTime")
+        }
+
         commonMain.dependencies {
             implementation(compose.runtime)
             implementation(compose.foundation)
@@ -58,6 +70,10 @@ kotlin {
             implementation(libs.filekit.core)
             implementation(libs.filekit.dialogs)
             implementation(libs.coil.compose)
+            // Persistencia de análisis (SPEC-0004): Room Multiplatform + driver SQLite empaquetado.
+            implementation(libs.room.runtime)
+            implementation(libs.androidx.sqlite.bundled)
+            implementation(libs.kotlinx.datetime)
         }
 
         val commonTest by getting {
@@ -108,6 +124,15 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+}
+
+// Room genera código por target, así que el procesador KSP debe declararse en cada configuración.
+dependencies {
+    add("kspAndroid", libs.room.compiler)
+    add("kspDesktop", libs.room.compiler)
+    add("kspIosX64", libs.room.compiler)
+    add("kspIosArm64", libs.room.compiler)
+    add("kspIosSimulatorArm64", libs.room.compiler)
 }
 
 ktlint {
