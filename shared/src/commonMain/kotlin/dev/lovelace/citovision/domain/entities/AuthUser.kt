@@ -9,4 +9,5 @@ data class AuthUser(
     val email: String?,
     val displayName: String?,
     val isGuest: Boolean,
+    val photoUrl: String? = null,
 )

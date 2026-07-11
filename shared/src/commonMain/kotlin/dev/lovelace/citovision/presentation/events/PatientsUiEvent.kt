@@ -12,6 +12,9 @@ sealed interface PatientsUiEvent {
 
     data object NewSearch : PatientsUiEvent
 
+    /** Recargar los análisis del paciente mostrado desde la BD remota. */
+    data object Refresh : PatientsUiEvent
+
     data class ShowDetail(
         val analysis: Analysis,
     ) : PatientsUiEvent

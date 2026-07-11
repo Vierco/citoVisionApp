@@ -104,5 +104,7 @@ class SaveMockAnalysisUseCaseTest {
         }
 
         override suspend fun deleteAnalysis(id: String): Result<Unit, AnalysisError> = Result.Success(Unit)
+
+        override suspend fun deleteAllAnalyses(): Result<Unit, AnalysisError> = Result.Success(Unit)
     }
 }

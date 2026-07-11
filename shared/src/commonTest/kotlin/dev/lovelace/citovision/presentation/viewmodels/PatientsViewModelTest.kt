@@ -7,12 +7,14 @@ import dev.lovelace.citovision.application.usecases.SearchPatientAnalysesUseCase
 import dev.lovelace.citovision.core.result.Result
 import dev.lovelace.citovision.domain.entities.Analysis
 import dev.lovelace.citovision.domain.entities.AuthUser
+import dev.lovelace.citovision.domain.errors.RemoteAnalysisError
 import dev.lovelace.citovision.presentation.events.PatientsUiEvent
 import dev.mokkery.answering.returns
 import dev.mokkery.every
 import dev.mokkery.everySuspend
 import dev.mokkery.mock
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -31,7 +33,7 @@ import kotlin.time.Instant
 /**
  * Mokkery no puede mockear el use case (clase final): se construye el real con los puertos mockeados.
  */
-@OptIn(ExperimentalTime::class)
+@OptIn(ExperimentalCoroutinesApi::class, ExperimentalTime::class)
 class PatientsViewModelTest {
     private val authService = mock<AuthService>()
     private val remote = mock<RemotePatientAnalyses>()
@@ -128,4 +130,40 @@ class PatientsViewModelTest {
 
             assertTrue(viewModel.uiState.value.results.isEmpty())
         }
+
+    @Test
+    fun `given a shown patient when refreshing then reloads entries from remote`() =
+        runTest(dispatcher) {
+            every { authService.currentUser } returns flowOf(AuthUser("u1", "a@b.com", null, isGuest = false))
+            val second = Analysis("a2", "12-34", Instant.fromEpochMilliseconds(2), "s2", null, emptyList())
+            val fakeRemote = QueueRemote(mutableListOf(listOf(analysis()), listOf(analysis(), second)))
+            val viewModel =
+                PatientsViewModel(
+                    SearchPatientAnalysesUseCase(authService, fakeRemote),
+                    DeleteRemoteAnalysisUseCase(fakeRemote),
+                )
+            viewModel.onEvent(PatientsUiEvent.QueryChanged("12-34"))
+            viewModel.onEvent(PatientsUiEvent.Search)
+            advanceUntilIdle()
+            assertEquals(1, viewModel.uiState.value.results.size)
+
+            viewModel.onEvent(PatientsUiEvent.Refresh)
+            advanceUntilIdle()
+
+            assertEquals(2, viewModel.uiState.value.results.size)
+            assertEquals("12-34", viewModel.uiState.value.resultsPatientCode)
+        }
+
+    /** Fake que devuelve una página de resultados por llamada, para verificar la recarga. */
+    private class QueueRemote(
+        private val pages: MutableList<List<Analysis>>,
+    ) : RemotePatientAnalyses {
+        override suspend fun queryByPatient(
+            ownerUid: String,
+            patientCode: String,
+        ): Result<List<Analysis>, RemoteAnalysisError> = Result.Success(pages.removeAt(0))
+
+        override suspend fun deleteAnalysis(analysisId: String): Result<Unit, RemoteAnalysisError> =
+            Result.Success(Unit)
+    }
 }

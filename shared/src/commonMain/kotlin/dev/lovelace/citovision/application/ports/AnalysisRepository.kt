@@ -18,4 +18,7 @@ interface AnalysisRepository {
 
     /** Borra el análisis, sus entradas de conteo (cascada) y su fichero de imagen (RN-7). */
     suspend fun deleteAnalysis(id: String): Result<Unit, AnalysisError>
+
+    /** Borra todos los análisis locales, su conteo (cascada) y sus ficheros de imagen. */
+    suspend fun deleteAllAnalyses(): Result<Unit, AnalysisError>
 }

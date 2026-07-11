@@ -109,3 +109,10 @@ class SendPasswordResetUseCase(
 ) {
     suspend operator fun invoke(email: String): Result<Unit, AuthError> = authService.sendPasswordReset(email)
 }
+
+/** Observa el usuario autenticado actual (cuenta), para mostrar su identidad en Ajustes. */
+class ObserveCurrentUserUseCase(
+    private val authService: AuthService,
+) {
+    operator fun invoke(): Flow<AuthUser?> = authService.currentUser
+}

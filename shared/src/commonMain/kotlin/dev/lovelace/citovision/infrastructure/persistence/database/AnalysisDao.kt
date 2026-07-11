@@ -41,7 +41,15 @@ interface AnalysisDao {
     @Query("SELECT imagePath FROM analyses WHERE id = :id")
     suspend fun findImagePath(id: String): String?
 
+    /** Rutas de todas las imágenes, para borrar sus ficheros tras vaciar la tabla. */
+    @Query("SELECT imagePath FROM analyses WHERE imagePath IS NOT NULL")
+    suspend fun findAllImagePaths(): List<String>
+
     /** Devuelve el número de filas borradas: 0 significa que el análisis no existía. */
     @Query("DELETE FROM analyses WHERE id = :id")
     suspend fun deleteById(id: String): Int
+
+    /** Vacía la tabla de análisis; el conteo celular se borra en cascada. */
+    @Query("DELETE FROM analyses")
+    suspend fun deleteAll()
 }

@@ -19,6 +19,7 @@ import dev.mokkery.answering.returns
 import dev.mokkery.everySuspend
 import dev.mokkery.mock
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -37,6 +38,7 @@ import kotlin.test.assertTrue
  * Mokkery no puede mockear clases final (los use cases), así que se construyen los use cases reales
  * con los puertos (interfaces) mockeados. La validación de formato de campos vive en el ViewModel.
  */
+@OptIn(ExperimentalCoroutinesApi::class)
 class LoginViewModelTest {
     private val authService = mock<AuthService>()
     private val googleSignInLauncher = mock<GoogleSignInLauncher>()

@@ -35,6 +35,7 @@
     <string name="common_close">Close</string>
 
     <!-- Settings -->
+    <string name="settings_guest">Guest</string>
     <string name="settings_login">Sign in with an account</string>
     <string name="settings_logout">Sign out</string>
     <string name="logout_dialog_title">Sign out?</string>
@@ -43,7 +44,20 @@
     <string name="settings_section_support">Support</string>
     <string name="settings_section_others">Others</string>
     <string name="settings_clear_analysis">Clear all local analysis</string>
+    <string name="settings_clear_confirm_title">Delete all local analyses?</string>
+    <string name="settings_clear_confirm_message">All analyses stored on this device will be removed. This action cannot be undone.</string>
+    <string name="settings_cleared_title">Analyses deleted</string>
+    <string name="settings_cleared_message">All local analyses have been deleted.</string>
     <string name="settings_feedback">Feedback</string>
+    <string name="feedback_dialog_title">Send feedback</string>
+    <string name="feedback_dialog_desc">Tell us about your experience or report a problem. We'll review your message.</string>
+    <string name="feedback_message_label">Message</string>
+    <string name="feedback_message_placeholder">Write your feedback here…</string>
+    <string name="feedback_send">Send</string>
+    <string name="feedback_sent_title">Thank you!</string>
+    <string name="feedback_sent_message">We've received your feedback.</string>
+    <string name="feedback_error_title">Couldn't send</string>
+    <string name="feedback_error_message">Check your connection and try again.</string>
     <string name="settings_license">License</string>
     <string name="settings_version">Version</string>
     <string name="settings_version_value">1.0.0 (Build 1)</string>
@@ -103,6 +117,7 @@
     <string name="analysis_sync_retry">Retry</string>
     <string name="patients_result_header">Patient: %1$s</string>
     <string name="patients_new_search">New search</string>
+    <string name="patients_refresh">Refresh</string>
     <string name="patients_requires_account_title">Account required</string>
     <string name="patients_requires_account_desc">This feature requires a user account. Sign in to look up patients.</string>
     <string name="patients_error_title">Search error</string>

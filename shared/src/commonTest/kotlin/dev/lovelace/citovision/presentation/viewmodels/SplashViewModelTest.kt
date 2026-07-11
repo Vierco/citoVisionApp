@@ -9,6 +9,7 @@ import dev.mokkery.answering.returns
 import dev.mokkery.every
 import dev.mokkery.mock
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -24,6 +25,7 @@ import kotlin.test.assertEquals
  * Mokkery no puede mockear clases final (los use cases), así que se construye el use case real
  * con los puertos (interfaces) mockeados.
  */
+@OptIn(ExperimentalCoroutinesApi::class)
 class SplashViewModelTest {
     private val authService = mock<AuthService>()
     private val sessionRepository = mock<SessionRepository>()

@@ -27,3 +27,10 @@ class DeleteAnalysisUseCase(
                 if (result.error == AnalysisError.NotFound) Result.Success(Unit) else result
         }
 }
+
+/** Borra todos los análisis locales (acción de Ajustes). No afecta a la base de datos remota (RF-9). */
+class DeleteAllAnalysesUseCase(
+    private val analysisRepository: AnalysisRepository,
+) {
+    suspend operator fun invoke(): Result<Unit, AnalysisError> = analysisRepository.deleteAllAnalyses()
+}

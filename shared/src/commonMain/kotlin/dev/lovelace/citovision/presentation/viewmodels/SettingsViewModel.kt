@@ -2,37 +2,66 @@ package dev.lovelace.citovision.presentation.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dev.lovelace.citovision.application.usecases.DeleteAllAnalysesUseCase
+import dev.lovelace.citovision.application.usecases.ObserveCurrentUserUseCase
 import dev.lovelace.citovision.application.usecases.ObserveSessionStatusUseCase
 import dev.lovelace.citovision.application.usecases.SignOutUseCase
+import dev.lovelace.citovision.application.usecases.SubmitFeedbackUseCase
+import dev.lovelace.citovision.domain.validation.isValidEmail
 import dev.lovelace.citovision.presentation.events.SettingsUiEvent
 import dev.lovelace.citovision.presentation.navigation.NavigationEvent
 import dev.lovelace.citovision.presentation.state.SettingsUiState
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 /**
  * Gestiona las acciones de sesión de la pantalla de Ajustes y expone el tipo de sesión activa para
  * mostrar la opción correcta (cuenta → cerrar sesión; invitado → iniciar sesión con cuenta).
  * Ambas acciones navegan a `LoginRoute`; el cierre de sesión limpia el flag de invitado y la cuenta
- * Firebase vía [SignOutUseCase].
+ * Firebase vía [SignOutUseCase]. También orquesta el borrado local y el envío de feedback remoto.
  */
 class SettingsViewModel(
     private val signOut: SignOutUseCase,
+    private val deleteAllAnalyses: DeleteAllAnalysesUseCase,
+    private val submitFeedback: SubmitFeedbackUseCase,
     observeSessionStatus: ObserveSessionStatusUseCase,
+    observeCurrentUser: ObserveCurrentUserUseCase,
 ) : ViewModel() {
+    private val clearedConfirmation = MutableStateFlow(false)
+    private val feedbackForm = MutableStateFlow(FeedbackForm())
+
     val uiState: StateFlow<SettingsUiState> =
-        observeSessionStatus()
-            .map { SettingsUiState(sessionStatus = it) }
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS),
-                initialValue = SettingsUiState(),
+        combine(
+            observeSessionStatus(),
+            observeCurrentUser(),
+            clearedConfirmation,
+            feedbackForm,
+        ) { status, user, cleared, feedback ->
+            SettingsUiState(
+                sessionStatus = status,
+                email = user?.email,
+                avatarUrl = user?.photoUrl,
+                clearedConfirmationVisible = cleared,
+                feedbackDialogVisible = feedback.visible,
+                feedbackEmail = feedback.email,
+                feedbackMessage = feedback.message,
+                isFeedbackValid = isValidEmail(feedback.email) && feedback.message.isNotBlank(),
+                feedbackSending = feedback.sending,
+                feedbackSentVisible = feedback.sentVisible,
+                feedbackErrorVisible = feedback.errorVisible,
             )
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS),
+            initialValue = SettingsUiState(),
+        )
 
     private val _navigationEvents = Channel<NavigationEvent>(Channel.BUFFERED)
     val navigationEvents = _navigationEvents.receiveAsFlow()
@@ -50,12 +79,61 @@ class SettingsViewModel(
                     _navigationEvents.send(NavigationEvent.ToLogin)
                 }
 
+            SettingsUiEvent.ClearLocalAnalyses ->
+                viewModelScope.launch {
+                    deleteAllAnalyses()
+                    clearedConfirmation.value = true
+                }
+
+            SettingsUiEvent.DismissClearedConfirmation ->
+                clearedConfirmation.value = false
+
+            SettingsUiEvent.OpenFeedback ->
+                feedbackForm.value = FeedbackForm(visible = true, email = uiState.value.email.orEmpty())
+
+            is SettingsUiEvent.FeedbackEmailChanged ->
+                feedbackForm.update { it.copy(email = event.email) }
+
+            is SettingsUiEvent.FeedbackMessageChanged ->
+                feedbackForm.update { it.copy(message = event.message) }
+
+            SettingsUiEvent.SubmitFeedback ->
+                viewModelScope.launch {
+                    feedbackForm.update { it.copy(sending = true, errorVisible = false) }
+                    val form = feedbackForm.value
+                    val sent = submitFeedback(form.email, form.message)
+                    feedbackForm.value =
+                        if (sent) {
+                            FeedbackForm(sentVisible = true)
+                        } else {
+                            feedbackForm.value.copy(sending = false, errorVisible = true)
+                        }
+                }
+
+            SettingsUiEvent.CancelFeedback ->
+                feedbackForm.value = FeedbackForm()
+
+            SettingsUiEvent.DismissFeedbackSent ->
+                feedbackForm.value = FeedbackForm()
+
+            SettingsUiEvent.DismissFeedbackError ->
+                feedbackForm.update { it.copy(errorVisible = false) }
+
             SettingsUiEvent.NavigateBack ->
                 viewModelScope.launch {
                     _navigationEvents.send(NavigationEvent.Back)
                 }
         }
     }
+
+    private data class FeedbackForm(
+        val visible: Boolean = false,
+        val email: String = "",
+        val message: String = "",
+        val sending: Boolean = false,
+        val sentVisible: Boolean = false,
+        val errorVisible: Boolean = false,
+    )
 
     private companion object {
         const val STOP_TIMEOUT_MS = 5_000L

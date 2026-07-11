@@ -108,4 +108,32 @@ class AnalysisDaoTest {
             assertEquals("/tmp/1.png", dao.findImagePath("1"))
             assertNull(dao.findImagePath("does-not-exist"))
         }
+
+    @Test
+    fun `given several analyses when deleting all then table is emptied and counts cascade`() =
+        runTest {
+            // Given
+            dao.insertAnalysisWithCellCounts(analysisEntity("1", 1_000), cellCounts("1", 3))
+            dao.insertAnalysisWithCellCounts(analysisEntity("2", 2_000), cellCounts("2", 2))
+
+            // When
+            dao.deleteAll()
+
+            // Then
+            assertTrue(dao.observeAll().first().isEmpty())
+        }
+
+    @Test
+    fun `given stored analyses when asking for all image paths then only non-null ones are returned`() =
+        runTest {
+            // Given
+            dao.insertAnalysisWithCellCounts(analysisEntity("1", 1_000), emptyList())
+            dao.insertAnalysisWithCellCounts(analysisEntity("2", 2_000), emptyList())
+
+            // When
+            val paths = dao.findAllImagePaths()
+
+            // Then
+            assertEquals(setOf("/tmp/1.png", "/tmp/2.png"), paths.toSet())
+        }
 }

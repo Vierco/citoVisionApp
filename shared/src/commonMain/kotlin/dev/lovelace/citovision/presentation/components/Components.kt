@@ -1,5 +1,11 @@
 package dev.lovelace.citovision.presentation.components
 
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
@@ -7,6 +13,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
@@ -23,7 +30,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -34,7 +45,7 @@ import citovision.shared.generated.resources.common_close
 import citovision.shared.generated.resources.dialog_cell_count_label
 import citovision.shared.generated.resources.dialog_date_label
 import citovision.shared.generated.resources.dialog_patient_label
-import coil3.compose.AsyncImage
+import coil3.compose.SubcomposeAsyncImage
 import dev.lovelace.citovision.domain.entities.CellCount
 import dev.lovelace.citovision.ui.theme.getTypography
 import org.jetbrains.compose.resources.stringResource
@@ -217,17 +228,59 @@ private fun AnalysisCardImage(
             .height(180.dp)
 
     if (imagePath == null) {
-        Box(modifier = imageModifier.background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f)))
+        ImageFallback(modifier = imageModifier)
     } else {
         // Local (SPEC-0004) = ruta de fichero → file://; remoto (SPEC-0005) = URL de descarga de Storage.
         val model = if (imagePath.startsWith("http")) imagePath else "file://$imagePath"
-        AsyncImage(
+        SubcomposeAsyncImage(
             model = model,
             contentDescription = contentDescription,
             modifier = imageModifier,
             contentScale = ContentScale.Crop,
+            // Mientras la imagen no está en caché (típico en remoto), se muestra un skeleton con shimmer.
+            loading = { ShimmerBox(modifier = Modifier.fillMaxSize()) },
+            error = { ImageFallback(modifier = Modifier.fillMaxSize()) },
         )
     }
+}
+
+/** Placeholder gris para imagen ausente o fallida (RN-5). */
+@Composable
+private fun ImageFallback(modifier: Modifier) {
+    Box(modifier = modifier.background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f)))
+}
+
+/** Placeholder animado (shimmer) para el hueco de la imagen mientras carga. */
+@Composable
+private fun ShimmerBox(modifier: Modifier) {
+    val transition = rememberInfiniteTransition(label = "shimmer")
+    val progress by transition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec =
+            infiniteRepeatable(
+                animation = tween(durationMillis = 1200, easing = LinearEasing),
+                repeatMode = RepeatMode.Restart,
+            ),
+        label = "shimmer-progress",
+    )
+    val base = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
+    val highlight = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.28f)
+    Box(
+        modifier =
+            modifier.drawBehind {
+                val width = size.width
+                val start = progress * 2f * width - width
+                drawRect(
+                    brush =
+                        Brush.linearGradient(
+                            colors = listOf(base, highlight, base),
+                            start = Offset(start, 0f),
+                            end = Offset(start + width, 0f),
+                        ),
+                )
+            },
+    )
 }
 
 @Composable

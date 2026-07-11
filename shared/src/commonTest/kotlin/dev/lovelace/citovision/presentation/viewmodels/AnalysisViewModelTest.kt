@@ -17,6 +17,7 @@ import dev.mokkery.answering.returns
 import dev.mokkery.everySuspend
 import dev.mokkery.mock
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
@@ -34,6 +35,7 @@ import kotlin.test.assertTrue
  * Mokkery no puede mockear clases final (el use case), así que se construye el [PickImageUseCase] real
  * con el puerto [ImagePicker] mockeado.
  */
+@OptIn(ExperimentalCoroutinesApi::class)
 class AnalysisViewModelTest {
     private val imagePicker = mock<ImagePicker>()
     private val analysisRepository = mock<AnalysisRepository>()

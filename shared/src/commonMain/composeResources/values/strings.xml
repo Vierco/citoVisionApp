@@ -35,6 +35,7 @@
     <string name="common_close">Cerrar</string>
 
     <!-- Settings -->
+    <string name="settings_guest">Invitado</string>
     <string name="settings_login">Iniciar sesión con una cuenta</string>
     <string name="settings_logout">Cerrar sesión</string>
     <string name="logout_dialog_title">¿Cerrar sesión?</string>
@@ -43,7 +44,20 @@
     <string name="settings_section_support">Soporte</string>
     <string name="settings_section_others">Otros</string>
     <string name="settings_clear_analysis">Borrar todos los análisis locales</string>
+    <string name="settings_clear_confirm_title">¿Borrar todos los análisis locales?</string>
+    <string name="settings_clear_confirm_message">Se eliminarán todos los análisis guardados en este dispositivo. Esta acción no se puede deshacer.</string>
+    <string name="settings_cleared_title">Análisis borrados</string>
+    <string name="settings_cleared_message">Se han eliminado todos los análisis locales.</string>
     <string name="settings_feedback">Feedback</string>
+    <string name="feedback_dialog_title">Enviar feedback</string>
+    <string name="feedback_dialog_desc">Cuéntanos tu experiencia o reporta un problema. Revisaremos tu mensaje.</string>
+    <string name="feedback_message_label">Mensaje</string>
+    <string name="feedback_message_placeholder">Escribe aquí tu feedback…</string>
+    <string name="feedback_send">Enviar</string>
+    <string name="feedback_sent_title">¡Gracias!</string>
+    <string name="feedback_sent_message">Hemos recibido tu feedback.</string>
+    <string name="feedback_error_title">No se pudo enviar</string>
+    <string name="feedback_error_message">Revisa tu conexión e inténtalo de nuevo.</string>
     <string name="settings_license">Licencia</string>
     <string name="settings_version">Versión</string>
     <string name="settings_version_value">1.0.0 (Build 1)</string>
@@ -103,6 +117,7 @@
     <string name="analysis_sync_retry">Reintentar</string>
     <string name="patients_result_header">Paciente: %1$s</string>
     <string name="patients_new_search">Nueva búsqueda</string>
+    <string name="patients_refresh">Actualizar</string>
     <string name="patients_requires_account_title">Requiere cuenta</string>
     <string name="patients_requires_account_desc">Esta función requiere una cuenta de usuario. Inicia sesión para consultar pacientes.</string>
     <string name="patients_error_title">Error de consulta</string>

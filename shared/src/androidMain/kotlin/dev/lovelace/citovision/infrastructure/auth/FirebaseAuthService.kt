@@ -76,7 +76,7 @@ class FirebaseAuthService : AuthService {
         }
 
     private fun FirebaseUser.toAuthUser(): AuthUser =
-        AuthUser(uid = uid, email = email, displayName = displayName, isGuest = false)
+        AuthUser(uid = uid, email = email, displayName = displayName, isGuest = false, photoUrl = photoURL)
 
     private companion object {
         const val GUEST_UID = "guest"

@@ -19,6 +19,7 @@ import dev.lovelace.citovision.application.usecases.SignInAsGuestUseCase
 import dev.lovelace.citovision.application.usecases.SignInWithEmailUseCase
 import dev.lovelace.citovision.application.usecases.SignInWithGoogleUseCase
 import dev.lovelace.citovision.application.usecases.SignOutUseCase
+import dev.lovelace.citovision.application.usecases.SubmitFeedbackUseCase
 import dev.lovelace.citovision.infrastructure.persistence.database.AnalysisDao
 import dev.lovelace.citovision.infrastructure.persistence.database.RemoteUploadOutboxDao
 import dev.mokkery.mock
@@ -68,6 +69,7 @@ class AppModulesGraphTest {
         assertNotNull(koin.get<ObserveAnalysesUseCase>())
         assertNotNull(koin.get<DeleteAnalysisUseCase>())
         assertNotNull(koin.get<SaveMockAnalysisUseCase>())
+        assertNotNull(koin.get<SubmitFeedbackUseCase>())
         assertNotNull(koin.get<SessionRepository>())
         assertNotNull(koin.get<AnalysisRepository>())
         assertNotNull(koin.get<RemoteAnalysisSync>())

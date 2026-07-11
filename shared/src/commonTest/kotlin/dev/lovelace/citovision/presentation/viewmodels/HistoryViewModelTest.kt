@@ -13,6 +13,7 @@ import dev.mokkery.everySuspend
 import dev.mokkery.mock
 import dev.mokkery.verifySuspend
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -29,9 +30,10 @@ import kotlin.test.assertTrue
 import kotlin.time.Instant
 
 /**
- * Mokkery no puede mockear clases final (los use cases), así que se construyen los use cases reales con el
+ * Mokkery no puede mockear clases "final" (los use cases), así que se construyen los use cases reales con el
  * puerto [AnalysisRepository] mockeado.
  */
+@OptIn(ExperimentalCoroutinesApi::class)
 class HistoryViewModelTest {
     private val analysisRepository = mock<AnalysisRepository>()
     private val observeAnalyses = ObserveAnalysesUseCase(analysisRepository)

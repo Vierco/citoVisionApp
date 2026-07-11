@@ -29,6 +29,7 @@ class PatientsViewModel(
         when (event) {
             is PatientsUiEvent.QueryChanged -> onQueryChanged(event.code)
             PatientsUiEvent.Search -> runSearch()
+            PatientsUiEvent.Refresh -> refresh()
             PatientsUiEvent.NewSearch -> _uiState.value = PatientsUiState()
             is PatientsUiEvent.ShowDetail -> _uiState.update { it.copy(detail = event.analysis) }
             PatientsUiEvent.DismissDetail -> _uiState.update { it.copy(detail = null) }
@@ -60,6 +61,30 @@ class PatientsViewModel(
 
                 PatientSearchResult.Empty ->
                     _uiState.update { it.copy(isLoading = false, noResultsVisible = true) }
+
+                PatientSearchResult.RequiresAccount ->
+                    _uiState.update { it.copy(isLoading = false, requiresAccountVisible = true) }
+
+                PatientSearchResult.Error ->
+                    _uiState.update { it.copy(isLoading = false, errorVisible = true) }
+            }
+        }
+    }
+
+    /** Recarga los análisis del paciente ya mostrado (mismo código) desde el remoto, sin salir de la vista. */
+    private fun refresh() {
+        val state = _uiState.value
+        val code = state.resultsPatientCode ?: return
+        if (state.isLoading) return
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+            when (val result = search(code)) {
+                is PatientSearchResult.Found ->
+                    _uiState.update { it.copy(isLoading = false, results = result.analyses) }
+
+                // El paciente ya no tiene análisis (p. ej. se borraron): lista vacía, sin salir de la vista.
+                PatientSearchResult.Empty ->
+                    _uiState.update { it.copy(isLoading = false, results = emptyList()) }
 
                 PatientSearchResult.RequiresAccount ->
                     _uiState.update { it.copy(isLoading = false, requiresAccountVisible = true) }

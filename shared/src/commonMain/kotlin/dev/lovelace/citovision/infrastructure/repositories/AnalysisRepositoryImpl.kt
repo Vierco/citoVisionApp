@@ -64,4 +64,22 @@ class AnalysisRepositoryImpl(
             Napier.e("Fallo al borrar el análisis", error)
             Result.Failure(AnalysisError.StorageFailure)
         }
+
+    override suspend fun deleteAllAnalyses(): Result<Unit, AnalysisError> =
+        try {
+            val imagePaths = dao.findAllImagePaths()
+            dao.deleteAll()
+            // Los ficheros son secundarios: si alguno no se puede borrar, se registra pero el borrado se confirma.
+            imagePaths.forEach { path ->
+                if (imageStore.delete(path) is Result.Failure) {
+                    Napier.w("Análisis borrados pero una imagen no pudo eliminarse")
+                }
+            }
+            Result.Success(Unit)
+        } catch (cancellation: CancellationException) {
+            throw cancellation
+        } catch (error: Exception) {
+            Napier.e("Fallo al borrar todos los análisis", error)
+            Result.Failure(AnalysisError.StorageFailure)
+        }
 }
