@@ -7,13 +7,15 @@ import androidx.room.RoomDatabaseConstructor
 
 /** Base de datos local de citoVision (SPEC-0004). El esquema se versiona en `shared/schemas`. */
 @Database(
-    entities = [AnalysisEntity::class, CellCountEntity::class],
-    version = 1,
+    entities = [AnalysisEntity::class, CellCountEntity::class, RemoteUploadOutboxEntity::class],
+    version = 2,
     exportSchema = true,
 )
 @ConstructedBy(AppDatabaseConstructor::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun analysisDao(): AnalysisDao
+
+    abstract fun outboxDao(): RemoteUploadOutboxDao
 }
 
 /**

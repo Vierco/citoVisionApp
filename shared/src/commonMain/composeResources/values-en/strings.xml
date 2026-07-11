@@ -37,6 +37,20 @@
     <!-- Settings -->
     <string name="settings_login">Sign in with an account</string>
     <string name="settings_logout">Sign out</string>
+    <string name="logout_dialog_title">Sign out?</string>
+    <string name="logout_dialog_desc">Are you sure you want to sign out of your current session?</string>
+    <string name="settings_section_actions">Actions</string>
+    <string name="settings_section_support">Support</string>
+    <string name="settings_section_others">Others</string>
+    <string name="settings_clear_analysis">Clear all local analysis</string>
+    <string name="settings_feedback">Feedback</string>
+    <string name="settings_license">License</string>
+    <string name="settings_version">Version</string>
+    <string name="settings_version_value">1.0.0 (Build 1)</string>
+    <string name="license_dialog_pending">License pending. This text will be very long to test scrolling. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</string>
+    <string name="settings_rn3">RN-3</string>
+    <string name="rn3_dialog_pending">RN-3 pending</string>
+    <string name="common_accept">Accept</string>
 
     <!-- Main Navigation -->
     <string name="nav_analysis">Analysis</string>
@@ -58,10 +72,10 @@
     <string name="patients_search_desc_default">Quickly find clinical records and analysis results.</string>
     <string name="patients_close_file">Close record</string>
     <string name="patients_no_results_title">No active results</string>
-    <string name="patients_no_results_desc">Enter the patient ID or full name in the search bar above to access clinical history.</string>
+    <string name="patients_no_results_desc">Enter the patient code in the search bar to access their analyses.</string>
     <string name="common_back">Back</string>
-    <string name="patients_id_name_label">Patient ID / Name</string>
-    <string name="patients_search_placeholder">E.g.: PAC-2023-8942 or John Doe</string>
+    <string name="patients_id_name_label">Patient code</string>
+    <string name="patients_search_placeholder">E.g.: 2026-001</string>
     <string name="patients_button_search">Search</string>
     <string name="patients_error_empty_title">Empty search</string>
     <string name="patients_error_empty_desc">Please enter a patient ID or name to search.</string>
@@ -81,6 +95,19 @@
     <string name="analysis_error_generic">The image could not be selected.</string>
     <string name="analysis_saved">Analysis saved to history</string>
     <string name="analysis_error_save">The analysis could not be saved.</string>
+    <string name="analysis_code_dialog_title">Patient code</string>
+    <string name="analysis_code_dialog_hint">Digits and hyphen only (e.g. 12-34)</string>
+    <string name="analysis_code_confirm">Save</string>
+    <string name="analysis_sync_error_title">Sync error</string>
+    <string name="analysis_sync_error_message">The analysis was saved to your local history, but could not be uploaded to the cloud. Retry?</string>
+    <string name="analysis_sync_retry">Retry</string>
+    <string name="patients_result_header">Patient: %1$s</string>
+    <string name="patients_new_search">New search</string>
+    <string name="patients_requires_account_title">Account required</string>
+    <string name="patients_requires_account_desc">This feature requires a user account. Sign in to look up patients.</string>
+    <string name="patients_error_title">Search error</string>
+    <string name="patients_error_desc">The search could not be completed. Try again.</string>
+    <string name="patients_delete_message">It will be deleted from the remote database. This does not affect your local history. Continue?</string>
 
     <!-- Components -->
     <string name="card_metadata">Date: %1$s | Patient: %2$s</string>

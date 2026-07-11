@@ -24,31 +24,36 @@ class SaveMockAnalysisUseCase(
     private val analysisRepository: AnalysisRepository,
     private val analysisImageStore: AnalysisImageStore,
 ) {
-    suspend operator fun invoke(image: SelectedImage): Result<Unit, AnalysisError> {
+    /** Devuelve el id del análisis persistido, para poder encolarlo en el outbox (SPEC-0005). */
+    suspend operator fun invoke(
+        image: SelectedImage,
+        patientCode: String,
+    ): Result<String, AnalysisError> {
         val id = generateId()
         val fileName = "$id.${image.mimeType.toFileExtension()}"
 
         return analysisImageStore.save(image.bytes, fileName).fold(
-            onSuccess = { imagePath -> saveRow(id, imagePath) },
+            onSuccess = { imagePath -> saveRow(id, patientCode, imagePath) },
             onFailure = { error -> Result.Failure(error) },
         )
     }
 
     private suspend fun saveRow(
         id: String,
+        patientCode: String,
         imagePath: String,
-    ): Result<Unit, AnalysisError> {
+    ): Result<String, AnalysisError> {
         val analysis =
             Analysis(
                 id = id,
-                patient = mockPatientCode(),
+                patient = patientCode,
                 performedAt = Clock.System.now(),
                 summary = MOCK_SUMMARIES.random(),
                 imagePath = imagePath,
                 cellCounts = mockCellCounts(),
             )
         return analysisRepository.saveAnalysis(analysis).fold(
-            onSuccess = { Result.Success(Unit) },
+            onSuccess = { Result.Success(id) },
             onFailure = { error ->
                 analysisImageStore.delete(imagePath) // no dejar la imagen huérfana
                 Result.Failure(error)
@@ -59,8 +64,6 @@ class SaveMockAnalysisUseCase(
     /** Único por instante + azar; suficiente para uso local. */
     private fun generateId(): String =
         "${Clock.System.now().toEpochMilliseconds()}-${Random.nextInt(MIN_SUFFIX, MAX_SUFFIX)}"
-
-    private fun mockPatientCode(): String = "PAC-2026-${Random.nextInt(1, 1000).toString().padStart(3, '0')}"
 
     /** Longitud variable entre análisis, para ejercitar el tamaño dinámico del conteo (RF-9). */
     private fun mockCellCounts(): List<CellCount> =

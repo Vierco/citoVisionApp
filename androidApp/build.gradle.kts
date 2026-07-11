@@ -9,6 +9,25 @@ plugins {
     alias(libs.plugins.google.services)
 }
 
+// Web API key de Firebase (SIN restricción) para las llamadas REST a Firestore/Storage (SPEC-0005). Se
+// lee de local.properties (no versionado) o de la variable de entorno FIREBASE_WEB_API_KEY; es la MISMA
+// que usa Desktop. No es un secreto de servidor (identifica el proyecto; la autorización real está en las
+// reglas de Firebase). Providers para compatibilidad con el configuration cache.
+val firebaseWebApiKey: String =
+    providers
+        .fileContents(rootProject.layout.projectDirectory.file("local.properties"))
+        .asText
+        .map { text ->
+            text
+                .lineSequence()
+                .map { it.trim() }
+                .firstOrNull { it.startsWith("firebaseWebApiKey=") }
+                ?.substringAfter("=")
+                ?.trim()
+                .orEmpty()
+        }.orElse(providers.environmentVariable("FIREBASE_WEB_API_KEY"))
+        .getOrElse("")
+
 android {
     namespace = "dev.lovelace.citovision"
     compileSdk {
@@ -26,6 +45,8 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        buildConfigField("String", "FIREBASE_WEB_API_KEY", "\"$firebaseWebApiKey\"")
     }
 
     buildTypes {
@@ -44,6 +65,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 

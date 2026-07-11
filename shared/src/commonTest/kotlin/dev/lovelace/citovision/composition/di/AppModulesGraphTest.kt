@@ -6,6 +6,7 @@ import dev.lovelace.citovision.application.ports.AnalysisImageStore
 import dev.lovelace.citovision.application.ports.AnalysisRepository
 import dev.lovelace.citovision.application.ports.AuthService
 import dev.lovelace.citovision.application.ports.GoogleSignInLauncher
+import dev.lovelace.citovision.application.ports.RemoteAnalysisSync
 import dev.lovelace.citovision.application.ports.SessionRepository
 import dev.lovelace.citovision.application.usecases.DeleteAnalysisUseCase
 import dev.lovelace.citovision.application.usecases.HasActiveSessionUseCase
@@ -19,7 +20,11 @@ import dev.lovelace.citovision.application.usecases.SignInWithEmailUseCase
 import dev.lovelace.citovision.application.usecases.SignInWithGoogleUseCase
 import dev.lovelace.citovision.application.usecases.SignOutUseCase
 import dev.lovelace.citovision.infrastructure.persistence.database.AnalysisDao
+import dev.lovelace.citovision.infrastructure.persistence.database.RemoteUploadOutboxDao
 import dev.mokkery.mock
+import io.ktor.client.engine.HttpClientEngine
+import io.ktor.client.engine.mock.MockEngine
+import io.ktor.client.engine.mock.respond
 import org.koin.dsl.koinApplication
 import org.koin.dsl.module
 import kotlin.test.Test
@@ -38,6 +43,8 @@ class AppModulesGraphTest {
             single<DataStore<Preferences>> { mock() }
             single<AnalysisDao> { mock() }
             single<AnalysisImageStore> { mock() }
+            single<RemoteUploadOutboxDao> { mock() }
+            single<HttpClientEngine> { MockEngine { respond("{}") } }
         }
 
     @Test
@@ -63,6 +70,7 @@ class AppModulesGraphTest {
         assertNotNull(koin.get<SaveMockAnalysisUseCase>())
         assertNotNull(koin.get<SessionRepository>())
         assertNotNull(koin.get<AnalysisRepository>())
+        assertNotNull(koin.get<RemoteAnalysisSync>())
 
         app.close()
     }

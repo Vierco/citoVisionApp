@@ -40,6 +40,19 @@ class OkioAnalysisImageStore(
             }
         }
 
+    override suspend fun read(path: String): Result<ByteArray, AnalysisError> =
+        withContext(dispatcher) {
+            try {
+                val bytes = fileSystem.read(path.toPath()) { readByteArray() }
+                Result.Success(bytes)
+            } catch (cancellation: CancellationException) {
+                throw cancellation
+            } catch (error: Exception) {
+                Napier.e("Fallo al leer la imagen del análisis", error)
+                Result.Failure(AnalysisError.StorageFailure)
+            }
+        }
+
     override suspend fun delete(path: String): Result<Unit, AnalysisError> =
         withContext(dispatcher) {
             try {

@@ -11,11 +11,28 @@ sealed interface AnalysisUiEvent {
     /** Cerrar el mensaje de error. */
     data object DismissError : AnalysisUiEvent
 
-    /**
-     * ⚠️ TEMPORAL (SPEC-0004 RF-7): persiste un análisis mock a partir de la imagen cargada.
-     * Se sustituirá por la invocación real a la IA.
-     */
+    /** Abre el diálogo que pide el código de paciente antes de escanear (SPEC-0005 RF-1). */
     data object StartScan : AnalysisUiEvent
+
+    /** Texto del código de paciente en el diálogo (se sanea a dígitos y guion). */
+    data class PatientCodeChanged(
+        val code: String,
+    ) : AnalysisUiEvent
+
+    /**
+     * Confirma el diálogo: guarda el análisis local (mock, andamiaje temporal) y, si hay cuenta, lo encola
+     * y sincroniza con remoto (SPEC-0005 RF-3).
+     */
+    data object ConfirmScan : AnalysisUiEvent
+
+    /** Cierra el diálogo de código sin escanear. */
+    data object CancelScan : AnalysisUiEvent
+
+    /** Reintenta la sincronización remota pendiente (RN-8). */
+    data object RetrySync : AnalysisUiEvent
+
+    /** Cierra el popup de error de sincronización. */
+    data object DismissSyncError : AnalysisUiEvent
 
     data object DismissSavedConfirmation : AnalysisUiEvent
 }

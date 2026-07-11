@@ -38,10 +38,10 @@ class SaveMockAnalysisUseCaseTest {
             everySuspend { analysisRepository.saveAnalysis(any()) } returns Result.Success(Unit)
 
             // When
-            val result = useCase(image)
+            val result = useCase(image, "12-34")
 
             // Then
-            assertEquals(Result.Success(Unit), result)
+            assertTrue(result is Result.Success)
             verifySuspend { analysisRepository.saveAnalysis(any()) }
         }
 
@@ -53,7 +53,7 @@ class SaveMockAnalysisUseCaseTest {
                 Result.Failure(AnalysisError.StorageFailure)
 
             // When
-            val result = useCase(image)
+            val result = useCase(image, "12-34")
 
             // Then
             assertEquals(Result.Failure(AnalysisError.StorageFailure), result)
@@ -69,7 +69,7 @@ class SaveMockAnalysisUseCaseTest {
             everySuspend { analysisImageStore.delete("/tmp/a.png") } returns Result.Success(Unit)
 
             // When
-            val result = useCase(image)
+            val result = useCase(image, "12-34")
 
             // Then
             assertEquals(Result.Failure(AnalysisError.StorageFailure), result)
@@ -84,13 +84,13 @@ class SaveMockAnalysisUseCaseTest {
             everySuspend { analysisImageStore.save(any(), any()) } returns Result.Success("/tmp/a.png")
 
             // When
-            SaveMockAnalysisUseCase(capturingRepository, analysisImageStore).invoke(image)
+            SaveMockAnalysisUseCase(capturingRepository, analysisImageStore).invoke(image, "12-34")
 
             // Then
             val persisted = requireNotNull(capturingRepository.saved)
             assertEquals("/tmp/a.png", persisted.imagePath)
             assertTrue(persisted.cellCounts.isNotEmpty())
-            assertTrue(persisted.patient.startsWith("PAC-"))
+            assertEquals("12-34", persisted.patient)
         }
 
     private class CapturingAnalysisRepository : AnalysisRepository {

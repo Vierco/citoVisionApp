@@ -219,8 +219,10 @@ private fun AnalysisCardImage(
     if (imagePath == null) {
         Box(modifier = imageModifier.background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f)))
     } else {
+        // Local (SPEC-0004) = ruta de fichero → file://; remoto (SPEC-0005) = URL de descarga de Storage.
+        val model = if (imagePath.startsWith("http")) imagePath else "file://$imagePath"
         AsyncImage(
-            model = "file://$imagePath",
+            model = model,
             contentDescription = contentDescription,
             modifier = imageModifier,
             contentScale = ContentScale.Crop,

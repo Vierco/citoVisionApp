@@ -49,6 +49,11 @@ class SettingsViewModel(
                     signOut()
                     _navigationEvents.send(NavigationEvent.ToLogin)
                 }
+
+            SettingsUiEvent.NavigateBack ->
+                viewModelScope.launch {
+                    _navigationEvents.send(NavigationEvent.Back)
+                }
         }
     }
 

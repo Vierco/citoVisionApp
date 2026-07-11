@@ -14,6 +14,8 @@ import dev.lovelace.citovision.infrastructure.persistence.database.appDatabaseBu
 import dev.lovelace.citovision.infrastructure.persistence.database.createAppDatabase
 import dev.lovelace.citovision.infrastructure.persistence.preferences.createDataStore
 import dev.lovelace.citovision.infrastructure.persistence.preferences.dataStorePath
+import io.ktor.client.engine.HttpClientEngine
+import io.ktor.client.engine.darwin.Darwin
 import org.koin.core.module.Module
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.bind
@@ -24,8 +26,10 @@ actual val platformModule: Module =
     module {
         singleOf(::StubAuthService) bind AuthService::class
         singleOf(::StubGoogleSignInLauncher) bind GoogleSignInLauncher::class
+        single<HttpClientEngine> { Darwin.create() }
         single<DataStore<Preferences>> { createDataStore { dataStorePath() } }
         single<AppDatabase> { createAppDatabase(appDatabaseBuilder()) }
         single { get<AppDatabase>().analysisDao() }
+        single { get<AppDatabase>().outboxDao() }
         single<AnalysisImageStore> { OkioAnalysisImageStore(baseDirectory = analysisImagesPath()) }
     }

@@ -74,10 +74,16 @@ fun AppNavHost() {
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
             LaunchedEffect(Unit) {
                 viewModel.navigationEvents.collect { event ->
-                    if (event == NavigationEvent.ToLogin) {
-                        navController.navigate(LoginRoute) {
-                            popUpTo<MainRoute> { inclusive = true }
+                    when (event) {
+                        NavigationEvent.ToLogin -> {
+                            navController.navigate(LoginRoute) {
+                                popUpTo<MainRoute> { inclusive = true }
+                            }
                         }
+                        NavigationEvent.Back -> {
+                            navController.popBackStack()
+                        }
+                        else -> Unit
                     }
                 }
             }

@@ -7,4 +7,7 @@ sealed interface SettingsUiEvent {
 
     /** Cerrar la sesión actual (cuenta o invitado) y volver al login (SPEC-0001 RF-6). */
     data object SignOut : SettingsUiEvent
+
+    /** Volver a la pantalla anterior. */
+    data object NavigateBack : SettingsUiEvent
 }

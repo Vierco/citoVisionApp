@@ -23,10 +23,13 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddPhotoAlternate
 import androidx.compose.material.icons.filled.FileUpload
 import androidx.compose.material.icons.filled.QrCodeScanner
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -48,13 +51,21 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import citovision.shared.generated.resources.Res
 import citovision.shared.generated.resources.analysis_button_scan
 import citovision.shared.generated.resources.analysis_change_image
+import citovision.shared.generated.resources.analysis_code_confirm
+import citovision.shared.generated.resources.analysis_code_dialog_hint
+import citovision.shared.generated.resources.analysis_code_dialog_title
 import citovision.shared.generated.resources.analysis_remove_image
 import citovision.shared.generated.resources.analysis_saved
 import citovision.shared.generated.resources.analysis_scan_hint
 import citovision.shared.generated.resources.analysis_select_image
 import citovision.shared.generated.resources.analysis_supported_formats
+import citovision.shared.generated.resources.analysis_sync_error_message
+import citovision.shared.generated.resources.analysis_sync_error_title
+import citovision.shared.generated.resources.analysis_sync_retry
 import citovision.shared.generated.resources.analysis_upload_desc
 import citovision.shared.generated.resources.analysis_upload_title
+import citovision.shared.generated.resources.common_cancel
+import citovision.shared.generated.resources.common_close
 import coil3.compose.rememberAsyncImagePainter
 import dev.lovelace.citovision.presentation.events.AnalysisUiEvent
 import dev.lovelace.citovision.presentation.state.AnalysisUiState
@@ -224,6 +235,23 @@ private fun AnalysisContent(
             color = MaterialTheme.colorScheme.onSurface,
         )
     }
+
+    if (uiState.codeDialogVisible) {
+        PatientCodeDialog(
+            code = uiState.patientCode,
+            isValid = uiState.isPatientCodeValid,
+            onCodeChange = { onEvent(AnalysisUiEvent.PatientCodeChanged(it)) },
+            onConfirm = { onEvent(AnalysisUiEvent.ConfirmScan) },
+            onDismiss = { onEvent(AnalysisUiEvent.CancelScan) },
+        )
+    }
+
+    if (uiState.syncErrorVisible) {
+        SyncErrorDialog(
+            onRetry = { onEvent(AnalysisUiEvent.RetrySync) },
+            onDismiss = { onEvent(AnalysisUiEvent.DismissSyncError) },
+        )
+    }
 }
 
 @Composable
@@ -276,6 +304,60 @@ private fun EmptyUploadContent(
             color = MaterialTheme.colorScheme.onSurface,
         )
     }
+}
+
+@Composable
+private fun PatientCodeDialog(
+    code: String,
+    isValid: Boolean,
+    onCodeChange: (String) -> Unit,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(Res.string.analysis_code_dialog_title)) },
+        text = {
+            OutlinedTextField(
+                value = code,
+                onValueChange = onCodeChange,
+                singleLine = true,
+                supportingText = { Text(stringResource(Res.string.analysis_code_dialog_hint)) },
+            )
+        },
+        confirmButton = {
+            Button(onClick = onConfirm, enabled = isValid) {
+                Text(stringResource(Res.string.analysis_code_confirm))
+            }
+        },
+        dismissButton = {
+            OutlinedButton(onClick = onDismiss) {
+                Text(stringResource(Res.string.common_cancel))
+            }
+        },
+    )
+}
+
+@Composable
+private fun SyncErrorDialog(
+    onRetry: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(Res.string.analysis_sync_error_title)) },
+        text = { Text(stringResource(Res.string.analysis_sync_error_message)) },
+        confirmButton = {
+            Button(onClick = onRetry) {
+                Text(stringResource(Res.string.analysis_sync_retry))
+            }
+        },
+        dismissButton = {
+            OutlinedButton(onClick = onDismiss) {
+                Text(stringResource(Res.string.common_close))
+            }
+        },
+    )
 }
 
 /** Altura máxima de la zona de preview; también la altura fija del estado vacío. */

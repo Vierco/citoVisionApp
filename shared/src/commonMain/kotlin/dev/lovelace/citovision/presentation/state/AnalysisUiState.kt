@@ -13,6 +13,10 @@ data class AnalysisUiState(
     val isSaving: Boolean = false,
     val savedConfirmationVisible: Boolean = false,
     val error: StringResource? = null,
+    val codeDialogVisible: Boolean = false,
+    val patientCode: String = "",
+    val isPatientCodeValid: Boolean = false,
+    val syncErrorVisible: Boolean = false,
 ) {
     val canScan: Boolean get() = selectedImage != null && !isSaving
 }

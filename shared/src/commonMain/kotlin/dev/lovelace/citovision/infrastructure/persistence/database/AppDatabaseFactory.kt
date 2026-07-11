@@ -13,6 +13,7 @@ const val DATABASE_NAME = "citovision.db"
  */
 fun createAppDatabase(builder: RoomDatabase.Builder<AppDatabase>): AppDatabase =
     builder
+        .addMigrations(MIGRATION_1_2)
         .setDriver(BundledSQLiteDriver())
         .setQueryCoroutineContext(ioDispatcher)
         .build()

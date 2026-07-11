@@ -1,0 +1,11 @@
+# local.properties.example — plantilla VERSIONADA (sin valores reales).
+# Copia lo que necesites a `local.properties` (NO versionado, en .gitignore) y rellena los valores.
+#
+# La ruta del SDK de Android (sdk.dir) la añade automáticamente el IDE; no la incluyas aquí.
+#
+# Web API key de Firebase para la autenticación en Desktop (Fase 2, ADR-0002).
+# Consola Firebase → Configuración del proyecto → app web "citovision desktop" → apiKey.
+# No es un secreto de servidor (identifica el proyecto; la autorización real está en las reglas
+# de Firebase), pero no se versiona por higiene. Alternativa para CI: variable de entorno
+# FIREBASE_WEB_API_KEY.
+firebaseWebApiKey=

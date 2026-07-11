@@ -37,6 +37,20 @@
     <!-- Settings -->
     <string name="settings_login">Iniciar sesión con una cuenta</string>
     <string name="settings_logout">Cerrar sesión</string>
+    <string name="logout_dialog_title">¿Cerrar sesión?</string>
+    <string name="logout_dialog_desc">¿Estás seguro de que quieres cerrar tu sesión actual?</string>
+    <string name="settings_section_actions">Acciones</string>
+    <string name="settings_section_support">Soporte</string>
+    <string name="settings_section_others">Otros</string>
+    <string name="settings_clear_analysis">Borrar todos los análisis locales</string>
+    <string name="settings_feedback">Feedback</string>
+    <string name="settings_license">Licencia</string>
+    <string name="settings_version">Versión</string>
+    <string name="settings_version_value">1.0.0 (Build 1)</string>
+    <string name="license_dialog_pending">Pendiente de licencia. Este texto será muy largo para probar el scroll. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</string>
+    <string name="settings_rn3">RN-3</string>
+    <string name="rn3_dialog_pending">Pendiente de RN-3</string>
+    <string name="common_accept">Aceptar</string>
 
     <!-- Main Navigation -->
     <string name="nav_analysis">Análisis</string>
@@ -58,10 +72,10 @@
     <string name="patients_search_desc_default">Encuentre rápidamente historiales clínicos y resultados de análisis.</string>
     <string name="patients_close_file">Cerrar ficha</string>
     <string name="patients_no_results_title">Sin resultados activos</string>
-    <string name="patients_no_results_desc">Ingrese el ID de paciente o su nombre completo en el buscador superior para acceder al historial clínico.</string>
+    <string name="patients_no_results_desc">Introduce el código de paciente en el buscador para acceder a sus análisis.</string>
     <string name="common_back">Volver</string>
-    <string name="patients_id_name_label">ID de Paciente / Nombre</string>
-    <string name="patients_search_placeholder">Ej: PAC-2023-8942 o Juan Pérez</string>
+    <string name="patients_id_name_label">Código de paciente</string>
+    <string name="patients_search_placeholder">Ej: 2026-001</string>
     <string name="patients_button_search">Buscar</string>
     <string name="patients_error_empty_title">Búsqueda vacía</string>
     <string name="patients_error_empty_desc">Por favor, introduzca un ID de paciente o nombre para realizar la búsqueda.</string>
@@ -81,6 +95,19 @@
     <string name="analysis_error_generic">No se pudo seleccionar la imagen.</string>
     <string name="analysis_saved">Análisis guardado en el historial</string>
     <string name="analysis_error_save">No se pudo guardar el análisis.</string>
+    <string name="analysis_code_dialog_title">Código de paciente</string>
+    <string name="analysis_code_dialog_hint">Solo números y guion medio (p. ej. 12-34)</string>
+    <string name="analysis_code_confirm">Guardar</string>
+    <string name="analysis_sync_error_title">Error de sincronización</string>
+    <string name="analysis_sync_error_message">El análisis se guardó en tu historial local, pero no pudo subirse a la nube. ¿Reintentar?</string>
+    <string name="analysis_sync_retry">Reintentar</string>
+    <string name="patients_result_header">Paciente: %1$s</string>
+    <string name="patients_new_search">Nueva búsqueda</string>
+    <string name="patients_requires_account_title">Requiere cuenta</string>
+    <string name="patients_requires_account_desc">Esta función requiere una cuenta de usuario. Inicia sesión para consultar pacientes.</string>
+    <string name="patients_error_title">Error de consulta</string>
+    <string name="patients_error_desc">No se pudo completar la búsqueda. Inténtalo de nuevo.</string>
+    <string name="patients_delete_message">Se eliminará de la base de datos remota. No afecta a tu historial local. ¿Continuar?</string>
 
     <!-- Components -->
     <string name="card_metadata">Fecha: %1$s | Paciente: %2$s</string>

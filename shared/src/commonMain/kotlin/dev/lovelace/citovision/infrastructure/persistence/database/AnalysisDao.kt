@@ -32,6 +32,11 @@ interface AnalysisDao {
         insertCellCounts(entries)
     }
 
+    /** Análisis con su conteo, por id; para construir el payload de sincronización remota (SPEC-0005). */
+    @Transaction
+    @Query("SELECT * FROM analyses WHERE id = :id")
+    suspend fun findById(id: String): AnalysisWithCellCounts?
+
     /** Ruta de la imagen, necesaria para borrar el fichero tras eliminar la fila (RN-7). */
     @Query("SELECT imagePath FROM analyses WHERE id = :id")
     suspend fun findImagePath(id: String): String?

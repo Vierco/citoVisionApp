@@ -6,6 +6,7 @@ import android.os.Bundle
 import dev.lovelace.citovision.composition.di.initKoin
 import dev.lovelace.citovision.infrastructure.auth.GOOGLE_WEB_CLIENT_ID_PROPERTY
 import dev.lovelace.citovision.infrastructure.platform.ActivityProvider
+import dev.lovelace.citovision.infrastructure.remote.FIREBASE_WEB_API_KEY_PROPERTY
 import org.koin.android.ext.android.get
 import org.koin.android.ext.koin.androidContext
 
@@ -21,7 +22,10 @@ class CitoVisionApplication : Application() {
         initKoin {
             androidContext(this@CitoVisionApplication)
             properties(
-                mapOf(GOOGLE_WEB_CLIENT_ID_PROPERTY to getString(R.string.default_web_client_id)),
+                mapOf(
+                    GOOGLE_WEB_CLIENT_ID_PROPERTY to getString(R.string.default_web_client_id),
+                    FIREBASE_WEB_API_KEY_PROPERTY to BuildConfig.FIREBASE_WEB_API_KEY,
+                ),
             )
         }
         trackVisibleActivity()

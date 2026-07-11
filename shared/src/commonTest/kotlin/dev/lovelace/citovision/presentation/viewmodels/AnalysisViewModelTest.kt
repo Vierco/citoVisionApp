@@ -2,9 +2,13 @@ package dev.lovelace.citovision.presentation.viewmodels
 
 import dev.lovelace.citovision.application.ports.AnalysisImageStore
 import dev.lovelace.citovision.application.ports.AnalysisRepository
+import dev.lovelace.citovision.application.ports.AuthService
 import dev.lovelace.citovision.application.ports.ImagePicker
+import dev.lovelace.citovision.application.ports.RemoteAnalysisSync
 import dev.lovelace.citovision.application.usecases.PickImageUseCase
+import dev.lovelace.citovision.application.usecases.ProcessPendingSyncUseCase
 import dev.lovelace.citovision.application.usecases.SaveMockAnalysisUseCase
+import dev.lovelace.citovision.application.usecases.SyncAnalysisUseCase
 import dev.lovelace.citovision.core.result.Result
 import dev.lovelace.citovision.domain.entities.SelectedImage
 import dev.lovelace.citovision.domain.errors.ImageError
@@ -34,11 +38,15 @@ class AnalysisViewModelTest {
     private val imagePicker = mock<ImagePicker>()
     private val analysisRepository = mock<AnalysisRepository>()
     private val analysisImageStore = mock<AnalysisImageStore>()
+    private val authService = mock<AuthService>()
+    private val remoteAnalysisSync = mock<RemoteAnalysisSync>()
     private val pickImage = PickImageUseCase(imagePicker)
     private val saveMockAnalysis = SaveMockAnalysisUseCase(analysisRepository, analysisImageStore)
+    private val syncAnalysis = SyncAnalysisUseCase(authService, remoteAnalysisSync)
+    private val processPendingSync = ProcessPendingSyncUseCase(remoteAnalysisSync)
     private val dispatcher = StandardTestDispatcher()
 
-    private fun buildViewModel() = AnalysisViewModel(pickImage, saveMockAnalysis)
+    private fun buildViewModel() = AnalysisViewModel(pickImage, saveMockAnalysis, syncAnalysis, processPendingSync)
 
     private val validImage =
         SelectedImage(bytes = ByteArray(4), fileName = "muestra.png", mimeType = "image/png", sizeBytes = 4)
@@ -46,6 +54,7 @@ class AnalysisViewModelTest {
     @BeforeTest
     fun setUp() {
         Dispatchers.setMain(dispatcher)
+        everySuspend { remoteAnalysisSync.processPending() } returns Result.Success(Unit)
     }
 
     @AfterTest
