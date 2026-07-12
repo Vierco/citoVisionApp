@@ -5,7 +5,7 @@
 
 # 🔬 citoVision
 
-> Aplicación de apoyo al análisis microscópico basada en visión e Inteligencia Artificial para la detección, conteo y clasificación automática de células sanguíneas.
+> Plataforma modular de análisis microscópico asistido por IA. El TFM desarrolla su primer módulo: un sistema de cribado morfológico hematológico que detecta, segmenta y clasifica automáticamente células para priorizar la revisión profesional.
 
 > ⚠️ **Estado del proyecto:** MVP en desarrollo.
 
@@ -17,10 +17,18 @@ citoVision es un proyecto desarrollado como TFM cuyo objetivo es demostrar cómo
 
 La aplicación analiza imágenes microscópicas de muestras sanguíneas para:
 
-- Detección celular.
-- Conteo seleccionado.
-- Clasificación según tipo y estado.
-- Estadísticas del análisis y segimuiento de muestras de fuente común.
+- Imagen microscópica
+
+- Segmentación y detección de células
+
+- Clasificación morfológica de células
+
+- Conteo por clase
+
+- Marcado de células potencialmente relevantes
+
+- Informe visual y estadístico
+
 
 El proyecto está concebido como un MVP (Minimum Viable Product), priorizando un alcance realista y técnicamente sólido.
 
