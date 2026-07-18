@@ -115,6 +115,11 @@
     <string name="analysis_sync_error_title">Sync error</string>
     <string name="analysis_sync_error_message">The analysis was saved to your local history, but could not be uploaded to the cloud. Retry?</string>
     <string name="analysis_sync_retry">Retry</string>
+    <string name="analysis_analyzing">Analyzing sample…</string>
+    <string name="analysis_no_cells_title">No cells</string>
+    <string name="analysis_no_cells_message">No cells were detected in the image. Try another sample.</string>
+    <string name="analysis_inference_error_title">Analysis error</string>
+    <string name="analysis_inference_error_message">The sample could not be analyzed. Retry?</string>
     <string name="patients_result_header">Patient: %1$s</string>
     <string name="patients_new_search">New search</string>
     <string name="patients_refresh">Refresh</string>
@@ -130,4 +135,16 @@
     <string name="dialog_patient_label">Patient</string>
     <string name="dialog_date_label">Analysis Date</string>
     <string name="dialog_cell_count_label">Cell Count (Summary)</string>
+    <string name="dialog_cell_label">Cell</string>
+    <string name="dialog_priority_label">Review priority</string>
+    <string name="dialog_low_confidence_label">Possible findings for review</string>
+    <string name="dialog_low_confidence_entry">Possible %1$s — low confidence: %2$s</string>
+    <string name="dialog_low_confidence_notice">These require human review. They are not confirmed detections.</string>
+
+    <!-- Priority (SPEC-0006) -->
+    <string name="priority_low">Low</string>
+    <string name="priority_medium">Medium</string>
+    <string name="priority_high">High</string>
+    <string name="priority_badge">Priority: %1$s</string>
+    <string name="analysis_non_diagnostic_notice">citoVision does not provide diagnoses. The priority is only a review suggestion for a professional.</string>
 </resources>

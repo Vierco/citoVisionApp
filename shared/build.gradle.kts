@@ -103,6 +103,8 @@ kotlin {
             implementation(libs.androidx.credentials)
             implementation(libs.androidx.credentials.play.services.auth)
             implementation(libs.google.identity.googleid)
+            // Inferencia on-device (SPEC-0006 / ADR-0003): ONNX Runtime, variante Android (AAR).
+            implementation(libs.onnxruntime.android)
         }
 
         val desktopMain by getting {
@@ -111,6 +113,8 @@ kotlin {
                 implementation(libs.kotlinx.coroutines.swing)
                 // Engine de Ktor para Desktop (auth Firebase REST, Fase 2 / ADR-0002).
                 implementation(libs.ktor.client.okhttp)
+                // Inferencia on-device (SPEC-0006 / ADR-0003): ONNX Runtime, variante JVM (nativos empaquetados).
+                implementation(libs.onnxruntime.jvm)
             }
         }
 

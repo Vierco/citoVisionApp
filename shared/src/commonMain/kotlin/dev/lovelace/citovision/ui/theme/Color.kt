@@ -10,6 +10,7 @@ val onPrimary = Color(0xFFFFFFFF)
 // Secondary
 val secondary = Color(0xFF2FD38A)
 val secondaryPressed = Color(0xFF1E9E67)
+val secondaryDark = Color(0xFF177552)
 val onSecondary = Color(0xFFFFFFFF)
 
 // Tertiary

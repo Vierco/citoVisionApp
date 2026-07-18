@@ -26,6 +26,7 @@ import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -49,11 +50,16 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import citovision.shared.generated.resources.Res
+import citovision.shared.generated.resources.analysis_analyzing
 import citovision.shared.generated.resources.analysis_button_scan
 import citovision.shared.generated.resources.analysis_change_image
 import citovision.shared.generated.resources.analysis_code_confirm
 import citovision.shared.generated.resources.analysis_code_dialog_hint
 import citovision.shared.generated.resources.analysis_code_dialog_title
+import citovision.shared.generated.resources.analysis_inference_error_message
+import citovision.shared.generated.resources.analysis_inference_error_title
+import citovision.shared.generated.resources.analysis_no_cells_message
+import citovision.shared.generated.resources.analysis_no_cells_title
 import citovision.shared.generated.resources.analysis_remove_image
 import citovision.shared.generated.resources.analysis_saved
 import citovision.shared.generated.resources.analysis_scan_hint
@@ -64,6 +70,7 @@ import citovision.shared.generated.resources.analysis_sync_error_title
 import citovision.shared.generated.resources.analysis_sync_retry
 import citovision.shared.generated.resources.analysis_upload_desc
 import citovision.shared.generated.resources.analysis_upload_title
+import citovision.shared.generated.resources.common_accept
 import citovision.shared.generated.resources.common_cancel
 import citovision.shared.generated.resources.common_close
 import coil3.compose.rememberAsyncImagePainter
@@ -200,7 +207,7 @@ private fun AnalysisContent(
         Spacer(modifier = Modifier.height(32.dp))
 
         // Botón de escáner: habilitado y en verde secundario solo cuando hay imagen (SPEC-0003 RF-5).
-        // ⚠️ TEMPORAL (SPEC-0004 RF-7): por ahora persiste un análisis mock; luego invocará a la IA.
+        // Al pulsar ejecuta el modelo (SPEC-0006); mientras analiza muestra un indicador de progreso.
         Button(
             onClick = { onEvent(AnalysisUiEvent.StartScan) },
             modifier =
@@ -218,12 +225,19 @@ private fun AnalysisContent(
             enabled = uiState.canScan,
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Default.QrCodeScanner, contentDescription = null)
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    stringResource(Res.string.analysis_button_scan),
-                    style = MaterialTheme.typography.labelLarge,
-                )
+                if (uiState.isSaving) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(20.dp),
+                        color = MaterialTheme.colorScheme.onSecondary,
+                        strokeWidth = 2.dp,
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(stringResource(Res.string.analysis_analyzing), style = MaterialTheme.typography.labelLarge)
+                } else {
+                    Icon(Icons.Default.QrCodeScanner, contentDescription = null)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(stringResource(Res.string.analysis_button_scan), style = MaterialTheme.typography.labelLarge)
+                }
             }
         }
 
@@ -250,6 +264,17 @@ private fun AnalysisContent(
         SyncErrorDialog(
             onRetry = { onEvent(AnalysisUiEvent.RetrySync) },
             onDismiss = { onEvent(AnalysisUiEvent.DismissSyncError) },
+        )
+    }
+
+    if (uiState.noCellsVisible) {
+        NoCellsDialog(onDismiss = { onEvent(AnalysisUiEvent.DismissNoCells) })
+    }
+
+    if (uiState.inferenceErrorVisible) {
+        InferenceErrorDialog(
+            onRetry = { onEvent(AnalysisUiEvent.RetryAnalysis) },
+            onDismiss = { onEvent(AnalysisUiEvent.DismissInferenceError) },
         )
     }
 }
@@ -347,6 +372,44 @@ private fun SyncErrorDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(Res.string.analysis_sync_error_title)) },
         text = { Text(stringResource(Res.string.analysis_sync_error_message)) },
+        confirmButton = {
+            Button(onClick = onRetry) {
+                Text(stringResource(Res.string.analysis_sync_retry))
+            }
+        },
+        dismissButton = {
+            OutlinedButton(onClick = onDismiss) {
+                Text(stringResource(Res.string.common_close))
+            }
+        },
+    )
+}
+
+/** Popup informativo cuando el modelo no detecta ninguna célula (SPEC-0006 RF-6): no se guarda nada. */
+@Composable
+private fun NoCellsDialog(onDismiss: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(Res.string.analysis_no_cells_title)) },
+        text = { Text(stringResource(Res.string.analysis_no_cells_message)) },
+        confirmButton = {
+            Button(onClick = onDismiss) {
+                Text(stringResource(Res.string.common_accept))
+            }
+        },
+    )
+}
+
+/** Popup de error de inferencia con opción de reintentar el análisis (SPEC-0006 RF-7). */
+@Composable
+private fun InferenceErrorDialog(
+    onRetry: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(Res.string.analysis_inference_error_title)) },
+        text = { Text(stringResource(Res.string.analysis_inference_error_message)) },
         confirmButton = {
             Button(onClick = onRetry) {
                 Text(stringResource(Res.string.analysis_sync_retry))

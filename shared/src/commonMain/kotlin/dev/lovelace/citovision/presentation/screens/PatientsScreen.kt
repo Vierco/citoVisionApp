@@ -115,6 +115,7 @@ private fun PatientsContent(
             title = stringResource(Res.string.analysis_card_title),
             patient = analysis.patient,
             date = analysis.performedAt.formatAnalysisDateTime(),
+            priority = analysis.priority,
             cellCounts = analysis.cellCounts,
             onDismissRequest = { onEvent(PatientsUiEvent.DismissDetail) },
         )
@@ -254,6 +255,7 @@ private fun ResultsView(
                     patient = analysis.patient,
                     description = analysis.summary,
                     imagePath = analysis.imagePath,
+                    priority = analysis.priority,
                     onClick = { onEvent(PatientsUiEvent.ShowDetail(analysis)) },
                     onLongClick = { onEvent(PatientsUiEvent.RequestDelete(analysis)) },
                 )

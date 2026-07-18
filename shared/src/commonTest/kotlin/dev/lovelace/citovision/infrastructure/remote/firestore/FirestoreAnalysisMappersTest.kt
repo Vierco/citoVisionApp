@@ -2,6 +2,8 @@ package dev.lovelace.citovision.infrastructure.remote.firestore
 
 import dev.lovelace.citovision.domain.entities.Analysis
 import dev.lovelace.citovision.domain.entities.CellCount
+import dev.lovelace.citovision.domain.entities.DetectionLevel
+import dev.lovelace.citovision.domain.entities.Priority
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -23,6 +25,7 @@ class FirestoreAnalysisMappersTest {
                         "patientCode" to FirestoreValue(stringValue = "12-34"),
                         "performedAt" to FirestoreValue(integerValue = "1700"),
                         "summary" to FirestoreValue(stringValue = "resumen"),
+                        "priority" to FirestoreValue(stringValue = "ALTA"),
                         "imageUrl" to FirestoreValue(stringValue = "https://img/xyz"),
                         "cellCounts" to
                             FirestoreValue(
@@ -32,12 +35,14 @@ class FirestoreAnalysisMappersTest {
                                             listOf(
                                                 mapValueOf(
                                                     "name" to FirestoreValue(stringValue = "Neutro"),
-                                                    "value" to FirestoreValue(stringValue = "60%"),
+                                                    "count" to FirestoreValue(integerValue = "1"),
+                                                    "confidences" to FirestoreValue(stringValue = "0.85"),
                                                     "position" to FirestoreValue(integerValue = "1"),
                                                 ),
                                                 mapValueOf(
                                                     "name" to FirestoreValue(stringValue = "Leuco"),
-                                                    "value" to FirestoreValue(stringValue = "7500"),
+                                                    "count" to FirestoreValue(integerValue = "3"),
+                                                    "confidences" to FirestoreValue(stringValue = "0.9,0.8,0.7"),
                                                     "position" to FirestoreValue(integerValue = "0"),
                                                 ),
                                             ),
@@ -52,9 +57,43 @@ class FirestoreAnalysisMappersTest {
         assertEquals("12-34", analysis.patient)
         assertEquals(Instant.fromEpochMilliseconds(1700), analysis.performedAt)
         assertEquals("https://img/xyz", analysis.imagePath)
+        assertEquals(Priority.ALTA, analysis.priority)
         assertEquals(
-            listOf(CellCount("Leuco", "7500"), CellCount("Neutro", "60%")),
+            listOf(
+                CellCount("Leuco", count = 3, confidences = listOf(0.9f, 0.8f, 0.7f)),
+                CellCount("Neutro", count = 1, confidences = listOf(0.85f)),
+            ),
             analysis.cellCounts,
+        )
+    }
+
+    @Test
+    fun `given a legacy document with value strings when mapping then count falls back to the value prefix`() {
+        val document =
+            FirestoreDocument(
+                name = "projects/p/databases/(default)/documents/analyses/old",
+                fields =
+                    mapOf(
+                        "cellCounts" to
+                            FirestoreValue(
+                                arrayValue =
+                                    FirestoreArrayValue(
+                                        values =
+                                            listOf(
+                                                mapValueOf(
+                                                    "name" to FirestoreValue(stringValue = "Linfocito"),
+                                                    "value" to FirestoreValue(stringValue = "7 (58%)"),
+                                                    "position" to FirestoreValue(integerValue = "0"),
+                                                ),
+                                            ),
+                                    ),
+                            ),
+                    ),
+            )
+
+        assertEquals(
+            listOf(CellCount("Linfocito", count = 7, confidences = emptyList())),
+            document.toAnalysis().cellCounts,
         )
     }
 
@@ -67,6 +106,7 @@ class FirestoreAnalysisMappersTest {
             )
 
         assertNull(document.toAnalysis().imagePath)
+        assertEquals(Priority.BAJA, document.toAnalysis().priority)
     }
 
     @Test
@@ -78,7 +118,12 @@ class FirestoreAnalysisMappersTest {
                 performedAt = Instant.fromEpochMilliseconds(2000),
                 summary = "resumen",
                 imagePath = "/local/a1.png",
-                cellCounts = listOf(CellCount("Leuco", "7500"), CellCount("Neutro", "60%")),
+                cellCounts =
+                    listOf(
+                        CellCount("Leuco", count = 3, confidences = listOf(0.9f, 0.8f, 0.7f)),
+                        CellCount("Neutro", count = 1, confidences = emptyList()),
+                    ),
+                priority = Priority.ALTA,
             )
 
         val fields = analysisToFirestoreFields(ownerUid = "u1", analysis = analysis, imageUrl = "https://img/a1")
@@ -86,11 +131,45 @@ class FirestoreAnalysisMappersTest {
         assertEquals("u1", fields["ownerUid"]?.stringValue)
         assertEquals("12-34", fields["patientCode"]?.stringValue)
         assertEquals("2000", fields["performedAt"]?.integerValue)
+        assertEquals("ALTA", fields["priority"]?.stringValue)
         assertEquals("https://img/a1", fields["imageUrl"]?.stringValue)
         val cellCounts = fields["cellCounts"]?.arrayValue?.values.orEmpty()
         assertEquals(2, cellCounts.size)
-        assertEquals("0", cellCounts[0].mapValue?.fields?.get("position")?.integerValue)
-        assertEquals("Leuco", cellCounts[0].mapValue?.fields?.get("name")?.stringValue)
+        val first = cellCounts[0].mapValue?.fields
+        assertEquals("0", first?.get("position")?.integerValue)
+        assertEquals("Leuco", first?.get("name")?.stringValue)
+        assertEquals("3", first?.get("count")?.integerValue)
+        assertEquals("0.9,0.8,0.7", first?.get("confidences")?.stringValue)
+        assertEquals("STANDARD", first?.get("level")?.stringValue)
+    }
+
+    @Test
+    fun `given a low confidence finding when mapping in both directions then the level round-trips`() {
+        val cellCount =
+            CellCount(
+                "Promielocito",
+                count = 1,
+                confidences = listOf(0.09f),
+                level = DetectionLevel.LOW_CONFIDENCE_REVIEW,
+            )
+        val analysis =
+            Analysis(
+                id = "a1",
+                patient = "12-34",
+                performedAt = Instant.fromEpochMilliseconds(2000),
+                summary = "resumen",
+                imagePath = null,
+                cellCounts = listOf(cellCount),
+            )
+
+        val fields = analysisToFirestoreFields(ownerUid = "u1", analysis = analysis, imageUrl = null)
+        val document =
+            FirestoreDocument(
+                name = "projects/p/databases/(default)/documents/analyses/a1",
+                fields = fields,
+            )
+
+        assertEquals(listOf(cellCount), document.toAnalysis().cellCounts)
     }
 
     @Test

@@ -118,7 +118,10 @@ class IdentityToolkitAuthDataSource(
         when {
             code == null -> AuthError.Unknown(null)
             code == EMAIL_NOT_FOUND -> AuthError.UserNotFound
-            code.startsWith(TOO_MANY_ATTEMPTS_PREFIX) || code == RESET_PASSWORD_EXCEED_LIMIT -> AuthError.TooManyRequests
+            code.startsWith(
+                TOO_MANY_ATTEMPTS_PREFIX,
+            ) ||
+                code == RESET_PASSWORD_EXCEED_LIMIT -> AuthError.TooManyRequests
             else -> AuthError.Unknown(code)
         }
 

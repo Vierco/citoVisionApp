@@ -63,6 +63,7 @@ onPrimary: "#FFFFFF"      # Texto sobre azul
 ```yaml
 secondary: "#2FD38A"        # Verde (ej. botón secundario sin pulsar)
 secondaryPressed: "#1E9E67" # Verde pulsado
+secondaryDark: "#177552"    # Verde oscuro (Dark secondary): texto/etiquetas sobre fondo claro (ej. prioridad BAJA)
 onSecondary: "#FFFFFF"      # Texto sobre verde
 ```
 

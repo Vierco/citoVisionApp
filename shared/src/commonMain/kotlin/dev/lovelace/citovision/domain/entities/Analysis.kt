@@ -8,6 +8,9 @@ import kotlin.time.Instant
  * [patient] es siempre un **código seudonimizado** (RN-3), nunca un nombre ni un documento de identidad.
  * [imagePath] apunta al fichero en almacenamiento privado; si es nulo o el fichero no existe, la UI muestra
  * un placeholder y se registra una advertencia: en el flujo real es una anomalía (RN-5).
+ *
+ * [priority] es la prioridad de revisión profesional (SPEC-0006); por defecto [Priority.BAJA] para que los
+ * análisis antiguos migrados sigan siendo válidos hasta que el análisis real la calcule.
  */
 data class Analysis(
     val id: String,
@@ -16,10 +19,20 @@ data class Analysis(
     val summary: String,
     val imagePath: String?,
     val cellCounts: List<CellCount>,
+    val priority: Priority = Priority.BAJA,
 )
 
-/** Entrada del conteo celular: el valor lleva la unidad embebida ("7.500/µL", "60%"). Ver RN-6. */
+/**
+ * Entrada del conteo celular (SPEC-0006 RN-6): [count] es el recuento del tipo detectado; [confidences] es
+ * la certeza del modelo por célula (0..1), presente **solo en tipos celulares reales** y vacía en las clases
+ * no celulares (`Artefacto`, `Restos celulares`).
+ *
+ * [level] separa las detecciones normales de los **posibles hallazgos de baja confianza** (RN-2): un mismo
+ * tipo con detecciones de ambos niveles produce **dos entradas**, nunca una suma (RF-2).
+ */
 data class CellCount(
     val name: String,
-    val value: String,
+    val count: Int,
+    val confidences: List<Float>,
+    val level: DetectionLevel = DetectionLevel.STANDARD,
 )

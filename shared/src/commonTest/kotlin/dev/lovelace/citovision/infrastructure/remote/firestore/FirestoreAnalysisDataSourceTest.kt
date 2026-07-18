@@ -31,7 +31,7 @@ class FirestoreAnalysisDataSourceTest {
             performedAt = Instant.fromEpochMilliseconds(2000),
             summary = "resumen",
             imagePath = "/local/a1.png",
-            cellCounts = listOf(CellCount("Leucocitos", "7500")),
+            cellCounts = listOf(CellCount("Leucocitos", count = 1, confidences = listOf(0.9f))),
         )
 
     private fun dataSource(

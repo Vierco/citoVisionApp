@@ -2,6 +2,8 @@ package dev.lovelace.citovision.infrastructure.remote.firestore
 
 import dev.lovelace.citovision.domain.entities.Analysis
 import dev.lovelace.citovision.domain.entities.CellCount
+import dev.lovelace.citovision.domain.entities.DetectionLevel
+import dev.lovelace.citovision.domain.entities.Priority
 import kotlin.time.Instant
 
 /**
@@ -19,32 +21,29 @@ internal fun analysisToFirestoreFields(
         put("patientCode", FirestoreValue(stringValue = analysis.patient))
         put("performedAt", FirestoreValue(integerValue = analysis.performedAt.toEpochMilliseconds().toString()))
         put("summary", FirestoreValue(stringValue = analysis.summary))
+        put("priority", FirestoreValue(stringValue = analysis.priority.name))
         if (imageUrl != null) {
             put("imageUrl", FirestoreValue(stringValue = imageUrl))
         }
-        put(
-            "cellCounts",
-            FirestoreValue(
-                arrayValue =
-                    FirestoreArrayValue(
-                        values =
-                            analysis.cellCounts.mapIndexed { index, cellCount ->
-                                FirestoreValue(
-                                    mapValue =
-                                        FirestoreMapValue(
-                                            fields =
-                                                mapOf(
-                                                    "name" to FirestoreValue(stringValue = cellCount.name),
-                                                    "value" to FirestoreValue(stringValue = cellCount.value),
-                                                    "position" to FirestoreValue(integerValue = index.toString()),
-                                                ),
-                                        ),
-                                )
-                            },
+        val cellCounts =
+            analysis.cellCounts.mapIndexed { index, cellCount -> cellCount.toFirestoreValue(index) }
+        put("cellCounts", FirestoreValue(arrayValue = FirestoreArrayValue(values = cellCounts)))
+    }
+
+private fun CellCount.toFirestoreValue(position: Int): FirestoreValue =
+    FirestoreValue(
+        mapValue =
+            FirestoreMapValue(
+                fields =
+                    mapOf(
+                        "name" to FirestoreValue(stringValue = name),
+                        "count" to FirestoreValue(integerValue = count.toString()),
+                        "confidences" to FirestoreValue(stringValue = confidences.toConfidenceCsv()),
+                        "level" to FirestoreValue(stringValue = level.name),
+                        "position" to FirestoreValue(integerValue = position.toString()),
                     ),
             ),
-        )
-    }
+    )
 
 internal fun FirestoreDocument.toAnalysis(): Analysis {
     val id = name?.substringAfterLast('/').orEmpty()
@@ -59,7 +58,11 @@ internal fun FirestoreDocument.toAnalysis(): Analysis {
             .map { entry ->
                 CellCount(
                     name = entry["name"]?.stringValue.orEmpty(),
-                    value = entry["value"]?.stringValue.orEmpty(),
+                    // Fallback a documentos antiguos: recuento como prefijo entero del viejo "value" ("3 (75%)").
+                    count = entry["count"]?.integerValue?.toIntOrNull() ?: legacyCount(entry["value"]?.stringValue),
+                    confidences = entry["confidences"]?.stringValue.toConfidenceList(),
+                    // Los documentos anteriores a la política de umbrales no tienen nivel: son normales.
+                    level = entry["level"]?.stringValue.toDetectionLevel(),
                 )
             }
     return Analysis(
@@ -69,5 +72,18 @@ internal fun FirestoreDocument.toAnalysis(): Analysis {
         summary = fields["summary"]?.stringValue.orEmpty(),
         imagePath = fields["imageUrl"]?.stringValue,
         cellCounts = cellCounts,
+        priority = Priority.fromName(fields["priority"]?.stringValue),
     )
 }
+
+private const val CONFIDENCE_SEPARATOR = ","
+
+private fun List<Float>.toConfidenceCsv(): String = joinToString(CONFIDENCE_SEPARATOR)
+
+private fun String?.toConfidenceList(): List<Float> =
+    this?.takeIf { it.isNotEmpty() }?.split(CONFIDENCE_SEPARATOR)?.map { it.toFloat() } ?: emptyList()
+
+private fun legacyCount(value: String?): Int = value?.takeWhile { it.isDigit() }?.toIntOrNull() ?: 0
+
+private fun String?.toDetectionLevel(): DetectionLevel =
+    DetectionLevel.entries.firstOrNull { it.name == this } ?: DetectionLevel.STANDARD

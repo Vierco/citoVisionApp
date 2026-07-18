@@ -128,7 +128,10 @@ class PatientsViewModelTest {
             viewModel.onEvent(PatientsUiEvent.ConfirmDelete)
             advanceUntilIdle()
 
-            assertTrue(viewModel.uiState.value.results.isEmpty())
+            assertTrue(
+                viewModel.uiState.value.results
+                    .isEmpty(),
+            )
         }
 
     @Test

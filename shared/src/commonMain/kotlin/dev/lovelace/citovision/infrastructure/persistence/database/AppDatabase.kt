@@ -8,7 +8,7 @@ import androidx.room.RoomDatabaseConstructor
 /** Base de datos local de citoVision (SPEC-0004). El esquema se versiona en `shared/schemas`. */
 @Database(
     entities = [AnalysisEntity::class, CellCountEntity::class, RemoteUploadOutboxEntity::class],
-    version = 2,
+    version = 5,
     exportSchema = true,
 )
 @ConstructedBy(AppDatabaseConstructor::class)

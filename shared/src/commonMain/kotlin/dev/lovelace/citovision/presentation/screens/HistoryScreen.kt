@@ -85,6 +85,7 @@ private fun HistoryContent(
                             patient = analysis.patient,
                             description = analysis.summary,
                             imagePath = analysis.imagePath,
+                            priority = analysis.priority,
                             onClick = { onEvent(HistoryUiEvent.ShowDetail(analysis)) },
                             onLongClick = { onEvent(HistoryUiEvent.RequestDelete(analysis)) },
                         )
@@ -97,6 +98,7 @@ private fun HistoryContent(
                 title = analysisTitle,
                 patient = analysis.patient,
                 date = analysis.performedAt.formatAnalysisDateTime(),
+                priority = analysis.priority,
                 cellCounts = analysis.cellCounts,
                 onDismissRequest = { onEvent(HistoryUiEvent.DismissDetail) },
             )

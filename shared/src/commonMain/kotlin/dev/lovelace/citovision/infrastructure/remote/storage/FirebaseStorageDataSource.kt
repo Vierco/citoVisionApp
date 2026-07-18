@@ -16,8 +16,8 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.http.encodeURLParameter
 import io.ktor.serialization.ContentConvertException
-import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.serialization.Serializable
+import kotlin.coroutines.cancellation.CancellationException
 
 /**
  * DataSource remoto de imágenes contra la API REST de Firebase Storage (SPEC-0005, ADR-0001).

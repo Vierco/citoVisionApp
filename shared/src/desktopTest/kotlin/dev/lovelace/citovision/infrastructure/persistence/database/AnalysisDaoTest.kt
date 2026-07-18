@@ -33,9 +33,15 @@ class AnalysisDaoTest {
 
     private fun cellCounts(
         analysisId: String,
-        count: Int,
-    ) = (0 until count).map { index ->
-        CellCountEntity(analysisId = analysisId, position = index, name = "Célula $index", value = "$index%")
+        size: Int,
+    ) = (0 until size).map { index ->
+        CellCountEntity(
+            analysisId = analysisId,
+            position = index,
+            name = "Célula $index",
+            count = index,
+            confidences = "",
+        )
     }
 
     @BeforeTest
@@ -121,6 +127,29 @@ class AnalysisDaoTest {
 
             // Then
             assertTrue(dao.observeAll().first().isEmpty())
+        }
+
+    @Test
+    fun `given an analysis with a priority when stored then it is read back`() =
+        runTest {
+            // Given
+            dao.insertAnalysisWithCellCounts(
+                AnalysisEntity(
+                    id = "p",
+                    patient = "PAC-2026-001",
+                    performedAt = 1_000,
+                    summary = "Resumen",
+                    imagePath = null,
+                    priority = "ALTA",
+                ),
+                emptyList(),
+            )
+
+            // When
+            val row = dao.observeAll().first().first()
+
+            // Then
+            assertEquals("ALTA", row.analysis.priority)
         }
 
     @Test

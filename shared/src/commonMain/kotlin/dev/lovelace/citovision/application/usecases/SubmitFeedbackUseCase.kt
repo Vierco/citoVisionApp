@@ -20,7 +20,11 @@ class SubmitFeedbackUseCase(
         email: String,
         message: String,
     ): Boolean {
-        val ownerUid = authService.currentUser.first()?.takeUnless { it.isGuest }?.uid
+        val ownerUid =
+            authService.currentUser
+                .first()
+                ?.takeUnless { it.isGuest }
+                ?.uid
         val feedback =
             Feedback(
                 email = email.trim(),

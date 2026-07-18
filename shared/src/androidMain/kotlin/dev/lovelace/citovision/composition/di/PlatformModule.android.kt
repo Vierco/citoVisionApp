@@ -6,11 +6,16 @@ import androidx.room.Room
 import dev.lovelace.citovision.application.ports.AnalysisImageStore
 import dev.lovelace.citovision.application.ports.AuthService
 import dev.lovelace.citovision.application.ports.GoogleSignInLauncher
+import dev.lovelace.citovision.application.ports.ImageDecoder
+import dev.lovelace.citovision.application.ports.OnnxRunner
 import dev.lovelace.citovision.infrastructure.auth.AndroidGoogleSignInLauncher
 import dev.lovelace.citovision.infrastructure.auth.FirebaseAuthService
 import dev.lovelace.citovision.infrastructure.auth.GOOGLE_WEB_CLIENT_ID_PROPERTY
 import dev.lovelace.citovision.infrastructure.image.ANALYSIS_IMAGES_DIRECTORY
 import dev.lovelace.citovision.infrastructure.image.OkioAnalysisImageStore
+import dev.lovelace.citovision.infrastructure.inference.ImageDecoderImpl
+import dev.lovelace.citovision.infrastructure.inference.OnnxRunnerImpl
+import dev.lovelace.citovision.infrastructure.inference.loadCellDetectorModel
 import dev.lovelace.citovision.infrastructure.persistence.database.AppDatabase
 import dev.lovelace.citovision.infrastructure.persistence.database.DATABASE_NAME
 import dev.lovelace.citovision.infrastructure.persistence.database.createAppDatabase
@@ -56,4 +61,6 @@ actual val platformModule: Module =
                 baseDirectory = androidContext().filesDir.resolve(ANALYSIS_IMAGES_DIRECTORY).absolutePath,
             )
         }
+        single<ImageDecoder> { ImageDecoderImpl() }
+        single<OnnxRunner> { OnnxRunnerImpl(::loadCellDetectorModel) }
     }

@@ -1,12 +1,10 @@
 package dev.lovelace.citovision.presentation.screens
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -17,11 +15,12 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.scale
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import citovision.shared.generated.resources.Res
-import citovision.shared.generated.resources.celula
+import citovision.shared.generated.resources.app_name
 import citovision.shared.generated.resources.splash_initializing
-import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -78,10 +77,16 @@ fun SplashScreen() {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Image(
-                painter = painterResource(Res.drawable.celula),
-                contentDescription = null,
-                modifier = Modifier.size(200.dp),
+            // Nombre de la app en color terciario, como en Login pero algo mayor (DESIGN.md).
+            Text(
+                text = stringResource(Res.string.app_name),
+                style =
+                    MaterialTheme.typography.displayLarge.copy(
+                        fontSize = 88.sp,
+                        lineHeight = 80.sp,
+                    ),
+                color = Color(0xFFA56AE3), // Tertiary de DESIGN.md
+                fontWeight = FontWeight.Bold,
             )
             Spacer(modifier = Modifier.height(24.dp))
             Text(

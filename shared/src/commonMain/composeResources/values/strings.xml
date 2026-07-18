@@ -115,6 +115,11 @@
     <string name="analysis_sync_error_title">Error de sincronización</string>
     <string name="analysis_sync_error_message">El análisis se guardó en tu historial local, pero no pudo subirse a la nube. ¿Reintentar?</string>
     <string name="analysis_sync_retry">Reintentar</string>
+    <string name="analysis_analyzing">Analizando muestra…</string>
+    <string name="analysis_no_cells_title">Sin células</string>
+    <string name="analysis_no_cells_message">No se han detectado células en la imagen. Prueba con otra muestra.</string>
+    <string name="analysis_inference_error_title">Error de análisis</string>
+    <string name="analysis_inference_error_message">No se pudo analizar la muestra. ¿Reintentar?</string>
     <string name="patients_result_header">Paciente: %1$s</string>
     <string name="patients_new_search">Nueva búsqueda</string>
     <string name="patients_refresh">Actualizar</string>
@@ -130,4 +135,16 @@
     <string name="dialog_patient_label">Paciente</string>
     <string name="dialog_date_label">Fecha de análisis</string>
     <string name="dialog_cell_count_label">Conteo Celular (Resumen)</string>
+    <string name="dialog_cell_label">Célula</string>
+    <string name="dialog_priority_label">Prioridad de revisión</string>
+    <string name="dialog_low_confidence_label">Posibles hallazgos para revisión</string>
+    <string name="dialog_low_confidence_entry">Posible %1$s — confianza baja: %2$s</string>
+    <string name="dialog_low_confidence_notice">Requieren revisión humana. No son detecciones confirmadas.</string>
+
+    <!-- Priority (SPEC-0006) -->
+    <string name="priority_low">Baja</string>
+    <string name="priority_medium">Media</string>
+    <string name="priority_high">Alta</string>
+    <string name="priority_badge">Prioridad: %1$s</string>
+    <string name="analysis_non_diagnostic_notice">citoVision no realiza diagnósticos. La prioridad es solo una sugerencia de revisión para un profesional.</string>
 </resources>

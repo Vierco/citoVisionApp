@@ -2,6 +2,8 @@ package dev.lovelace.citovision.infrastructure.persistence.mappers
 
 import dev.lovelace.citovision.domain.entities.Analysis
 import dev.lovelace.citovision.domain.entities.CellCount
+import dev.lovelace.citovision.domain.entities.DetectionLevel
+import dev.lovelace.citovision.domain.entities.Priority
 import dev.lovelace.citovision.infrastructure.persistence.database.AnalysisEntity
 import dev.lovelace.citovision.infrastructure.persistence.database.AnalysisWithCellCounts
 import dev.lovelace.citovision.infrastructure.persistence.database.CellCountEntity
@@ -34,15 +36,17 @@ class AnalysisMappersTest {
                             id = 2,
                             analysisId = "1",
                             position = 1,
-                            name = "Neutrófilos",
-                            value = "60%",
+                            name = "Neutrófilo segmentado",
+                            count = 1,
+                            confidences = "0.85",
                         ),
                         CellCountEntity(
                             id = 1,
                             analysisId = "1",
                             position = 0,
-                            name = "Leucocitos",
-                            value = "7.500/µL",
+                            name = "Linfocito",
+                            count = 3,
+                            confidences = "0.9,0.8,0.7",
                         ),
                     ),
             )
@@ -52,7 +56,10 @@ class AnalysisMappersTest {
 
         // Then
         assertEquals(
-            listOf(CellCount("Leucocitos", "7.500/µL"), CellCount("Neutrófilos", "60%")),
+            listOf(
+                CellCount("Linfocito", count = 3, confidences = listOf(0.9f, 0.8f, 0.7f)),
+                CellCount("Neutrófilo segmentado", count = 1, confidences = listOf(0.85f)),
+            ),
             analysis.cellCounts,
         )
         assertEquals(Instant.fromEpochMilliseconds(1_700_000_000_000), analysis.performedAt)
@@ -82,7 +89,11 @@ class AnalysisMappersTest {
                 performedAt = Instant.fromEpochMilliseconds(1_700_000_000_000),
                 summary = "Resumen",
                 imagePath = "/tmp/a.png",
-                cellCounts = listOf(CellCount("Leucocitos", "7.500/µL"), CellCount("Neutrófilos", "60%")),
+                cellCounts =
+                    listOf(
+                        CellCount("Linfocito", count = 3, confidences = listOf(0.9f, 0.8f, 0.7f)),
+                        CellCount("Artefacto", count = 2, confidences = emptyList()),
+                    ),
             )
 
         // When
@@ -91,7 +102,91 @@ class AnalysisMappersTest {
         // Then
         assertEquals(entity, analysis.toEntity())
         assertEquals(listOf(0, 1), entities.map { it.position })
-        assertEquals(listOf("Leucocitos", "Neutrófilos"), entities.map { it.name })
+        assertEquals(listOf("Linfocito", "Artefacto"), entities.map { it.name })
         assertEquals(listOf("1", "1"), entities.map { it.analysisId })
+        assertEquals(listOf(3, 2), entities.map { it.count })
+        // Las confianzas viajan como CSV; las clases no celulares quedan vacías.
+        assertEquals(listOf("0.9,0.8,0.7", ""), entities.map { it.confidences })
+    }
+
+    @OptIn(ExperimentalTime::class)
+    @Test
+    fun `given a priority when mapping in both directions then it round-trips`() {
+        // Entidad → dominio
+        val row = AnalysisWithCellCounts(analysis = entity.copy(priority = "ALTA"), cellCounts = emptyList())
+        assertEquals(Priority.ALTA, row.toDomain().priority)
+
+        // Dominio → entidad
+        val analysis =
+            Analysis(
+                id = "1",
+                patient = "PAC-2026-001",
+                performedAt = Instant.fromEpochMilliseconds(1_700_000_000_000),
+                summary = "Resumen",
+                imagePath = "/tmp/a.png",
+                cellCounts = emptyList(),
+                priority = Priority.ALTA,
+            )
+        assertEquals("ALTA", analysis.toEntity().priority)
+    }
+
+    @OptIn(ExperimentalTime::class)
+    @Test
+    fun `given a detection level when mapping in both directions then it round-trips`() {
+        val analysis =
+            Analysis(
+                id = "1",
+                patient = "PAC-2026-001",
+                performedAt = Instant.fromEpochMilliseconds(1_700_000_000_000),
+                summary = "Resumen",
+                imagePath = "/tmp/a.png",
+                cellCounts =
+                    listOf(
+                        CellCount("Mielocito", count = 1, confidences = listOf(0.97f)),
+                        CellCount(
+                            "Promielocito",
+                            count = 1,
+                            confidences = listOf(0.09f),
+                            level = DetectionLevel.LOW_CONFIDENCE_REVIEW,
+                        ),
+                    ),
+            )
+
+        val entities = analysis.toCellCountEntities()
+        assertEquals(listOf("STANDARD", "LOW_CONFIDENCE_REVIEW"), entities.map { it.level })
+
+        val row = AnalysisWithCellCounts(analysis = entity, cellCounts = entities)
+        assertEquals(analysis.cellCounts, row.toDomain().cellCounts)
+    }
+
+    @OptIn(ExperimentalTime::class)
+    @Test
+    fun `given a row migrated from v4 when mapping to domain then the level falls back to standard`() {
+        // Las filas anteriores a la política de umbrales se generaron con el umbral único de 0.25.
+        val row =
+            AnalysisWithCellCounts(
+                analysis = entity,
+                cellCounts =
+                    listOf(
+                        CellCountEntity(
+                            id = 1,
+                            analysisId = "1",
+                            position = 0,
+                            name = "Linfocito",
+                            count = 1,
+                            confidences = "0.9",
+                            level = "",
+                        ),
+                    ),
+            )
+
+        assertEquals(
+            DetectionLevel.STANDARD,
+            row
+                .toDomain()
+                .cellCounts
+                .single()
+                .level,
+        )
     }
 }

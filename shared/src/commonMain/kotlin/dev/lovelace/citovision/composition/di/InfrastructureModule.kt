@@ -1,12 +1,15 @@
 package dev.lovelace.citovision.composition.di
 
 import dev.lovelace.citovision.application.ports.AnalysisRepository
+import dev.lovelace.citovision.application.ports.CellDetector
 import dev.lovelace.citovision.application.ports.ImagePicker
 import dev.lovelace.citovision.application.ports.RemoteAnalysisSync
 import dev.lovelace.citovision.application.ports.RemoteFeedback
 import dev.lovelace.citovision.application.ports.RemotePatientAnalyses
 import dev.lovelace.citovision.application.ports.SessionRepository
+import dev.lovelace.citovision.core.coroutines.defaultDispatcher
 import dev.lovelace.citovision.infrastructure.image.FileKitImagePicker
+import dev.lovelace.citovision.infrastructure.inference.CellDetectorImpl
 import dev.lovelace.citovision.infrastructure.network.createHttpClient
 import dev.lovelace.citovision.infrastructure.remote.FIREBASE_PROJECT_ID
 import dev.lovelace.citovision.infrastructure.remote.FIREBASE_STORAGE_BUCKET
@@ -33,6 +36,10 @@ val infrastructureModule =
         singleOf(::SessionRepositoryImpl) bind SessionRepository::class
         singleOf(::FileKitImagePicker) bind ImagePicker::class
         singleOf(::AnalysisRepositoryImpl) bind AnalysisRepository::class
+        // Orquestador de inferencia común; el ImageDecoder y el OnnxRunner los aporta cada platformModule.
+        single<CellDetector> {
+            CellDetectorImpl(imageDecoder = get(), onnxRunner = get(), dispatcher = defaultDispatcher)
+        }
         single<HttpClient> { createHttpClient(get()) }
         single {
             FirestoreAnalysisDataSource(

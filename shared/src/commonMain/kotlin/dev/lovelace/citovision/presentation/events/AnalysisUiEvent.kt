@@ -20,13 +20,22 @@ sealed interface AnalysisUiEvent {
     ) : AnalysisUiEvent
 
     /**
-     * Confirma el diálogo: guarda el análisis local (mock, andamiaje temporal) y, si hay cuenta, lo encola
-     * y sincroniza con remoto (SPEC-0005 RF-3).
+     * Confirma el diálogo: ejecuta el modelo sobre la imagen (SPEC-0006), y si hay células persiste el
+     * análisis local y, con cuenta, lo encola y sincroniza con remoto (SPEC-0005 RF-3).
      */
     data object ConfirmScan : AnalysisUiEvent
 
     /** Cierra el diálogo de código sin escanear. */
     data object CancelScan : AnalysisUiEvent
+
+    /** Reintenta el análisis con la misma imagen tras un fallo de inferencia (SPEC-0006 RF-7). */
+    data object RetryAnalysis : AnalysisUiEvent
+
+    /** Cierra el popup informativo de "sin células detectadas" (SPEC-0006 RF-6). */
+    data object DismissNoCells : AnalysisUiEvent
+
+    /** Cierra el popup de error de inferencia. */
+    data object DismissInferenceError : AnalysisUiEvent
 
     /** Reintenta la sincronización remota pendiente (RN-8). */
     data object RetrySync : AnalysisUiEvent

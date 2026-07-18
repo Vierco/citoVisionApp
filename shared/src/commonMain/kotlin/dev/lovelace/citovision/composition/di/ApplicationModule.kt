@@ -1,5 +1,6 @@
 package dev.lovelace.citovision.composition.di
 
+import dev.lovelace.citovision.application.usecases.AnalyzeSampleUseCase
 import dev.lovelace.citovision.application.usecases.DeleteAllAnalysesUseCase
 import dev.lovelace.citovision.application.usecases.DeleteAnalysisUseCase
 import dev.lovelace.citovision.application.usecases.DeleteRemoteAnalysisUseCase
@@ -9,7 +10,6 @@ import dev.lovelace.citovision.application.usecases.ObserveCurrentUserUseCase
 import dev.lovelace.citovision.application.usecases.ObserveSessionStatusUseCase
 import dev.lovelace.citovision.application.usecases.PickImageUseCase
 import dev.lovelace.citovision.application.usecases.ProcessPendingSyncUseCase
-import dev.lovelace.citovision.application.usecases.SaveMockAnalysisUseCase
 import dev.lovelace.citovision.application.usecases.SearchPatientAnalysesUseCase
 import dev.lovelace.citovision.application.usecases.SendPasswordResetUseCase
 import dev.lovelace.citovision.application.usecases.SignInAsGuestUseCase
@@ -36,8 +36,8 @@ val applicationModule =
         factoryOf(::ObserveAnalysesUseCase)
         factoryOf(::DeleteAnalysisUseCase)
         factoryOf(::DeleteAllAnalysesUseCase)
-        // ⚠️ Temporal (SPEC-0004 RF-7): inserción de análisis mock desde "Iniciar Escáner".
-        factoryOf(::SaveMockAnalysisUseCase)
+        // Análisis real con el modelo on-device (SPEC-0006), sustituye al andamiaje mock.
+        factoryOf(::AnalyzeSampleUseCase)
         factoryOf(::SyncAnalysisUseCase)
         factoryOf(::ProcessPendingSyncUseCase)
         factoryOf(::SearchPatientAnalysesUseCase)
