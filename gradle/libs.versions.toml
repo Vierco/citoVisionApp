@@ -41,7 +41,10 @@ ksp = "2.2.10-2.0.2"
 kotlinx-datetime = "0.7.1"
 # Inferencia on-device (SPEC-0006 / ADR-0003). Java/JNI puro (sin metadata Kotlin → sin límite de compilador).
 # `onnxruntime-android` (AAR) para Android; `onnxruntime` (JVM, con nativos win/linux/macOS) para Desktop.
-onnxruntime = "1.20.0"
+# NO bajar de 1.22.0: hasta 1.21.1 incluida, `libonnxruntime4j_jni.so` se publica con segmentos LOAD
+# alineados a 4 KB, lo que incumple el requisito de páginas de 16 KB de Google Play (obligatorio desde
+# nov-2025 para targetSdk >= 35). `libonnxruntime.so` ya venía a 16 KB; el que fallaba era el wrapper JNI.
+onnxruntime = "1.22.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
