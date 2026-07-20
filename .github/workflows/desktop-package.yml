@@ -1,0 +1,64 @@
+name: Desktop package
+
+# `jpackage` solo empaqueta para el sistema en el que corre, así que no hay forma de generar el ejecutable de
+# Windows ni el de Linux desde el macOS de desarrollo: hace falta un runner de cada sistema.
+#
+# Se construye `createDistributable` (app-image) y no `packageMsi`/`packageDeb` a propósito: el instalador de
+# Windows necesita WiX instalado en el runner, mientras que el app-image es una carpeta con el ejecutable
+# dentro, que se descarga y se ejecuta sin instalar nada ni pedir permisos de administrador. Para probar la
+# app en una máquina prestada es lo que menos fricción tiene.
+#
+# Se lanza a mano desde la pestaña Actions (workflow_dispatch); no tiene sentido empaquetar en cada push.
+
+on:
+    workflow_dispatch:
+
+permissions:
+    contents: read
+
+jobs:
+    package:
+        name: ${{ matrix.name }}
+        runs-on: ${{ matrix.os }}
+
+        strategy:
+            # Sin fail-fast: si Windows falla queremos igualmente el artefacto de Linux, y al revés.
+            fail-fast: false
+            matrix:
+                include:
+                    - os: windows-latest
+                      name: Windows
+                      artifact: citoVision-windows
+                    - os: ubuntu-latest
+                      name: Linux
+                      artifact: citoVision-linux
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Set up JDK
+              uses: actions/setup-java@v4
+              with:
+                  distribution: temurin
+                  java-version: 17
+
+            - name: Make Gradle executable
+              if: runner.os != 'Windows'
+              run: chmod +x ./gradlew
+
+            # La clave se hornea en el binario en tiempo de compilación (ADR-0002). No es un secreto de
+            # servidor —identifica el proyecto Firebase y la autorización real vive en las reglas—, pero se
+            # pasa como secret para no versionarla. Si el secret no existe, el build no falla: la app se
+            # empaqueta con la clave vacía y la autenticación no funcionará.
+            - name: Package application
+              env:
+                  FIREBASE_WEB_API_KEY: ${{ secrets.FIREBASE_WEB_API_KEY }}
+              run: ./gradlew :desktopApp:createDistributable
+
+            - name: Upload package
+              uses: actions/upload-artifact@v4
+              with:
+                  name: ${{ matrix.artifact }}
+                  path: desktopApp/build/compose/binaries/main/app
+                  if-no-files-found: error

@@ -25,7 +25,14 @@ kotlin {
         }
     }
 
-    jvm("desktop")
+    // Sin `jvmTarget` explícito, el bytecode saldría con la versión del JDK que ejecute el build (la JBR de
+    // Android Studio es 21), y entonces el runtime que empaqueta `jpackage` puede no poder cargarlo:
+    // «UnsupportedClassVersionError: class file version 65.0». Fijarlo hace la salida reproducible.
+    jvm("desktop") {
+        compilerOptions {
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+        }
+    }
 
     listOf(
         iosX64(),
