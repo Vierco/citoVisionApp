@@ -14,9 +14,13 @@ import dev.lovelace.citovision.application.usecases.AnalyzeSampleUseCase
 import dev.lovelace.citovision.application.usecases.DeleteAnalysisUseCase
 import dev.lovelace.citovision.application.usecases.HasActiveSessionUseCase
 import dev.lovelace.citovision.application.usecases.ObserveAnalysesUseCase
+import dev.lovelace.citovision.application.usecases.ObserveLastPatientCodeUseCase
 import dev.lovelace.citovision.application.usecases.ObserveSessionStatusUseCase
+import dev.lovelace.citovision.application.usecases.ObserveThemePreferenceUseCase
 import dev.lovelace.citovision.application.usecases.PickImageUseCase
+import dev.lovelace.citovision.application.usecases.SaveLastPatientCodeUseCase
 import dev.lovelace.citovision.application.usecases.SendPasswordResetUseCase
+import dev.lovelace.citovision.application.usecases.SetThemePreferenceUseCase
 import dev.lovelace.citovision.application.usecases.SignInAsGuestUseCase
 import dev.lovelace.citovision.application.usecases.SignInWithEmailUseCase
 import dev.lovelace.citovision.application.usecases.SignInWithGoogleUseCase
@@ -75,6 +79,10 @@ class AppModulesGraphTest {
         assertNotNull(koin.get<DeleteAnalysisUseCase>())
         assertNotNull(koin.get<AnalyzeSampleUseCase>())
         assertNotNull(koin.get<SubmitFeedbackUseCase>())
+        assertNotNull(koin.get<ObserveThemePreferenceUseCase>())
+        assertNotNull(koin.get<SetThemePreferenceUseCase>())
+        assertNotNull(koin.get<ObserveLastPatientCodeUseCase>())
+        assertNotNull(koin.get<SaveLastPatientCodeUseCase>())
         assertNotNull(koin.get<SessionRepository>())
         assertNotNull(koin.get<AnalysisRepository>())
         assertNotNull(koin.get<RemoteAnalysisSync>())

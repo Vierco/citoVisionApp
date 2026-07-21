@@ -2,6 +2,7 @@ package dev.lovelace.citovision.application.usecases
 
 import dev.lovelace.citovision.application.ports.AuthService
 import dev.lovelace.citovision.application.ports.GoogleSignInLauncher
+import dev.lovelace.citovision.application.ports.PatientCodeRepository
 import dev.lovelace.citovision.application.ports.SessionRepository
 import dev.lovelace.citovision.core.result.Result
 import dev.lovelace.citovision.core.result.fold
@@ -61,9 +62,12 @@ class SignInAsGuestUseCase(
 class SignOutUseCase(
     private val authService: AuthService,
     private val sessionRepository: SessionRepository,
+    private val patientCodeRepository: PatientCodeRepository,
 ) {
     suspend operator fun invoke(): Result<Unit, AuthError> {
         sessionRepository.setGuestSession(false)
+        // El último código de paciente es propio de la sesión: al cerrarla no debe filtrarse a la siguiente.
+        patientCodeRepository.clear()
         return authService.signOut()
     }
 }

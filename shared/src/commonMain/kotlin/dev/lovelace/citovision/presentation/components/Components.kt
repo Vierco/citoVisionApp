@@ -56,6 +56,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import citovision.shared.generated.resources.Res
@@ -79,10 +80,8 @@ import coil3.compose.SubcomposeAsyncImage
 import dev.lovelace.citovision.domain.entities.CellCount
 import dev.lovelace.citovision.domain.entities.DetectionLevel
 import dev.lovelace.citovision.domain.entities.Priority
-import dev.lovelace.citovision.ui.theme.error
+import dev.lovelace.citovision.ui.theme.LocalAppColors
 import dev.lovelace.citovision.ui.theme.getTypography
-import dev.lovelace.citovision.ui.theme.secondaryDark
-import dev.lovelace.citovision.ui.theme.warning
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import kotlin.math.roundToInt
@@ -207,17 +206,17 @@ fun PriorityBadge(
     val levelLabel: String
     when (priority) {
         Priority.ALTA -> {
-            color = error
+            color = MaterialTheme.colorScheme.error
             icon = Icons.Filled.KeyboardDoubleArrowUp
             levelLabel = stringResource(Res.string.priority_high)
         }
         Priority.MEDIA -> {
-            color = warning
+            color = LocalAppColors.current.warning
             icon = Icons.Filled.Remove
             levelLabel = stringResource(Res.string.priority_medium)
         }
         Priority.BAJA -> {
-            color = secondaryDark
+            color = LocalAppColors.current.secondaryDark
             icon = Icons.Filled.KeyboardDoubleArrowDown
             levelLabel = stringResource(Res.string.priority_low)
         }
@@ -309,14 +308,14 @@ private fun LowConfidenceFindings(cellCounts: List<CellCount>) {
                             "${(confidence * 100).roundToInt()}%",
                         ),
                     style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onBackground,
+                    color = LocalAppColors.current.hint,
                 )
             }
         }
         Text(
             text = stringResource(Res.string.dialog_low_confidence_notice),
             style = MaterialTheme.typography.bodyMedium,
-            color = warning,
+            color = LocalAppColors.current.warning,
         )
     }
 }
@@ -363,7 +362,7 @@ fun AnalysisCard(
             Column(modifier = Modifier.padding(16.dp)) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
@@ -371,6 +370,9 @@ fun AnalysisCard(
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onBackground,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f),
                     )
                     PriorityBadge(priority = priority)
                 }

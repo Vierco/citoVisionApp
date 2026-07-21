@@ -32,6 +32,7 @@ fun AnalysisWithCellCounts.toDomain(): Analysis =
                     )
                 },
         priority = Priority.fromName(analysis.priority),
+        sampleName = analysis.sampleName,
     )
 
 fun Analysis.toEntity(): AnalysisEntity =
@@ -42,6 +43,7 @@ fun Analysis.toEntity(): AnalysisEntity =
         summary = summary,
         imagePath = imagePath,
         priority = priority.name,
+        sampleName = sampleName,
     )
 
 fun Analysis.toCellCountEntities(): List<CellCountEntity> =

@@ -1,5 +1,7 @@
 package dev.lovelace.citovision.presentation.events
 
+import dev.lovelace.citovision.domain.settings.ThemePreference
+
 /** Acciones de la pantalla de Ajustes. */
 sealed interface SettingsUiEvent {
     /** Ir a la pantalla de login para iniciar sesión con una cuenta (p. ej. desde sesión de invitado). */
@@ -38,6 +40,16 @@ sealed interface SettingsUiEvent {
 
     /** Cerrar el aviso de error al enviar el feedback (el diálogo permanece para reintentar). */
     data object DismissFeedbackError : SettingsUiEvent
+
+    /** Abrir una URL externa (licencias de terceros) en el navegador del sistema. */
+    data class OpenExternalUrl(
+        val url: String,
+    ) : SettingsUiEvent
+
+    /** El usuario elige el tema de la app (Claro/Oscuro/Seguir sistema). */
+    data class SetTheme(
+        val preference: ThemePreference,
+    ) : SettingsUiEvent
 
     /** Volver a la pantalla anterior. */
     data object NavigateBack : SettingsUiEvent

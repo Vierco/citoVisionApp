@@ -7,6 +7,7 @@ import dev.lovelace.citovision.application.ports.AuthService
 import dev.lovelace.citovision.application.ports.GoogleSignInLauncher
 import dev.lovelace.citovision.application.ports.ImageDecoder
 import dev.lovelace.citovision.application.ports.OnnxRunner
+import dev.lovelace.citovision.application.ports.UrlOpener
 import dev.lovelace.citovision.infrastructure.auth.DesktopFirebaseAuthService
 import dev.lovelace.citovision.infrastructure.auth.StubGoogleSignInLauncher
 import dev.lovelace.citovision.infrastructure.auth.remote.IdentityToolkitAuthDataSource
@@ -20,6 +21,7 @@ import dev.lovelace.citovision.infrastructure.persistence.database.appDatabaseBu
 import dev.lovelace.citovision.infrastructure.persistence.database.createAppDatabase
 import dev.lovelace.citovision.infrastructure.persistence.preferences.createDataStore
 import dev.lovelace.citovision.infrastructure.persistence.preferences.dataStorePath
+import dev.lovelace.citovision.infrastructure.platform.DesktopUrlOpener
 import dev.lovelace.citovision.infrastructure.remote.FIREBASE_WEB_API_KEY_PROPERTY
 import io.ktor.client.engine.HttpClientEngine
 import io.ktor.client.engine.okhttp.OkHttp
@@ -43,4 +45,5 @@ actual val platformModule: Module =
         single<AnalysisImageStore> { OkioAnalysisImageStore(baseDirectory = analysisImagesPath()) }
         single<ImageDecoder> { ImageDecoderImpl() }
         single<OnnxRunner> { OnnxRunnerImpl(::loadCellDetectorModel) }
+        single<UrlOpener> { DesktopUrlOpener() }
     }

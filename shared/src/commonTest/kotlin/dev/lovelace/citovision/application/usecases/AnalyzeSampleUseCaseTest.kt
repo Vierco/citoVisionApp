@@ -106,6 +106,8 @@ class AnalyzeSampleUseCaseTest {
             assertEquals(Priority.ALTA, persisted.priority)
             assertEquals("12-34", persisted.patient)
             assertEquals("/tmp/a.png", persisted.imagePath)
+            // El nombre de la muestra es el del fichero sin extensión ("muestra.png" → "muestra").
+            assertEquals("muestra", persisted.sampleName)
             assertTrue(persisted.cellCounts.isNotEmpty())
         }
 

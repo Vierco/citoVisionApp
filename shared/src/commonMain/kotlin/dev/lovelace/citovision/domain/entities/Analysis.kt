@@ -11,6 +11,9 @@ import kotlin.time.Instant
  *
  * [priority] es la prioridad de revisión profesional (SPEC-0006); por defecto [Priority.BAJA] para que los
  * análisis antiguos migrados sigan siendo válidos hasta que el análisis real la calcule.
+ *
+ * [sampleName] es el nombre de la muestra: el nombre del fichero de imagen cargado, **sin extensión**. Es
+ * nulo en los análisis antiguos migrados (que no lo guardaban); la UI muestra un rótulo genérico en ese caso.
  */
 data class Analysis(
     val id: String,
@@ -20,6 +23,7 @@ data class Analysis(
     val imagePath: String?,
     val cellCounts: List<CellCount>,
     val priority: Priority = Priority.BAJA,
+    val sampleName: String? = null,
 )
 
 /**

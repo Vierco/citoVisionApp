@@ -40,8 +40,10 @@ class AnalyzeSampleUseCase(
 
         val id = generateId()
         val fileName = "$id.${image.mimeType.toFileExtension()}"
+        // Nombre de la muestra = nombre del fichero original sin extensión (obviamos .jpg/.png).
+        val sampleName = image.fileName.substringBeforeLast('.').takeIf { it.isNotBlank() }
         return when (val saved = analysisImageStore.save(image.bytes, fileName)) {
-            is Result.Success -> saveRow(id, patientCode, saved.value, detections)
+            is Result.Success -> saveRow(id, patientCode, saved.value, detections, sampleName)
             is Result.Failure -> AnalysisOutcome.SaveFailed
         }
     }
@@ -51,6 +53,7 @@ class AnalyzeSampleUseCase(
         patientCode: String,
         imagePath: String,
         detections: List<Detection>,
+        sampleName: String?,
     ): AnalysisOutcome {
         val priority = PriorityCalculator.priorityOf(detections)
         val analysis =
@@ -62,6 +65,7 @@ class AnalyzeSampleUseCase(
                 imagePath = imagePath,
                 cellCounts = CellCountBuilder.build(detections),
                 priority = priority,
+                sampleName = sampleName,
             )
         return when (analysisRepository.saveAnalysis(analysis)) {
             is Result.Success -> AnalysisOutcome.Saved(id)

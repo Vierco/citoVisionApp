@@ -43,6 +43,10 @@
     <string name="settings_section_actions">Acciones</string>
     <string name="settings_section_support">Soporte</string>
     <string name="settings_section_others">Otros</string>
+    <string name="settings_theme_title">Tema</string>
+    <string name="settings_theme_light">Claro</string>
+    <string name="settings_theme_dark">Oscuro</string>
+    <string name="settings_theme_system">Seguir sistema</string>
     <string name="settings_clear_analysis">Borrar todos los análisis locales</string>
     <string name="settings_clear_confirm_title">¿Borrar todos los análisis locales?</string>
     <string name="settings_clear_confirm_message">Se eliminarán todos los análisis guardados en este dispositivo. Esta acción no se puede deshacer.</string>
@@ -61,9 +65,24 @@
     <string name="settings_license">Licencia</string>
     <string name="settings_version">Versión</string>
     <string name="settings_version_value">1.0.0 (Build 1)</string>
-    <string name="license_dialog_pending">Pendiente de licencia. Este texto será muy largo para probar el scroll. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</string>
-    <string name="settings_rn3">RN-3</string>
-    <string name="rn3_dialog_pending">Pendiente de RN-3</string>
+    <string name="settings_copyright">2026 - Lovelaced / Sergio Álvarez.</string>
+    <string name="settings_third_party">Third party</string>
+    <string name="third_party_yolo">Ultralytics YOLO — AGPL-3.0</string>
+    <string name="third_party_ultralytics_pending">Pendiente de licencia comercial Ultralytics</string>
+    <string name="third_party_onnx">ONNX Runtime — MIT</string>
+    <string name="third_party_univali">UNIVALI Leukocyte Dataset — CC BY 4.0</string>
+    <string name="third_party_kotlin_compose">Kotlin y Compose — Apache-2.0</string>
+    <string name="third_party_androidx">AndroidX — Apache-2.0</string>
+    <string name="third_party_ktor">Ktor — Apache-2.0</string>
+    <string name="third_party_koin">Koin — Apache-2.0</string>
+    <string name="third_party_coil">Coil — Apache-2.0</string>
+    <string name="third_party_napier">Napier — Apache-2.0</string>
+    <string name="third_party_gitlive">GitLive Firebase Kotlin SDK — Apache-2.0</string>
+    <string name="third_party_coroutines_datetime">Kotlinx Coroutines y DateTime — Apache-2.0</string>
+    <string name="third_party_filekit">FileKit — MIT</string>
+    <string name="license_body">CitoVision\n\nCopyright © 2026 Sergio Álvarez.\nTodos los derechos reservados.\n\nCitoVision es software propietario. Si está interesado en reutilizar, modificar o realizar acciones relacionadas al código original, por favor, póngase en contacto con nosotros.\n\nCitoVision es un prototipo académico y experimental. No está clínicamente validado, no es un producto sanitario y no debe utilizarse para emitir diagnósticos ni sustituir el criterio de profesionales sanitarios.</string>
+    <string name="license_univali_title">Atribución UNIVALI</string>
+    <string name="license_univali_body">CitoVision utiliza el UNIVALI Leukocyte Dataset, disponible en Zenodo bajo licencia Creative Commons Attribution 4.0 International (CC BY 4.0).\n\nFuente:\nhttps://zenodo.org/records/17743609\n\nEl conjunto de datos fue reorganizado mediante un reparto estratificado y utilizado para ajustar un modelo de segmentación. Los autores del dataset no respaldan ni certifican CitoVision.</string>
     <string name="common_accept">Aceptar</string>
 
     <!-- Main Navigation -->

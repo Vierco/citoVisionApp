@@ -25,18 +25,18 @@ import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun SplashScreen() {
+    val backgroundColor = MaterialTheme.colorScheme.background
+    val primaryColor = MaterialTheme.colorScheme.primary
+    val tertiaryColor = MaterialTheme.colorScheme.tertiary
     Box(
         modifier =
             Modifier
                 .fillMaxSize()
                 .drawBehind {
-                    // Fondo blanco base
-                    drawRect(Color.White)
+                    // Fondo base del tema
+                    drawRect(backgroundColor)
 
                     // Efecto de resplandor azul y morado vertical (mezclados en el centro)
-                    val primaryColor = Color(0xFF2FA7F0)
-                    val tertiaryColor = Color(0xFFA56AE3)
-
                     scale(scaleX = 2.2f, scaleY = 2.5f, pivot = center) {
                         // Resplandor Azul (Posicionado más arriba)
                         val blueCenter = Offset(center.x, center.y - size.height * 0.15f)
@@ -85,7 +85,7 @@ fun SplashScreen() {
                         fontSize = 88.sp,
                         lineHeight = 80.sp,
                     ),
-                color = Color(0xFFA56AE3), // Tertiary de DESIGN.md
+                color = MaterialTheme.colorScheme.tertiary,
                 fontWeight = FontWeight.Bold,
             )
             Spacer(modifier = Modifier.height(24.dp))

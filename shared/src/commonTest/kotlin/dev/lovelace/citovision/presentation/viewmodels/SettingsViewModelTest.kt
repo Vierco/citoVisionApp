@@ -2,16 +2,22 @@ package dev.lovelace.citovision.presentation.viewmodels
 
 import dev.lovelace.citovision.application.ports.AnalysisRepository
 import dev.lovelace.citovision.application.ports.AuthService
+import dev.lovelace.citovision.application.ports.PatientCodeRepository
 import dev.lovelace.citovision.application.ports.RemoteFeedback
 import dev.lovelace.citovision.application.ports.SessionRepository
+import dev.lovelace.citovision.application.ports.ThemeRepository
+import dev.lovelace.citovision.application.ports.UrlOpener
 import dev.lovelace.citovision.application.usecases.DeleteAllAnalysesUseCase
 import dev.lovelace.citovision.application.usecases.ObserveCurrentUserUseCase
 import dev.lovelace.citovision.application.usecases.ObserveSessionStatusUseCase
+import dev.lovelace.citovision.application.usecases.ObserveThemePreferenceUseCase
 import dev.lovelace.citovision.application.usecases.SessionStatus
+import dev.lovelace.citovision.application.usecases.SetThemePreferenceUseCase
 import dev.lovelace.citovision.application.usecases.SignOutUseCase
 import dev.lovelace.citovision.application.usecases.SubmitFeedbackUseCase
 import dev.lovelace.citovision.core.result.Result
 import dev.lovelace.citovision.domain.entities.AuthUser
+import dev.lovelace.citovision.domain.settings.ThemePreference
 import dev.lovelace.citovision.presentation.events.SettingsUiEvent
 import dev.lovelace.citovision.presentation.navigation.NavigationEvent
 import dev.mokkery.answering.returns
@@ -19,12 +25,14 @@ import dev.mokkery.every
 import dev.mokkery.everySuspend
 import dev.mokkery.matcher.any
 import dev.mokkery.mock
+import dev.mokkery.verify
 import dev.mokkery.verifySuspend
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
@@ -46,16 +54,23 @@ class SettingsViewModelTest {
     private val sessionRepository = mock<SessionRepository>()
     private val analysisRepository = mock<AnalysisRepository>()
     private val remoteFeedback = mock<RemoteFeedback>()
-    private val signOut = SignOutUseCase(authService, sessionRepository)
+    private val urlOpener = mock<UrlOpener>()
+    private val themeRepository = mock<ThemeRepository>()
+    private val patientCodeRepository = mock<PatientCodeRepository>()
+    private val signOut = SignOutUseCase(authService, sessionRepository, patientCodeRepository)
     private val deleteAllAnalyses = DeleteAllAnalysesUseCase(analysisRepository)
     private val submitFeedback = SubmitFeedbackUseCase(remoteFeedback, authService)
     private val observeSessionStatus = ObserveSessionStatusUseCase(authService, sessionRepository)
     private val observeCurrentUser = ObserveCurrentUserUseCase(authService)
+    private val observeThemePreference = ObserveThemePreferenceUseCase(themeRepository)
+    private val setThemePreference = SetThemePreferenceUseCase(themeRepository)
     private val dispatcher = StandardTestDispatcher()
 
     @BeforeTest
     fun setUp() {
         Dispatchers.setMain(dispatcher)
+        // El combine del estado incluye la preferencia de tema; se estabiliza en SYSTEM por defecto.
+        every { themeRepository.themePreference() } returns flowOf(ThemePreference.SYSTEM)
     }
 
     @AfterTest
@@ -68,8 +83,11 @@ class SettingsViewModelTest {
             signOut = signOut,
             deleteAllAnalyses = deleteAllAnalyses,
             submitFeedback = submitFeedback,
+            urlOpener = urlOpener,
+            setThemePreference = setThemePreference,
             observeSessionStatus = observeSessionStatus,
             observeCurrentUser = observeCurrentUser,
+            observeThemePreference = observeThemePreference,
         )
 
     private fun buildViewModel(): SettingsViewModel {
@@ -84,6 +102,7 @@ class SettingsViewModelTest {
         runTest(dispatcher) {
             // Given
             everySuspend { sessionRepository.setGuestSession(false) } returns Unit
+            everySuspend { patientCodeRepository.clear() } returns Unit
             everySuspend { authService.signOut() } returns Result.Success(Unit)
             val viewModel = buildViewModel()
 
@@ -160,6 +179,35 @@ class SettingsViewModelTest {
             // Then
             assertTrue(viewModel.uiState.first { it.clearedConfirmationVisible }.clearedConfirmationVisible)
             verifySuspend { analysisRepository.deleteAllAnalyses() }
+        }
+
+    @Test
+    fun `given open-external-url event when handled then delegates to the url opener`() =
+        runTest(dispatcher) {
+            // Given
+            every { urlOpener.open(any()) } returns Unit
+            val viewModel = buildViewModel()
+
+            // When
+            viewModel.onEvent(SettingsUiEvent.OpenExternalUrl("https://opensource.org/license/mit"))
+
+            // Then
+            verify { urlOpener.open("https://opensource.org/license/mit") }
+        }
+
+    @Test
+    fun `given set-theme event when handled then persists the chosen preference`() =
+        runTest(dispatcher) {
+            // Given
+            everySuspend { themeRepository.setThemePreference(any()) } returns Unit
+            val viewModel = buildViewModel()
+
+            // When
+            viewModel.onEvent(SettingsUiEvent.SetTheme(ThemePreference.DARK))
+            advanceUntilIdle() // el handler persiste dentro de un viewModelScope.launch
+
+            // Then
+            verifySuspend { themeRepository.setThemePreference(ThemePreference.DARK) }
         }
 
     @Test

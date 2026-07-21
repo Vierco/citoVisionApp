@@ -3,10 +3,12 @@ package dev.lovelace.citovision.composition.di
 import dev.lovelace.citovision.application.ports.AnalysisRepository
 import dev.lovelace.citovision.application.ports.CellDetector
 import dev.lovelace.citovision.application.ports.ImagePicker
+import dev.lovelace.citovision.application.ports.PatientCodeRepository
 import dev.lovelace.citovision.application.ports.RemoteAnalysisSync
 import dev.lovelace.citovision.application.ports.RemoteFeedback
 import dev.lovelace.citovision.application.ports.RemotePatientAnalyses
 import dev.lovelace.citovision.application.ports.SessionRepository
+import dev.lovelace.citovision.application.ports.ThemeRepository
 import dev.lovelace.citovision.core.coroutines.defaultDispatcher
 import dev.lovelace.citovision.infrastructure.image.FileKitImagePicker
 import dev.lovelace.citovision.infrastructure.inference.CellDetectorImpl
@@ -19,7 +21,9 @@ import dev.lovelace.citovision.infrastructure.remote.firestore.FirestoreAnalysis
 import dev.lovelace.citovision.infrastructure.remote.firestore.FirestoreFeedbackDataSource
 import dev.lovelace.citovision.infrastructure.remote.storage.FirebaseStorageDataSource
 import dev.lovelace.citovision.infrastructure.repositories.AnalysisRepositoryImpl
+import dev.lovelace.citovision.infrastructure.repositories.PatientCodeRepositoryImpl
 import dev.lovelace.citovision.infrastructure.repositories.SessionRepositoryImpl
+import dev.lovelace.citovision.infrastructure.repositories.ThemeRepositoryImpl
 import io.ktor.client.HttpClient
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.bind
@@ -34,6 +38,8 @@ import org.koin.dsl.module
 val infrastructureModule =
     module {
         singleOf(::SessionRepositoryImpl) bind SessionRepository::class
+        singleOf(::ThemeRepositoryImpl) bind ThemeRepository::class
+        singleOf(::PatientCodeRepositoryImpl) bind PatientCodeRepository::class
         singleOf(::FileKitImagePicker) bind ImagePicker::class
         singleOf(::AnalysisRepositoryImpl) bind AnalysisRepository::class
         // Orquestador de inferencia común; el ImageDecoder y el OnnxRunner los aporta cada platformModule.

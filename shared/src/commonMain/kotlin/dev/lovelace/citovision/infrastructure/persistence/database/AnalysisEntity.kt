@@ -17,4 +17,5 @@ data class AnalysisEntity(
     val summary: String,
     val imagePath: String?,
     @ColumnInfo(defaultValue = "BAJA") val priority: String = "BAJA",
+    val sampleName: String? = null,
 )

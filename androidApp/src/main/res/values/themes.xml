@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
 
-    <style name="Theme.CitoVIsion" parent="android:Theme.Material.Light.NoActionBar" />
+    <style name="Theme.CitoVIsion" parent="android:Theme.Material.Light.NoActionBar">
+        <!-- Fondo de la ventana antes de que Compose dibuje (evita el flash blanco en modo oscuro). -->
+        <item name="android:windowBackground">@color/windowBackground</item>
+        <!-- Fondo del splash del sistema en Android 12+ (icono centrado). -->
+        <item name="android:windowSplashScreenBackground" tools:targetApi="31">@color/windowBackground</item>
+    </style>
 </resources>

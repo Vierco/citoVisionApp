@@ -1,5 +1,6 @@
 package dev.lovelace.citovision.presentation.screens
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -18,17 +19,20 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Login
 import androidx.compose.material.icons.automirrored.filled.Logout
+import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Feedback
-import androidx.compose.material.icons.filled.Healing
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.AlertDialog
@@ -43,8 +47,11 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -53,15 +60,27 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.LinkAnnotation
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextLinkStyles
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.withLink
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.DialogProperties
 import citovision.shared.generated.resources.Res
 import citovision.shared.generated.resources.common_accept
 import citovision.shared.generated.resources.common_cancel
@@ -76,32 +95,56 @@ import citovision.shared.generated.resources.feedback_send
 import citovision.shared.generated.resources.feedback_sent_message
 import citovision.shared.generated.resources.feedback_sent_title
 import citovision.shared.generated.resources.history_delete_confirm
-import citovision.shared.generated.resources.license_dialog_pending
+import citovision.shared.generated.resources.license_body
+import citovision.shared.generated.resources.license_univali_body
+import citovision.shared.generated.resources.license_univali_title
 import citovision.shared.generated.resources.login_email_label
 import citovision.shared.generated.resources.login_email_placeholder
 import citovision.shared.generated.resources.logout_dialog_desc
 import citovision.shared.generated.resources.logout_dialog_title
-import citovision.shared.generated.resources.rn3_dialog_pending
+import citovision.shared.generated.resources.lovelaced
 import citovision.shared.generated.resources.settings_clear_analysis
 import citovision.shared.generated.resources.settings_clear_confirm_message
 import citovision.shared.generated.resources.settings_clear_confirm_title
 import citovision.shared.generated.resources.settings_cleared_message
 import citovision.shared.generated.resources.settings_cleared_title
+import citovision.shared.generated.resources.settings_copyright
 import citovision.shared.generated.resources.settings_feedback
 import citovision.shared.generated.resources.settings_guest
 import citovision.shared.generated.resources.settings_license
 import citovision.shared.generated.resources.settings_login
 import citovision.shared.generated.resources.settings_logout
-import citovision.shared.generated.resources.settings_rn3
 import citovision.shared.generated.resources.settings_section_actions
 import citovision.shared.generated.resources.settings_section_others
 import citovision.shared.generated.resources.settings_section_support
+import citovision.shared.generated.resources.settings_theme_dark
+import citovision.shared.generated.resources.settings_theme_light
+import citovision.shared.generated.resources.settings_theme_system
+import citovision.shared.generated.resources.settings_theme_title
+import citovision.shared.generated.resources.settings_third_party
 import citovision.shared.generated.resources.settings_version
 import citovision.shared.generated.resources.settings_version_value
+import citovision.shared.generated.resources.third_party_androidx
+import citovision.shared.generated.resources.third_party_coil
+import citovision.shared.generated.resources.third_party_coroutines_datetime
+import citovision.shared.generated.resources.third_party_filekit
+import citovision.shared.generated.resources.third_party_gitlive
+import citovision.shared.generated.resources.third_party_koin
+import citovision.shared.generated.resources.third_party_kotlin_compose
+import citovision.shared.generated.resources.third_party_ktor
+import citovision.shared.generated.resources.third_party_napier
+import citovision.shared.generated.resources.third_party_onnx
+import citovision.shared.generated.resources.third_party_ultralytics_pending
+import citovision.shared.generated.resources.third_party_univali
+import citovision.shared.generated.resources.third_party_yolo
 import coil3.compose.AsyncImage
 import dev.lovelace.citovision.application.usecases.SessionStatus
+import dev.lovelace.citovision.domain.settings.ThemePreference
 import dev.lovelace.citovision.presentation.events.SettingsUiEvent
 import dev.lovelace.citovision.presentation.state.SettingsUiState
+import dev.lovelace.citovision.ui.theme.LocalAppColors
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -111,7 +154,7 @@ fun SettingsScreen(
 ) {
     var showLogoutDialog by remember { mutableStateOf(false) }
     var showLicenseDialog by remember { mutableStateOf(false) }
-    var showRN3Dialog by remember { mutableStateOf(false) }
+    var showThirdPartyDialog by remember { mutableStateOf(false) }
     var showClearAnalysesDialog by remember { mutableStateOf(false) }
 
     if (showLogoutDialog) {
@@ -136,6 +179,7 @@ fun SettingsScreen(
                         showLogoutDialog = false
                         onEvent(SettingsUiEvent.SignOut)
                     },
+                    modifier = Modifier.focusRequester(rememberDialogPrimaryFocus()),
                     colors =
                         ButtonDefaults.buttonColors(
                             containerColor = MaterialTheme.colorScheme.primary,
@@ -159,76 +203,13 @@ fun SettingsScreen(
     }
 
     if (showLicenseDialog) {
-        AlertDialog(
-            onDismissRequest = { showLicenseDialog = false },
-            title = {
-                Text(
-                    text = stringResource(Res.string.settings_license),
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                )
-            },
-            text = {
-                Column(
-                    modifier =
-                        Modifier
-                            .heightIn(max = 300.dp)
-                            .verticalScroll(rememberScrollState()),
-                ) {
-                    Text(
-                        text = stringResource(Res.string.license_dialog_pending),
-                        style = MaterialTheme.typography.bodyMedium,
-                    )
-                }
-            },
-            confirmButton = {
-                Button(
-                    onClick = { showLicenseDialog = false },
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
-                    shape = RoundedCornerShape(16.dp),
-                ) {
-                    Text(stringResource(Res.string.common_close))
-                }
-            },
-            containerColor = MaterialTheme.colorScheme.surface,
-            shape = RoundedCornerShape(28.dp),
-        )
+        LicenseDialog(onClose = { showLicenseDialog = false })
     }
 
-    if (showRN3Dialog) {
-        AlertDialog(
-            onDismissRequest = { showRN3Dialog = false },
-            title = {
-                Text(
-                    text = stringResource(Res.string.settings_rn3),
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                )
-            },
-            text = {
-                Column(
-                    modifier =
-                        Modifier
-                            .heightIn(max = 300.dp)
-                            .verticalScroll(rememberScrollState()),
-                ) {
-                    Text(
-                        text = stringResource(Res.string.rn3_dialog_pending),
-                        style = MaterialTheme.typography.bodyMedium,
-                    )
-                }
-            },
-            confirmButton = {
-                Button(
-                    onClick = { showRN3Dialog = false },
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
-                    shape = RoundedCornerShape(16.dp),
-                ) {
-                    Text(stringResource(Res.string.common_accept))
-                }
-            },
-            containerColor = MaterialTheme.colorScheme.surface,
-            shape = RoundedCornerShape(28.dp),
+    if (showThirdPartyDialog) {
+        ThirdPartyDialog(
+            onOpenUrl = { url -> onEvent(SettingsUiEvent.OpenExternalUrl(url)) },
+            onClose = { showThirdPartyDialog = false },
         )
     }
 
@@ -254,6 +235,7 @@ fun SettingsScreen(
                         showClearAnalysesDialog = false
                         onEvent(SettingsUiEvent.ClearLocalAnalyses)
                     },
+                    modifier = Modifier.focusRequester(rememberDialogPrimaryFocus()),
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
                     shape = RoundedCornerShape(16.dp),
                 ) {
@@ -292,6 +274,7 @@ fun SettingsScreen(
             confirmButton = {
                 Button(
                     onClick = { onEvent(SettingsUiEvent.DismissClearedConfirmation) },
+                    modifier = Modifier.focusRequester(rememberDialogPrimaryFocus()),
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
                     shape = RoundedCornerShape(16.dp),
                 ) {
@@ -326,6 +309,7 @@ fun SettingsScreen(
             confirmButton = {
                 Button(
                     onClick = { onEvent(SettingsUiEvent.DismissFeedbackSent) },
+                    modifier = Modifier.focusRequester(rememberDialogPrimaryFocus()),
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
                     shape = RoundedCornerShape(16.dp),
                 ) {
@@ -356,6 +340,7 @@ fun SettingsScreen(
             confirmButton = {
                 Button(
                     onClick = { onEvent(SettingsUiEvent.DismissFeedbackError) },
+                    modifier = Modifier.focusRequester(rememberDialogPrimaryFocus()),
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
                     shape = RoundedCornerShape(16.dp),
                 ) {
@@ -367,18 +352,18 @@ fun SettingsScreen(
         )
     }
 
+    val backgroundColor = MaterialTheme.colorScheme.background
+    val primaryColor = MaterialTheme.colorScheme.primary
+    val tertiaryColor = MaterialTheme.colorScheme.tertiary
     Box(
         modifier =
             Modifier
                 .fillMaxSize()
                 .drawBehind {
-                    // Fondo blanco base
-                    drawRect(Color.White)
+                    // Fondo base del tema
+                    drawRect(backgroundColor)
 
                     // Efecto de resplandor azul y morado vertical (mezclados en el centro)
-                    val primaryColor = Color(0xFF2FA7F0)
-                    val tertiaryColor = Color(0xFFA56AE3)
-
                     scale(scaleX = 2.2f, scaleY = 2.5f, pivot = center) {
                         // Resplandor Azul (Posicionado más arriba)
                         val blueCenter = Offset(center.x, center.y - size.height * 0.15f)
@@ -515,22 +500,53 @@ fun SettingsScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Sección Otros
-            SettingsSectionCard(title = stringResource(Res.string.settings_section_others)) {
-                SettingsItem(
-                    text = stringResource(Res.string.settings_rn3),
-                    icon = Icons.Default.Healing,
-                    onClick = { showRN3Dialog = true },
+            // Sección Tema
+            SettingsSectionCard(title = stringResource(Res.string.settings_theme_title)) {
+                ThemeOption(
+                    label = stringResource(Res.string.settings_theme_light),
+                    selected = uiState.themePreference == ThemePreference.LIGHT,
+                    onClick = { onEvent(SettingsUiEvent.SetTheme(ThemePreference.LIGHT)) },
                 )
                 HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), thickness = 0.5.dp)
+                ThemeOption(
+                    label = stringResource(Res.string.settings_theme_dark),
+                    selected = uiState.themePreference == ThemePreference.DARK,
+                    onClick = { onEvent(SettingsUiEvent.SetTheme(ThemePreference.DARK)) },
+                )
+                HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), thickness = 0.5.dp)
+                ThemeOption(
+                    label = stringResource(Res.string.settings_theme_system),
+                    selected = uiState.themePreference == ThemePreference.SYSTEM,
+                    onClick = { onEvent(SettingsUiEvent.SetTheme(ThemePreference.SYSTEM)) },
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Sección Otros
+            SettingsSectionCard(title = stringResource(Res.string.settings_section_others)) {
                 SettingsItem(
                     text = stringResource(Res.string.settings_license),
                     icon = Icons.Default.Description,
                     onClick = { showLicenseDialog = true },
                 )
                 HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), thickness = 0.5.dp)
+                SettingsItem(
+                    text = stringResource(Res.string.settings_third_party),
+                    icon = Icons.Default.Code,
+                    onClick = { showThirdPartyDialog = true },
+                )
+                HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), thickness = 0.5.dp)
                 SettingsVersionItem()
             }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Text(
+                text = stringResource(Res.string.settings_copyright),
+                style = MaterialTheme.typography.bodyMedium,
+                color = LocalAppColors.current.hint,
+            )
 
             Spacer(modifier = Modifier.height(32.dp))
         }
@@ -600,6 +616,7 @@ private fun FeedbackDialog(
     uiState: SettingsUiState,
     onEvent: (SettingsUiEvent) -> Unit,
 ) {
+    val focusManager = LocalFocusManager.current
     AlertDialog(
         onDismissRequest = { onEvent(SettingsUiEvent.CancelFeedback) },
         title = {
@@ -632,6 +649,15 @@ private fun FeedbackDialog(
                     singleLine = true,
                     enabled = !uiState.feedbackSending,
                     shape = RoundedCornerShape(12.dp),
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                    keyboardActions =
+                        KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) }),
+                    colors =
+                        OutlinedTextFieldDefaults.colors(
+                            focusedPlaceholderColor = LocalAppColors.current.hint,
+                            unfocusedPlaceholderColor = LocalAppColors.current.hint,
+                            disabledPlaceholderColor = LocalAppColors.current.hint,
+                        ),
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
@@ -651,6 +677,12 @@ private fun FeedbackDialog(
                     placeholder = { Text(stringResource(Res.string.feedback_message_placeholder)) },
                     enabled = !uiState.feedbackSending,
                     shape = RoundedCornerShape(12.dp),
+                    colors =
+                        OutlinedTextFieldDefaults.colors(
+                            focusedPlaceholderColor = LocalAppColors.current.hint,
+                            unfocusedPlaceholderColor = LocalAppColors.current.hint,
+                            disabledPlaceholderColor = LocalAppColors.current.hint,
+                        ),
                 )
             }
         },
@@ -683,7 +715,250 @@ private fun FeedbackDialog(
         },
         containerColor = MaterialTheme.colorScheme.surface,
         shape = RoundedCornerShape(28.dp),
+        modifier = Modifier.padding(32.dp).fillMaxSize(),
+        properties = DialogProperties(usePlatformDefaultWidth = false),
     )
+}
+
+/**
+ * Diálogo de licencia: aviso de software propietario y prototipo académico, seguido de la atribución del
+ * dataset UNIVALI (CC BY 4.0) y un gráfico provisional. Ocupa la pantalla completa menos 32dp por lado.
+ */
+@Composable
+private fun LicenseDialog(onClose: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onClose,
+        title = {
+            Text(
+                text = stringResource(Res.string.settings_license),
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+            )
+        },
+        text = {
+            Column(
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .verticalScroll(rememberScrollState()),
+            ) {
+                Text(
+                    text = stringResource(Res.string.license_body),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+                Spacer(modifier = Modifier.height(24.dp))
+                Text(
+                    text = stringResource(Res.string.license_univali_title),
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onBackground,
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = stringResource(Res.string.license_univali_body),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+                Spacer(modifier = Modifier.height(24.dp))
+                Image(
+                    painter = painterResource(Res.drawable.lovelaced),
+                    contentDescription = null,
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .height(120.dp),
+                    contentScale = ContentScale.Fit,
+                )
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = onClose,
+                modifier = Modifier.focusRequester(rememberDialogPrimaryFocus()),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                shape = RoundedCornerShape(16.dp),
+            ) {
+                Text(stringResource(Res.string.common_close))
+            }
+        },
+        containerColor = MaterialTheme.colorScheme.surface,
+        shape = RoundedCornerShape(28.dp),
+        modifier = Modifier.padding(32.dp).fillMaxSize(),
+        properties = DialogProperties(usePlatformDefaultWidth = false),
+    )
+}
+
+/**
+ * Diálogo de librerías de terceros: cada línea muestra la dependencia con su licencia y, al pulsarla, abre
+ * en el navegador la página de esa licencia. Ocupa la pantalla completa menos 32dp por lado.
+ */
+@Composable
+private fun ThirdPartyDialog(
+    onOpenUrl: (String) -> Unit,
+    onClose: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onClose,
+        title = {
+            Text(
+                text = stringResource(Res.string.settings_third_party),
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+            )
+        },
+        text = {
+            Column(
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .verticalScroll(rememberScrollState()),
+            ) {
+                thirdPartyLibraries.forEach { (labelRes, url) ->
+                    ThirdPartyLink(
+                        label = stringResource(labelRes),
+                        onClick = { onOpenUrl(url) },
+                    )
+                    if (labelRes == Res.string.third_party_yolo) {
+                        Text(
+                            text = stringResource(Res.string.third_party_ultralytics_pending),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = LocalAppColors.current.hint,
+                            modifier = Modifier.padding(start = 20.dp),
+                        )
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = onClose,
+                modifier = Modifier.focusRequester(rememberDialogPrimaryFocus()),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                shape = RoundedCornerShape(16.dp),
+            ) {
+                Text(stringResource(Res.string.common_close))
+            }
+        },
+        containerColor = MaterialTheme.colorScheme.surface,
+        shape = RoundedCornerShape(28.dp),
+        modifier = Modifier.padding(32.dp).fillMaxSize(),
+        properties = DialogProperties(usePlatformDefaultWidth = false),
+    )
+}
+
+/**
+ * Una fila de la lista de terceros: viñeta + nombre de la librería en texto normal, donde únicamente el
+ * nombre de la licencia (tras el separador «—») es un enlace subrayado que abre su página en el navegador.
+ */
+@Composable
+private fun ThirdPartyLink(
+    label: String,
+    onClick: () -> Unit,
+) {
+    val separator = " — "
+    val name = label.substringBefore(separator)
+    val license = label.substringAfter(separator, "")
+    val linkStyles =
+        TextLinkStyles(
+            style =
+                SpanStyle(
+                    color = MaterialTheme.colorScheme.primary,
+                    textDecoration = TextDecoration.Underline,
+                ),
+        )
+    val annotated =
+        buildAnnotatedString {
+            append(name)
+            if (license.isNotEmpty()) {
+                append(separator)
+                withLink(
+                    LinkAnnotation.Clickable(
+                        tag = license,
+                        styles = linkStyles,
+                        linkInteractionListener = { onClick() },
+                    ),
+                ) {
+                    append(license)
+                }
+            }
+        }
+    Row(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(vertical = 12.dp),
+        verticalAlignment = Alignment.Top,
+    ) {
+        Text(
+            text = "•",
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
+        Spacer(modifier = Modifier.width(12.dp))
+        Text(
+            text = annotated,
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
+    }
+}
+
+/**
+ * Librerías de terceros y la URL de la página de su licencia (SPEC de créditos). El nombre visible procede
+ * de recursos; la URL es un dato técnico no localizable, por eso vive aquí y no en `strings.xml`.
+ */
+private val thirdPartyLibraries: List<Pair<StringResource, String>> =
+    listOf(
+        Res.string.third_party_yolo to "https://www.gnu.org/licenses/agpl-3.0.html",
+        Res.string.third_party_onnx to "https://opensource.org/license/mit",
+        Res.string.third_party_univali to "https://creativecommons.org/licenses/by/4.0/",
+        Res.string.third_party_kotlin_compose to "https://www.apache.org/licenses/LICENSE-2.0",
+        Res.string.third_party_androidx to "https://www.apache.org/licenses/LICENSE-2.0",
+        Res.string.third_party_ktor to "https://www.apache.org/licenses/LICENSE-2.0",
+        Res.string.third_party_koin to "https://www.apache.org/licenses/LICENSE-2.0",
+        Res.string.third_party_coil to "https://www.apache.org/licenses/LICENSE-2.0",
+        Res.string.third_party_napier to "https://www.apache.org/licenses/LICENSE-2.0",
+        Res.string.third_party_gitlive to "https://www.apache.org/licenses/LICENSE-2.0",
+        Res.string.third_party_coroutines_datetime to "https://www.apache.org/licenses/LICENSE-2.0",
+        Res.string.third_party_filekit to "https://opensource.org/license/mit",
+    )
+
+/**
+ * Enfoca el botón primario de un diálogo al abrirse. En escritorio, un botón con foco se activa con Enter
+ * por la semántica `clickable` de Compose, así que basta con darle el foco para que Enter equivalga a
+ * pulsarlo. Solo se usa en diálogos sin campo de texto, para no robar el foco a la escritura.
+ */
+@Composable
+private fun rememberDialogPrimaryFocus(): FocusRequester {
+    val focusRequester = remember { FocusRequester() }
+    LaunchedEffect(Unit) { focusRequester.requestFocus() }
+    return focusRequester
+}
+
+/** Una opción de tema (Claro/Oscuro/Seguir sistema): fila seleccionable con radio + etiqueta. */
+@Composable
+private fun ThemeOption(
+    label: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+) {
+    Row(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .selectable(selected = selected, role = Role.RadioButton, onClick = onClick)
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        RadioButton(selected = selected, onClick = null)
+        Spacer(modifier = Modifier.width(16.dp))
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onBackground,
+        )
+    }
 }
 
 @Composable

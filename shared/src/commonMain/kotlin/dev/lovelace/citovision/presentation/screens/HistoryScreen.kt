@@ -80,7 +80,7 @@ private fun HistoryContent(
                 ) {
                     items(uiState.analyses, key = { it.id }) { analysis ->
                         AnalysisCard(
-                            title = analysisTitle,
+                            title = analysis.sampleName ?: analysisTitle,
                             date = analysis.performedAt.formatAnalysisDateTime(),
                             patient = analysis.patient,
                             description = analysis.summary,
@@ -95,7 +95,7 @@ private fun HistoryContent(
 
         uiState.detail?.let { analysis ->
             AnalysisDetailDialog(
-                title = analysisTitle,
+                title = analysis.sampleName ?: analysisTitle,
                 patient = analysis.patient,
                 date = analysis.performedAt.formatAnalysisDateTime(),
                 priority = analysis.priority,

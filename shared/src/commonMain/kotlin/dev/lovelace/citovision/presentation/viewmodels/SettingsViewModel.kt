@@ -2,9 +2,12 @@ package dev.lovelace.citovision.presentation.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dev.lovelace.citovision.application.ports.UrlOpener
 import dev.lovelace.citovision.application.usecases.DeleteAllAnalysesUseCase
 import dev.lovelace.citovision.application.usecases.ObserveCurrentUserUseCase
 import dev.lovelace.citovision.application.usecases.ObserveSessionStatusUseCase
+import dev.lovelace.citovision.application.usecases.ObserveThemePreferenceUseCase
+import dev.lovelace.citovision.application.usecases.SetThemePreferenceUseCase
 import dev.lovelace.citovision.application.usecases.SignOutUseCase
 import dev.lovelace.citovision.application.usecases.SubmitFeedbackUseCase
 import dev.lovelace.citovision.domain.validation.isValidEmail
@@ -31,8 +34,11 @@ class SettingsViewModel(
     private val signOut: SignOutUseCase,
     private val deleteAllAnalyses: DeleteAllAnalysesUseCase,
     private val submitFeedback: SubmitFeedbackUseCase,
+    private val urlOpener: UrlOpener,
+    private val setThemePreference: SetThemePreferenceUseCase,
     observeSessionStatus: ObserveSessionStatusUseCase,
     observeCurrentUser: ObserveCurrentUserUseCase,
+    observeThemePreference: ObserveThemePreferenceUseCase,
 ) : ViewModel() {
     private val clearedConfirmation = MutableStateFlow(false)
     private val feedbackForm = MutableStateFlow(FeedbackForm())
@@ -43,7 +49,8 @@ class SettingsViewModel(
             observeCurrentUser(),
             clearedConfirmation,
             feedbackForm,
-        ) { status, user, cleared, feedback ->
+            observeThemePreference(),
+        ) { status, user, cleared, feedback, theme ->
             SettingsUiState(
                 sessionStatus = status,
                 email = user?.email,
@@ -56,6 +63,7 @@ class SettingsViewModel(
                 feedbackSending = feedback.sending,
                 feedbackSentVisible = feedback.sentVisible,
                 feedbackErrorVisible = feedback.errorVisible,
+                themePreference = theme,
             )
         }.stateIn(
             scope = viewModelScope,
@@ -118,6 +126,12 @@ class SettingsViewModel(
 
             SettingsUiEvent.DismissFeedbackError ->
                 feedbackForm.update { it.copy(errorVisible = false) }
+
+            is SettingsUiEvent.OpenExternalUrl ->
+                urlOpener.open(event.url)
+
+            is SettingsUiEvent.SetTheme ->
+                viewModelScope.launch { setThemePreference(event.preference) }
 
             SettingsUiEvent.NavigateBack ->
                 viewModelScope.launch {

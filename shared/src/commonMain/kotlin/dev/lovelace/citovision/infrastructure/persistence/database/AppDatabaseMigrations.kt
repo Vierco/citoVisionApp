@@ -83,3 +83,18 @@ val MIGRATION_4_5 =
             )
         }
     }
+
+/**
+ * Migración v5 → v6: añade la columna `sampleName` a `analyses` (nombre de la muestra = fichero de imagen sin
+ * extensión). No destructiva (RULES.md §Persistencia): solo añade la columna, **nullable sin default**, así
+ * que los análisis existentes toman `NULL` (no tenían nombre) y la UI muestra un rótulo genérico. Coincide
+ * con `val sampleName: String?` de [AnalysisEntity], que Room valida al abrir.
+ */
+val MIGRATION_5_6 =
+    object : Migration(5, 6) {
+        override fun migrate(connection: SQLiteConnection) {
+            connection.execSQL(
+                "ALTER TABLE `analyses` ADD COLUMN `sampleName` TEXT",
+            )
+        }
+    }

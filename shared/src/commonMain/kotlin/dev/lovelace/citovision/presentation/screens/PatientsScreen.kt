@@ -14,6 +14,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
@@ -32,8 +34,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import citovision.shared.generated.resources.Res
@@ -65,6 +67,7 @@ import dev.lovelace.citovision.presentation.events.PatientsUiEvent
 import dev.lovelace.citovision.presentation.format.formatAnalysisDateTime
 import dev.lovelace.citovision.presentation.state.PatientsUiState
 import dev.lovelace.citovision.presentation.viewmodels.PatientsViewModel
+import dev.lovelace.citovision.ui.theme.LocalAppColors
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -112,7 +115,7 @@ private fun PatientsContent(
 
     uiState.detail?.let { analysis ->
         AnalysisDetailDialog(
-            title = stringResource(Res.string.analysis_card_title),
+            title = analysis.sampleName ?: stringResource(Res.string.analysis_card_title),
             patient = analysis.patient,
             date = analysis.performedAt.formatAnalysisDateTime(),
             priority = analysis.priority,
@@ -180,10 +183,16 @@ private fun SearchInput(
             leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
             singleLine = true,
             shape = RoundedCornerShape(16.dp),
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+            keyboardActions =
+                KeyboardActions(onSearch = { if (isValid) onEvent(PatientsUiEvent.Search) }),
             colors =
                 OutlinedTextFieldDefaults.colors(
-                    unfocusedContainerColor = Color.White,
-                    focusedContainerColor = Color.White,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                    focusedContainerColor = MaterialTheme.colorScheme.surface,
+                    focusedPlaceholderColor = LocalAppColors.current.hint,
+                    unfocusedPlaceholderColor = LocalAppColors.current.hint,
+                    disabledPlaceholderColor = LocalAppColors.current.hint,
                 ),
         )
         Spacer(modifier = Modifier.height(24.dp))
@@ -250,7 +259,7 @@ private fun ResultsView(
         ) {
             items(results) { analysis ->
                 AnalysisCard(
-                    title = title,
+                    title = analysis.sampleName ?: title,
                     date = analysis.performedAt.formatAnalysisDateTime(),
                     patient = analysis.patient,
                     description = analysis.summary,

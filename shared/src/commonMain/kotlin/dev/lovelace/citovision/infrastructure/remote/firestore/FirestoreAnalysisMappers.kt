@@ -22,6 +22,9 @@ internal fun analysisToFirestoreFields(
         put("performedAt", FirestoreValue(integerValue = analysis.performedAt.toEpochMilliseconds().toString()))
         put("summary", FirestoreValue(stringValue = analysis.summary))
         put("priority", FirestoreValue(stringValue = analysis.priority.name))
+        if (analysis.sampleName != null) {
+            put("sampleName", FirestoreValue(stringValue = analysis.sampleName))
+        }
         if (imageUrl != null) {
             put("imageUrl", FirestoreValue(stringValue = imageUrl))
         }
@@ -73,6 +76,7 @@ internal fun FirestoreDocument.toAnalysis(): Analysis {
         imagePath = fields["imageUrl"]?.stringValue,
         cellCounts = cellCounts,
         priority = Priority.fromName(fields["priority"]?.stringValue),
+        sampleName = fields["sampleName"]?.stringValue,
     )
 }
 

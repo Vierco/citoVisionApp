@@ -8,6 +8,7 @@ import dev.lovelace.citovision.application.ports.AuthService
 import dev.lovelace.citovision.application.ports.GoogleSignInLauncher
 import dev.lovelace.citovision.application.ports.ImageDecoder
 import dev.lovelace.citovision.application.ports.OnnxRunner
+import dev.lovelace.citovision.application.ports.UrlOpener
 import dev.lovelace.citovision.infrastructure.auth.AndroidGoogleSignInLauncher
 import dev.lovelace.citovision.infrastructure.auth.FirebaseAuthService
 import dev.lovelace.citovision.infrastructure.auth.GOOGLE_WEB_CLIENT_ID_PROPERTY
@@ -22,6 +23,7 @@ import dev.lovelace.citovision.infrastructure.persistence.database.createAppData
 import dev.lovelace.citovision.infrastructure.persistence.preferences.PREFERENCES_FILE_NAME
 import dev.lovelace.citovision.infrastructure.persistence.preferences.createDataStore
 import dev.lovelace.citovision.infrastructure.platform.ActivityProvider
+import dev.lovelace.citovision.infrastructure.platform.AndroidUrlOpener
 import io.ktor.client.engine.HttpClientEngine
 import io.ktor.client.engine.okhttp.OkHttp
 import org.koin.android.ext.koin.androidContext
@@ -63,4 +65,5 @@ actual val platformModule: Module =
         }
         single<ImageDecoder> { ImageDecoderImpl() }
         single<OnnxRunner> { OnnxRunnerImpl(::loadCellDetectorModel) }
+        single<UrlOpener> { AndroidUrlOpener(androidContext()) }
     }

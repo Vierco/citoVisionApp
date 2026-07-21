@@ -7,11 +7,15 @@ import dev.lovelace.citovision.application.usecases.DeleteRemoteAnalysisUseCase
 import dev.lovelace.citovision.application.usecases.HasActiveSessionUseCase
 import dev.lovelace.citovision.application.usecases.ObserveAnalysesUseCase
 import dev.lovelace.citovision.application.usecases.ObserveCurrentUserUseCase
+import dev.lovelace.citovision.application.usecases.ObserveLastPatientCodeUseCase
 import dev.lovelace.citovision.application.usecases.ObserveSessionStatusUseCase
+import dev.lovelace.citovision.application.usecases.ObserveThemePreferenceUseCase
 import dev.lovelace.citovision.application.usecases.PickImageUseCase
 import dev.lovelace.citovision.application.usecases.ProcessPendingSyncUseCase
+import dev.lovelace.citovision.application.usecases.SaveLastPatientCodeUseCase
 import dev.lovelace.citovision.application.usecases.SearchPatientAnalysesUseCase
 import dev.lovelace.citovision.application.usecases.SendPasswordResetUseCase
+import dev.lovelace.citovision.application.usecases.SetThemePreferenceUseCase
 import dev.lovelace.citovision.application.usecases.SignInAsGuestUseCase
 import dev.lovelace.citovision.application.usecases.SignInWithEmailUseCase
 import dev.lovelace.citovision.application.usecases.SignInWithGoogleUseCase
@@ -43,4 +47,8 @@ val applicationModule =
         factoryOf(::SearchPatientAnalysesUseCase)
         factoryOf(::DeleteRemoteAnalysisUseCase)
         factoryOf(::SubmitFeedbackUseCase)
+        factoryOf(::ObserveThemePreferenceUseCase)
+        factoryOf(::SetThemePreferenceUseCase)
+        factoryOf(::ObserveLastPatientCodeUseCase)
+        factoryOf(::SaveLastPatientCodeUseCase)
     }

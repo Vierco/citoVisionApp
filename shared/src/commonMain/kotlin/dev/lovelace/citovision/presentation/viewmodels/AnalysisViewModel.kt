@@ -10,8 +10,10 @@ import citovision.shared.generated.resources.analysis_error_too_large
 import citovision.shared.generated.resources.analysis_error_unsupported_format
 import dev.lovelace.citovision.application.usecases.AnalysisOutcome
 import dev.lovelace.citovision.application.usecases.AnalyzeSampleUseCase
+import dev.lovelace.citovision.application.usecases.ObserveLastPatientCodeUseCase
 import dev.lovelace.citovision.application.usecases.PickImageUseCase
 import dev.lovelace.citovision.application.usecases.ProcessPendingSyncUseCase
+import dev.lovelace.citovision.application.usecases.SaveLastPatientCodeUseCase
 import dev.lovelace.citovision.application.usecases.SyncAnalysisUseCase
 import dev.lovelace.citovision.application.usecases.SyncOutcome
 import dev.lovelace.citovision.core.result.fold
@@ -23,6 +25,8 @@ import dev.lovelace.citovision.presentation.events.AnalysisUiEvent
 import dev.lovelace.citovision.presentation.state.AnalysisUiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.StringResource
@@ -38,13 +42,19 @@ class AnalysisViewModel(
     private val analyzeSample: AnalyzeSampleUseCase,
     private val syncAnalysis: SyncAnalysisUseCase,
     private val processPendingSync: ProcessPendingSyncUseCase,
+    private val observeLastPatientCode: ObserveLastPatientCodeUseCase,
+    private val saveLastPatientCode: SaveLastPatientCodeUseCase,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(AnalysisUiState())
     val uiState = _uiState.asStateFlow()
 
+    /** Último código de paciente usado, para prerrellenar el diálogo de la siguiente muestra. */
+    private var lastPatientCode: String = ""
+
     init {
         // Reintento al reabrir (RN-8): best-effort, sin molestar con popup si vuelve a fallar.
         viewModelScope.launch { processPendingSync() }
+        observeLastPatientCode().onEach { lastPatientCode = it }.launchIn(viewModelScope)
     }
 
     fun onEvent(event: AnalysisUiEvent) {
@@ -68,7 +78,15 @@ class AnalysisViewModel(
 
     private fun openCodeDialog() {
         if (!_uiState.value.canScan) return
-        _uiState.update { it.copy(codeDialogVisible = true, patientCode = "", isPatientCodeValid = false) }
+        // Prerrelleno con el último código usado (vacío si no hay): se guardan muchas muestras del mismo
+        // paciente seguidas. El usuario puede editarlo.
+        _uiState.update {
+            it.copy(
+                codeDialogVisible = true,
+                patientCode = lastPatientCode,
+                isPatientCodeValid = isValidPatientCode(lastPatientCode),
+            )
+        }
     }
 
     private fun onCodeChanged(code: String) {
@@ -82,6 +100,7 @@ class AnalysisViewModel(
         val state = _uiState.value
         val image = state.selectedImage ?: return
         if (state.isSaving || !state.isPatientCodeValid) return
+        viewModelScope.launch { saveLastPatientCode(state.patientCode) }
         _uiState.update { it.copy(codeDialogVisible = false) }
         runAnalysis(image, state.patientCode)
     }

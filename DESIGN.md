@@ -81,7 +81,9 @@ background: "#FFFFFF" # Fondo principal
 surface: "#FFFFFF"    # Superficie
 onBackground: "#282828" # Texto principal
 onSurface: "#6F6F6F"    # Texto secundario/aclaratorio
+hint: "#9E9E9E"         # Texto suave: placeholders/hints de campos de texto (tercer nivel, más tenue que onSurface)
 ```
+> Nota de accesibilidad: `hint` (#9E9E9E) tiene un contraste ~2.9:1 sobre blanco, por debajo de WCAG AA (4.5:1). Se admite únicamente para el texto de *placeholder* de los campos, que no es contenido esencial (cada campo lleva su label visible encima) y desaparece al escribir. No usar `hint` para contenido de lectura.
 
 ## Semantic Colors
 
@@ -244,7 +246,51 @@ minimumTouchTarget: 48dp
 # Dark Mode
 
 ```yaml
-enabled: false
+enabled: true
+selection: user            # Elegible por el usuario en Ajustes
+options: [light, dark, system]
+default: system            # "Seguir sistema" por defecto
+```
+
+El usuario elige el tema en Ajustes entre tres opciones excluyentes: **Claro**, **Oscuro** o
+**Seguir sistema** (usa `isSystemInDarkTheme()`). La preferencia se persiste (DataStore).
+
+## Paleta oscura
+
+Misma identidad de marca que el tema claro, adaptada a fondo oscuro: fondos/textos invertidos (nunca negro
+puro), colores de marca **desaturados ~18%** para calmarlos sobre oscuro, y `secondaryDark` **invertido** a
+un verde claro (en claro es verde oscuro para texto sobre blanco; en oscuro, verde claro para texto sobre
+fondo oscuro). El fondo lleva un ligero tinte azulado de marca.
+
+```yaml
+# Primary
+primary: "#42A4E0"        # Azul principal (desaturado)
+primaryPressed: "#317DB3" # Azul pulsado
+onPrimary: "#FFFFFF"      # Texto sobre azul
+
+# Secondary
+secondary: "#3EC589"        # Verde (desaturado)
+secondaryPressed: "#2E9366" # Verde pulsado
+secondaryDark: "#64D3A1"    # Verde claro: texto/etiquetas sobre fondo oscuro (ej. prioridad BAJA)
+onSecondary: "#FFFFFF"      # Texto sobre verde
+
+# Tertiary
+tertiary: "#A575D8"   # Morado (desaturado)
+onTertiary: "#FFFFFF" # Texto sobre morado
+
+# Background
+background: "#111318" # Fondo principal (oscuro con tinte azulado)
+surface: "#262A33"    # Superficie (claramente más clara que el fondo, para diferenciar las cards)
+onBackground: "#ECECEC" # Texto principal
+onSurface: "#A8A8A8"    # Texto secundario/aclaratorio
+hint: "#707070"         # Texto suave: placeholders/hints (más tenue que onSurface)
+
+# Semantic
+success: "#3EC589"      # Verde (coincide con secondary)
+warning: "#E59D4B"      # Naranja (desaturado)
+error: "#E14869"        # Rojo principal (desaturado)
+errorPressed: "#B52949" # Rojo pulsado
+info: "#42A4E0"         # Azul (coincide con primary)
 ```
 
 ---

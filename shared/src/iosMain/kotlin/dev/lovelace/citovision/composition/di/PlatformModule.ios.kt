@@ -7,6 +7,7 @@ import dev.lovelace.citovision.application.ports.AuthService
 import dev.lovelace.citovision.application.ports.GoogleSignInLauncher
 import dev.lovelace.citovision.application.ports.ImageDecoder
 import dev.lovelace.citovision.application.ports.OnnxRunner
+import dev.lovelace.citovision.application.ports.UrlOpener
 import dev.lovelace.citovision.infrastructure.auth.StubAuthService
 import dev.lovelace.citovision.infrastructure.auth.StubGoogleSignInLauncher
 import dev.lovelace.citovision.infrastructure.image.OkioAnalysisImageStore
@@ -19,6 +20,7 @@ import dev.lovelace.citovision.infrastructure.persistence.database.appDatabaseBu
 import dev.lovelace.citovision.infrastructure.persistence.database.createAppDatabase
 import dev.lovelace.citovision.infrastructure.persistence.preferences.createDataStore
 import dev.lovelace.citovision.infrastructure.persistence.preferences.dataStorePath
+import dev.lovelace.citovision.infrastructure.platform.IosUrlOpener
 import io.ktor.client.engine.HttpClientEngine
 import io.ktor.client.engine.darwin.Darwin
 import org.koin.core.module.Module
@@ -39,4 +41,5 @@ actual val platformModule: Module =
         single<AnalysisImageStore> { OkioAnalysisImageStore(baseDirectory = analysisImagesPath()) }
         single<ImageDecoder> { ImageDecoderImpl() }
         single<OnnxRunner> { OnnxRunnerImpl(::loadCellDetectorModel) }
+        single<UrlOpener> { IosUrlOpener() }
     }

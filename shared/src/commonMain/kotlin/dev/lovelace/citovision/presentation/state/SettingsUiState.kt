@@ -1,6 +1,7 @@
 package dev.lovelace.citovision.presentation.state
 
 import dev.lovelace.citovision.application.usecases.SessionStatus
+import dev.lovelace.citovision.domain.settings.ThemePreference
 
 /**
  * Estado de la pantalla de Ajustes. El tipo de sesión decide qué opción se muestra:
@@ -20,4 +21,5 @@ data class SettingsUiState(
     val feedbackSending: Boolean = false,
     val feedbackSentVisible: Boolean = false,
     val feedbackErrorVisible: Boolean = false,
+    val themePreference: ThemePreference = ThemePreference.SYSTEM,
 )

@@ -11,14 +11,15 @@
     <string name="login_password_placeholder">••••••••</string>
     <string name="login_forgot_password">Forgot your password?</string>
     <string name="login_button_sign_in">Sign In</string>
-    <string name="login_or_separator">or</string>
+    <string name="login_or_separator">or</string>Actualiz LA rm -rf ~/.citovision
+
     <string name="login_google_button">Login with Google</string>
     <string name="login_guest_button">Continue as guest</string>
     <string name="login_show_password">Show password</string>
     <string name="login_hide_password">Hide password</string>
     <string name="login_error_email_format">Invalid email format</string>
     <string name="login_error_password_chars">Invalid characters</string>
-    <string name="login_error_password_desc">Only uppercase, lowercase letters and numbers are allowed.</string>
+    <string name="login_error_password_desc">Only uppercase, lowercase letters and numbers are allowed.</string>Vale he detactado
     <string name="login_error_title">Sign-in failed</string>
     <string name="login_error_password_length">Password must be at least 6 characters.</string>
     <string name="login_error_invalid_credentials">Incorrect email or password.</string>
@@ -34,7 +35,7 @@
     <string name="common_cancel">Cancel</string>
     <string name="common_close">Close</string>
 
-    <!-- Settings -->
+    <!-- Settings -->Perfect
     <string name="settings_guest">Guest</string>
     <string name="settings_login">Sign in with an account</string>
     <string name="settings_logout">Sign out</string>
@@ -43,6 +44,10 @@
     <string name="settings_section_actions">Actions</string>
     <string name="settings_section_support">Support</string>
     <string name="settings_section_others">Others</string>
+    <string name="settings_theme_title">Theme</string>
+    <string name="settings_theme_light">Light</string>
+    <string name="settings_theme_dark">Dark</string>
+    <string name="settings_theme_system">Follow system</string>
     <string name="settings_clear_analysis">Clear all local analysis</string>
     <string name="settings_clear_confirm_title">Delete all local analyses?</string>
     <string name="settings_clear_confirm_message">All analyses stored on this device will be removed. This action cannot be undone.</string>
@@ -61,9 +66,24 @@
     <string name="settings_license">License</string>
     <string name="settings_version">Version</string>
     <string name="settings_version_value">1.0.0 (Build 1)</string>
-    <string name="license_dialog_pending">License pending. This text will be very long to test scrolling. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</string>
-    <string name="settings_rn3">RN-3</string>
-    <string name="rn3_dialog_pending">RN-3 pending</string>
+    <string name="settings_copyright">2026 - Lovelaced / Sergio Álvarez.</string>
+    <string name="settings_third_party">Third party</string>
+    <string name="third_party_yolo">Ultralytics YOLO — AGPL-3.0</string>
+    <string name="third_party_ultralytics_pending">Ultralytics commercial license pending</string>
+    <string name="third_party_onnx">ONNX Runtime — MIT</string>
+    <string name="third_party_univali">UNIVALI Leukocyte Dataset — CC BY 4.0</string>
+    <string name="third_party_kotlin_compose">Kotlin and Compose — Apache-2.0</string>
+    <string name="third_party_androidx">AndroidX — Apache-2.0</string>
+    <string name="third_party_ktor">Ktor — Apache-2.0</string>
+    <string name="third_party_koin">Koin — Apache-2.0</string>
+    <string name="third_party_coil">Coil — Apache-2.0</string>
+    <string name="third_party_napier">Napier — Apache-2.0</string>
+    <string name="third_party_gitlive">GitLive Firebase Kotlin SDK — Apache-2.0</string>
+    <string name="third_party_coroutines_datetime">Kotlinx Coroutines and DateTime — Apache-2.0</string>
+    <string name="third_party_filekit">FileKit — MIT</string>
+    <string name="license_body">CitoVision\n\nCopyright © 2026 Sergio Álvarez.\nAll rights reserved.\n\nCitoVision is proprietary software. If you are interested in reusing, modifying or performing any action related to the original code, please contact us.\n\nCitoVision is an academic and experimental prototype. It is not clinically validated, is not a medical device and must not be used to issue diagnoses or to replace the judgement of healthcare professionals.</string>
+    <string name="license_univali_title">UNIVALI Attribution</string>
+    <string name="license_univali_body">CitoVision uses the UNIVALI Leukocyte Dataset, available on Zenodo under the Creative Commons Attribution 4.0 International (CC BY 4.0) license.\n\nSource:\nhttps://zenodo.org/records/17743609\n\nThe dataset was reorganized through a stratified split and used to fine-tune a segmentation model. The dataset authors do not endorse or certify CitoVision.</string>
     <string name="common_accept">Accept</string>
 
     <!-- Main Navigation -->
