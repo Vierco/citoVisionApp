@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">citoVision</string>
+    <string name="app_beta">beta</string>
     <string name="splash_initializing">Initializing system…</string>
 
     <!-- Login -->
@@ -11,7 +12,7 @@
     <string name="login_password_placeholder">••••••••</string>
     <string name="login_forgot_password">Forgot your password?</string>
     <string name="login_button_sign_in">Sign In</string>
-    <string name="login_or_separator">or</string>Actualiz LA rm -rf ~/.citovision
+    <string name="login_or_separator">or</string>
 
     <string name="login_google_button">Login with Google</string>
     <string name="login_guest_button">Continue as guest</string>
@@ -19,7 +20,7 @@
     <string name="login_hide_password">Hide password</string>
     <string name="login_error_email_format">Invalid email format</string>
     <string name="login_error_password_chars">Invalid characters</string>
-    <string name="login_error_password_desc">Only uppercase, lowercase letters and numbers are allowed.</string>Vale he detactado
+    <string name="login_error_password_desc">Only uppercase, lowercase letters and numbers are allowed.</string>
     <string name="login_error_title">Sign-in failed</string>
     <string name="login_error_password_length">Password must be at least 6 characters.</string>
     <string name="login_error_invalid_credentials">Incorrect email or password.</string>
@@ -35,7 +36,7 @@
     <string name="common_cancel">Cancel</string>
     <string name="common_close">Close</string>
 
-    <!-- Settings -->Perfect
+    <!-- Settings -->
     <string name="settings_guest">Guest</string>
     <string name="settings_login">Sign in with an account</string>
     <string name="settings_logout">Sign out</string>
@@ -65,7 +66,7 @@
     <string name="feedback_error_message">Check your connection and try again.</string>
     <string name="settings_license">License</string>
     <string name="settings_version">Version</string>
-    <string name="settings_version_value">1.0.0 (Build 1)</string>
+    <string name="settings_version_value">1.0.0-beta (Build 1)</string>
     <string name="settings_copyright">2026 - Lovelaced / Sergio Álvarez.</string>
     <string name="settings_third_party">Third party</string>
     <string name="third_party_yolo">Ultralytics YOLO — AGPL-3.0</string>

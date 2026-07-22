@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">citoVision</string>
+    <string name="app_beta">beta</string>
     <string name="splash_initializing">Iniciando sistema…</string>
 
     <!-- Login -->
@@ -64,7 +65,7 @@
     <string name="feedback_error_message">Revisa tu conexión e inténtalo de nuevo.</string>
     <string name="settings_license">Licencia</string>
     <string name="settings_version">Versión</string>
-    <string name="settings_version_value">1.0.0 (Build 1)</string>
+    <string name="settings_version_value">1.0.0-beta (Build 1)</string>
     <string name="settings_copyright">2026 - Lovelaced / Sergio Álvarez.</string>
     <string name="settings_third_party">Third party</string>
     <string name="third_party_yolo">Ultralytics YOLO — AGPL-3.0</string>

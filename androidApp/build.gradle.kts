@@ -1,4 +1,5 @@
 import io.gitlab.arturbosch.detekt.Detekt
+import java.util.Properties
 
 plugins {
     alias(libs.plugins.android.application)
@@ -28,6 +29,18 @@ val firebaseWebApiKey: String =
         }.orElse(providers.environmentVariable("FIREBASE_WEB_API_KEY"))
         .getOrElse("")
 
+// Credenciales de firma de release. Viven en keystore.properties (raíz del repo, NO versionado). Si el
+// fichero no está (CI, checkout limpio), la firma no se configura y las builds debug siguen funcionando;
+// solo assembleRelease/bundleRelease la necesitan. Nunca se hardcodean contraseñas ni rutas en el repo.
+val keystorePropertiesFile = rootProject.file("keystore.properties")
+val keystoreProperties =
+    Properties().apply {
+        if (keystorePropertiesFile.exists()) {
+            keystorePropertiesFile.inputStream().use { load(it) }
+        }
+    }
+val hasReleaseSigning = keystorePropertiesFile.exists()
+
 android {
     namespace = "dev.lovelace.citovision"
     compileSdk {
@@ -42,17 +55,34 @@ android {
         minSdk = 27
         targetSdk = 36
         versionCode = 1
-        versionName = "1.0"
+        versionName = "1.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         buildConfigField("String", "FIREBASE_WEB_API_KEY", "\"$firebaseWebApiKey\"")
     }
 
+    signingConfigs {
+        // Firma de release leída de keystore.properties. Si el fichero no está, no se crea la config y las
+        // builds debug siguen funcionando; solo assembleRelease/bundleRelease la necesitan.
+        if (hasReleaseSigning) {
+            create("release") {
+                storeFile = file(keystoreProperties.getProperty("storeFile"))
+                storePassword = keystoreProperties.getProperty("storePassword")
+                keyAlias = keystoreProperties.getProperty("keyAlias")
+                keyPassword = keystoreProperties.getProperty("keyPassword")
+            }
+        }
+    }
+
     buildTypes {
         release {
             optimization {
                 enable = false
+            }
+            // Sin keystore.properties (CI, checkout limpio) el release queda sin firmar a propósito.
+            if (hasReleaseSigning) {
+                signingConfig = signingConfigs.getByName("release")
             }
         }
     }

@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -16,13 +17,18 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import citovision.shared.generated.resources.Res
+import citovision.shared.generated.resources.app_beta
 import citovision.shared.generated.resources.app_name
 import citovision.shared.generated.resources.splash_initializing
 import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.ui.tooling.preview.Preview
+import kotlin.math.roundToInt
 
+@Preview
 @Composable
 fun SplashScreen() {
     val backgroundColor = MaterialTheme.colorScheme.background
@@ -77,17 +83,31 @@ fun SplashScreen() {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            // Nombre de la app en color terciario, como en Login pero algo mayor (DESIGN.md).
-            Text(
-                text = stringResource(Res.string.app_name),
-                style =
-                    MaterialTheme.typography.displayLarge.copy(
-                        fontSize = 88.sp,
-                        lineHeight = 80.sp,
-                    ),
-                color = MaterialTheme.colorScheme.tertiary,
-                fontWeight = FontWeight.Bold,
-            )
+            // Nombre de la app en color terciario, como en Login pero algo mayor (DESIGN.md). La etiqueta
+            // "beta" cuelga del borde derecho del wordmark: el Column con alineación End ajusta su ancho al
+            // del wordmark, así que "beta" queda pegada a la derecha de "citoVision".
+            Column(horizontalAlignment = Alignment.End) {
+                Text(
+                    text = stringResource(Res.string.app_name),
+                    style =
+                        MaterialTheme.typography.displayLarge.copy(
+                            fontSize = 88.sp,
+                            lineHeight = 88.sp,
+                        ),
+                    color = MaterialTheme.colorScheme.tertiary,
+                    fontWeight = FontWeight.Bold,
+                )
+                Text(
+                    text = stringResource(Res.string.app_beta),
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    // La fuente Dongle declara un descendente enorme bajo "citoVision" que la API común no puede
+                    // recortar (no hay includeFontPadding en commonMain y el trim de lineHeight no surte efecto
+                    // con esta fuente). Se sube "beta" ese descendente, en sp para que escale también con el
+                    // tamaño de fuente del sistema (el lambda de offset resuelve sp a px con densidad y font-scale).
+                    modifier = Modifier.offset { IntOffset(x = 0, y = -(57.sp).toPx().roundToInt()) },
+                )
+            }
             Spacer(modifier = Modifier.height(24.dp))
             Text(
                 text = stringResource(Res.string.splash_initializing),
