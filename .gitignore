@@ -16,3 +16,7 @@ local.properties
 .idea/git_toolbox_prj.xml
 *.class
 *.kotlin_module
+*.jks
+*.keystore
+keystore.properties
+
