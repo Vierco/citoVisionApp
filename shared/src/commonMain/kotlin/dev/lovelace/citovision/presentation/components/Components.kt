@@ -1,5 +1,6 @@
 package dev.lovelace.citovision.presentation.components
 
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -8,6 +9,7 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
@@ -21,27 +23,33 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.KeyboardDoubleArrowDown
 import androidx.compose.material.icons.filled.KeyboardDoubleArrowUp
 import androidx.compose.material.icons.filled.Remove
+import androidx.compose.material.icons.filled.ZoomIn
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -58,8 +66,11 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import citovision.shared.generated.resources.Res
+import citovision.shared.generated.resources.analysis_image_desc
+import citovision.shared.generated.resources.analysis_image_zoom
 import citovision.shared.generated.resources.analysis_non_diagnostic_notice
 import citovision.shared.generated.resources.card_metadata
 import citovision.shared.generated.resources.card_view_detail
@@ -92,10 +103,12 @@ fun AnalysisDetailDialog(
     title: String,
     patient: String,
     date: String,
+    imagePath: String?,
     priority: Priority,
     cellCounts: List<CellCount>,
     onDismissRequest: () -> Unit,
 ) {
+    var showFullImage by remember { mutableStateOf(false) }
     AlertDialog(
         onDismissRequest = onDismissRequest,
         // Se libera el ancho por defecto para poder agrandar el diálogo (hay más datos que mostrar).
@@ -137,8 +150,20 @@ fun AnalysisDetailDialog(
                         .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                LabelledValue(stringResource(Res.string.dialog_patient_label), patient)
-                LabelledValue(stringResource(Res.string.dialog_date_label), date)
+                // Paciente y fecha a la izquierda; la miniatura de la muestra a la derecha (pulsable para
+                // verla en grande). Si no hay imagen, la columna ocupa todo el ancho.
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                    ) {
+                        LabelledValue(stringResource(Res.string.dialog_patient_label), patient)
+                        LabelledValue(stringResource(Res.string.dialog_date_label), date)
+                    }
+                    if (imagePath != null) {
+                        DetailImageThumbnail(imagePath = imagePath, onClick = { showFullImage = true })
+                    }
+                }
 
                 Column {
                     SectionLabel(stringResource(Res.string.dialog_priority_label))
@@ -165,6 +190,95 @@ fun AnalysisDetailDialog(
         // Algo de transparencia en el fondo del diálogo (se intuye el contenido atenuado detrás).
         containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.90f),
     )
+
+    if (showFullImage && imagePath != null) {
+        FullScreenImageDialog(imagePath = imagePath, onDismiss = { showFullImage = false })
+    }
+}
+
+/**
+ * Miniatura de la imagen de la muestra en el detalle, con un badge de lupa abajo a la derecha. Toda la
+ * miniatura es pulsable para abrir el visor a pantalla completa.
+ */
+@Composable
+private fun DetailImageThumbnail(
+    imagePath: String,
+    onClick: () -> Unit,
+) {
+    Box(
+        modifier =
+            Modifier
+                .size(width = 132.dp, height = 100.dp)
+                .clip(RoundedCornerShape(16.dp))
+                .clickable(onClick = onClick),
+    ) {
+        AnalysisImage(
+            imagePath = imagePath,
+            contentDescription = stringResource(Res.string.analysis_image_desc),
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.fillMaxSize(),
+        )
+        Box(
+            modifier =
+                Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(6.dp)
+                    .size(28.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.85f)),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                imageVector = Icons.Filled.ZoomIn,
+                contentDescription = stringResource(Res.string.analysis_image_zoom),
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(18.dp),
+            )
+        }
+    }
+}
+
+/** Visor de la imagen de la muestra a pantalla completa; botón de cerrar arriba a la izquierda. */
+@Composable
+private fun FullScreenImageDialog(
+    imagePath: String,
+    onDismiss: () -> Unit,
+) {
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false),
+    ) {
+        Box(
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.92f)),
+        ) {
+            AnalysisImage(
+                imagePath = imagePath,
+                contentDescription = stringResource(Res.string.analysis_image_desc),
+                contentScale = ContentScale.Fit,
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .padding(16.dp),
+            )
+            IconButton(
+                onClick = onDismiss,
+                modifier =
+                    Modifier
+                        .align(Alignment.TopStart)
+                        .statusBarsPadding()
+                        .padding(8.dp),
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Close,
+                    contentDescription = stringResource(Res.string.common_close),
+                    tint = Color.White,
+                )
+            }
+        }
+    }
 }
 
 @Composable
@@ -330,9 +444,15 @@ private fun NonDiagnosticNotice() {
     )
 }
 
+/** Pulsos y duración del destello del borde de una card recién creada. DESIGN.md no define tokens de motion. */
+private const val HIGHLIGHT_PULSES = 2
+private const val HIGHLIGHT_PULSE_MILLIS = 320
+
 /**
  * Card de un análisis del historial. [onLongClick] ofrece el borrado (SPEC-0004 RF-5).
  * Si [imagePath] es nulo o el fichero no existe, se muestra un placeholder gris (RN-5).
+ * Si [highlight] es `true`, el borde destella para señalar una card recién creada y avisa con
+ * [onHighlightFinished] al terminar (para que el llamante marque el destello como consumido).
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -346,12 +466,31 @@ fun AnalysisCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     onLongClick: (() -> Unit)? = null,
+    highlight: Boolean = false,
+    onHighlightFinished: () -> Unit = {},
 ) {
+    // Destello del borde: un par de pulsos suaves en color terciario (el outline de card de DESIGN.md)
+    // que se desvanecen. Sutil y calmado (DESIGN.md), pero perceptible. Termina solo.
+    val highlightAlpha = remember { Animatable(0f) }
+    val highlightColor = MaterialTheme.colorScheme.tertiary
+    LaunchedEffect(highlight) {
+        if (highlight) {
+            repeat(HIGHLIGHT_PULSES) {
+                highlightAlpha.animateTo(1f, animationSpec = tween(durationMillis = HIGHLIGHT_PULSE_MILLIS))
+                highlightAlpha.animateTo(0f, animationSpec = tween(durationMillis = HIGHLIGHT_PULSE_MILLIS))
+            }
+            onHighlightFinished()
+        }
+    }
     Card(
         modifier =
             modifier
                 .fillMaxWidth()
-                .combinedClickable(onClick = onClick, onLongClick = onLongClick),
+                .border(
+                    width = 3.dp,
+                    color = highlightColor.copy(alpha = highlightAlpha.value),
+                    shape = RoundedCornerShape(16.dp),
+                ).combinedClickable(onClick = onClick, onLongClick = onLongClick),
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 12.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
@@ -431,18 +570,35 @@ private fun AnalysisCardImage(
     if (imagePath == null) {
         ImageFallback(modifier = imageModifier)
     } else {
-        // Local (SPEC-0004) = ruta de fichero → file://; remoto (SPEC-0005) = URL de descarga de Storage.
-        val model = if (imagePath.startsWith("http")) imagePath else "file://$imagePath"
-        SubcomposeAsyncImage(
-            model = model,
+        AnalysisImage(
+            imagePath = imagePath,
             contentDescription = contentDescription,
-            modifier = imageModifier,
             contentScale = ContentScale.Crop,
-            // Mientras la imagen no está en caché (típico en remoto), se muestra un skeleton con shimmer.
-            loading = { ShimmerBox(modifier = Modifier.fillMaxSize()) },
-            error = { ImageFallback(modifier = Modifier.fillMaxSize()) },
+            modifier = imageModifier,
         )
     }
+}
+
+/**
+ * Carga la imagen de una muestra con Coil: local (SPEC-0004) = ruta de fichero → `file://`; remoto
+ * (SPEC-0005) = URL de descarga de Storage. Muestra shimmer al cargar y un placeholder gris si falla (RN-5).
+ */
+@Composable
+private fun AnalysisImage(
+    imagePath: String,
+    contentDescription: String,
+    contentScale: ContentScale,
+    modifier: Modifier = Modifier,
+) {
+    val model = if (imagePath.startsWith("http")) imagePath else "file://$imagePath"
+    SubcomposeAsyncImage(
+        model = model,
+        contentDescription = contentDescription,
+        modifier = modifier,
+        contentScale = contentScale,
+        loading = { ShimmerBox(modifier = Modifier.fillMaxSize()) },
+        error = { ImageFallback(modifier = Modifier.fillMaxSize()) },
+    )
 }
 
 /** Placeholder gris para imagen ausente o fallida (RN-5). */

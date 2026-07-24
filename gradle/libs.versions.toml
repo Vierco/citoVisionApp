@@ -38,6 +38,9 @@ coil = "3.3.0"
 room = "2.8.4"
 androidx-sqlite = "2.6.2"
 ksp = "2.2.10-2.0.2"
+# Cobertura de tests (TESTING.md §2). Kover es el oficial de JetBrains y entiende KMP; solo instrumenta los
+# targets JVM (Android + Desktop), así que los tests de iOS no cuentan en el informe.
+kover = "0.9.9"
 kotlinx-datetime = "0.7.1"
 # Inferencia on-device (SPEC-0006 / ADR-0003). Java/JNI puro (sin metadata Kotlin → sin límite de compilador).
 # `onnxruntime-android` (AAR) para Android; `onnxruntime` (JVM, con nativos win/linux/macOS) para Desktop.
@@ -114,3 +117,4 @@ google-services = { id = "com.google.gms.google-services", version.ref = "google
 mokkery = { id = "dev.mokkery", version.ref = "mokkery" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 room = { id = "androidx.room", version.ref = "room" }
+kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover" }

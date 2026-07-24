@@ -4,9 +4,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.lovelace.citovision.application.ports.UrlOpener
 import dev.lovelace.citovision.application.usecases.DeleteAllAnalysesUseCase
+import dev.lovelace.citovision.application.usecases.FeedbackResult
 import dev.lovelace.citovision.application.usecases.ObserveCurrentUserUseCase
 import dev.lovelace.citovision.application.usecases.ObserveSessionStatusUseCase
 import dev.lovelace.citovision.application.usecases.ObserveThemePreferenceUseCase
+import dev.lovelace.citovision.application.usecases.SessionStatus
 import dev.lovelace.citovision.application.usecases.SetThemePreferenceUseCase
 import dev.lovelace.citovision.application.usecases.SignOutUseCase
 import dev.lovelace.citovision.application.usecases.SubmitFeedbackUseCase
@@ -59,10 +61,14 @@ class SettingsViewModel(
                 feedbackDialogVisible = feedback.visible,
                 feedbackEmail = feedback.email,
                 feedbackMessage = feedback.message,
-                isFeedbackValid = isValidEmail(feedback.email) && feedback.message.isNotBlank(),
+                isFeedbackValid =
+                    isValidEmail(feedback.email) &&
+                        feedback.message.isNotBlank() &&
+                        status == SessionStatus.ACCOUNT,
                 feedbackSending = feedback.sending,
                 feedbackSentVisible = feedback.sentVisible,
                 feedbackErrorVisible = feedback.errorVisible,
+                feedbackRequiresAccount = status != SessionStatus.ACCOUNT || feedback.requiresAccountVisible,
                 themePreference = theme,
             )
         }.stateIn(
@@ -107,14 +113,16 @@ class SettingsViewModel(
 
             SettingsUiEvent.SubmitFeedback ->
                 viewModelScope.launch {
-                    feedbackForm.update { it.copy(sending = true, errorVisible = false) }
+                    feedbackForm.update {
+                        it.copy(sending = true, errorVisible = false, requiresAccountVisible = false)
+                    }
                     val form = feedbackForm.value
-                    val sent = submitFeedback(form.email, form.message)
                     feedbackForm.value =
-                        if (sent) {
-                            FeedbackForm(sentVisible = true)
-                        } else {
-                            feedbackForm.value.copy(sending = false, errorVisible = true)
+                        when (submitFeedback(form.email, form.message)) {
+                            FeedbackResult.SENT -> FeedbackForm(sentVisible = true)
+                            FeedbackResult.REQUIRES_ACCOUNT ->
+                                form.copy(sending = false, requiresAccountVisible = true)
+                            FeedbackResult.ERROR -> form.copy(sending = false, errorVisible = true)
                         }
                 }
 
@@ -147,6 +155,7 @@ class SettingsViewModel(
         val sending: Boolean = false,
         val sentVisible: Boolean = false,
         val errorVisible: Boolean = false,
+        val requiresAccountVisible: Boolean = false,
     )
 
     private companion object {

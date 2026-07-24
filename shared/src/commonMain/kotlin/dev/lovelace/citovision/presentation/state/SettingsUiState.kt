@@ -21,5 +21,7 @@ data class SettingsUiState(
     val feedbackSending: Boolean = false,
     val feedbackSentVisible: Boolean = false,
     val feedbackErrorVisible: Boolean = false,
+    /** El feedback se guarda en la base remota y esta solo admite escritura con cuenta iniciada. */
+    val feedbackRequiresAccount: Boolean = false,
     val themePreference: ThemePreference = ThemePreference.SYSTEM,
 )

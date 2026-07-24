@@ -4,6 +4,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import dev.lovelace.citovision.application.ports.AnalysisImageStore
 import dev.lovelace.citovision.application.ports.AuthService
+import dev.lovelace.citovision.application.ports.AuthTokenProvider
 import dev.lovelace.citovision.application.ports.GoogleSignInLauncher
 import dev.lovelace.citovision.application.ports.ImageDecoder
 import dev.lovelace.citovision.application.ports.OnnxRunner
@@ -28,6 +29,7 @@ import io.ktor.client.engine.okhttp.OkHttp
 import org.koin.core.module.Module
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.bind
+import org.koin.dsl.binds
 import org.koin.dsl.module
 
 actual val platformModule: Module =
@@ -35,7 +37,11 @@ actual val platformModule: Module =
         single {
             IdentityToolkitAuthDataSource(client = get(), apiKey = getProperty(FIREBASE_WEB_API_KEY_PROPERTY, ""))
         }
-        single<AuthService> { DesktopFirebaseAuthService(remote = get()) }
+        // Misma instancia como puerto de sesión y como proveedor de token: los tokens del login viven en
+        // memoria dentro de ella (ADR-0002) y desde ahí autorizan las llamadas a Firestore/Storage.
+        single {
+            DesktopFirebaseAuthService(remote = get())
+        }.binds(arrayOf(AuthService::class, AuthTokenProvider::class))
         singleOf(::StubGoogleSignInLauncher) bind GoogleSignInLauncher::class
         single<HttpClientEngine> { OkHttp.create() }
         single<DataStore<Preferences>> { createDataStore { dataStorePath() } }

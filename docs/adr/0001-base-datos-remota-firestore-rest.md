@@ -56,12 +56,12 @@ con **Ktor Client** y una **única implementación en `commonMain`** (no el SDK 
 
 **Negativas / deuda**
 
-- **Autorización en el servidor pendiente.** Durante el desarrollo las reglas de Firestore/Storage serán
-  **públicas** y solo se usarán **datos ficticios** (desviación de SECURITY_MOBILE aceptada explícitamente
-  por el owner, documentada en SPEC-0005). **Antes de la entrega** deben cerrarse a
-  `request.auth != null` + `ownerUid == request.auth.uid` y enviarse el **ID token** en cada petición vía
-  el interceptor de auth. Mientras tanto, "solo cuenta iniciada" y "solo tus pacientes" son garantías de
-  UI, no del servidor.
+- **Autorización en el servidor: resuelta el 24-jul-2026.** Durante el desarrollo las reglas de
+  Firestore/Storage fueron **públicas** y solo con **datos ficticios** (desviación de SECURITY_MOBILE
+  aceptada explícitamente por el owner, documentada en SPEC-0005). Ya están cerradas a
+  `request.auth != null` + `ownerUid == request.auth.uid`, versionadas en el repositorio, y el **ID token**
+  viaja en cada petición vía el cliente Ktor autorizado. Queda asumido que las URL de descarga de Storage
+  llevan *download token* y no pasan por las reglas.
 - **Dependencia de la Fase 2 de auth Desktop** para el `ownerUid` real y el ciclo end-to-end en Desktop.
 - Se pierde la caché offline/realtime del SDK (no necesaria aquí).
 - La API REST de Firestore obliga a mapear el formato de documento (typed values) en los DTOs.

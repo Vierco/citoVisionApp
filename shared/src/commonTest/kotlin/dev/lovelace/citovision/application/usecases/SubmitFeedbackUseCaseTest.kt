@@ -13,9 +13,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFalse
 import kotlin.test.assertNull
-import kotlin.test.assertTrue
 
 class SubmitFeedbackUseCaseTest {
     private val authService = mock<AuthService>()
@@ -39,30 +37,41 @@ class SubmitFeedbackUseCaseTest {
             val remote = RecordingFeedback(Result.Success(Unit))
             val useCase = SubmitFeedbackUseCase(remote, authService)
 
-            assertTrue(useCase(email = "  a@b.com  ", message = "  Hola  "))
+            assertEquals(FeedbackResult.SENT, useCase(email = "  a@b.com  ", message = "  Hola  "))
             assertEquals("u1", remote.last?.ownerUid)
             assertEquals("a@b.com", remote.last?.email)
             assertEquals("Hola", remote.last?.message)
         }
 
     @Test
-    fun `given a guest when submitting then ownerUid is null`() =
+    fun `given a guest when submitting then requires an account and skips the network`() =
         runTest {
             every { authService.currentUser } returns flowOf(AuthUser("guest", null, null, isGuest = true))
             val remote = RecordingFeedback(Result.Success(Unit))
             val useCase = SubmitFeedbackUseCase(remote, authService)
 
-            assertTrue(useCase(email = "a@b.com", message = "Hola"))
-            assertNull(remote.last?.ownerUid)
+            assertEquals(FeedbackResult.REQUIRES_ACCOUNT, useCase(email = "a@b.com", message = "Hola"))
+            assertNull(remote.last)
         }
 
     @Test
-    fun `given a remote failure when submitting then returns false`() =
+    fun `given no session when submitting then requires an account`() =
         runTest {
             every { authService.currentUser } returns flowOf(null)
+            val remote = RecordingFeedback(Result.Success(Unit))
+            val useCase = SubmitFeedbackUseCase(remote, authService)
+
+            assertEquals(FeedbackResult.REQUIRES_ACCOUNT, useCase(email = "a@b.com", message = "Hola"))
+            assertNull(remote.last)
+        }
+
+    @Test
+    fun `given a remote failure when submitting then returns an error`() =
+        runTest {
+            every { authService.currentUser } returns flowOf(AuthUser("u1", "a@b.com", null, isGuest = false))
             val remote = RecordingFeedback(Result.Failure(RemoteFeedbackError.Network))
             val useCase = SubmitFeedbackUseCase(remote, authService)
 
-            assertFalse(useCase(email = "a@b.com", message = "Hola"))
+            assertEquals(FeedbackResult.ERROR, useCase(email = "a@b.com", message = "Hola"))
         }
 }

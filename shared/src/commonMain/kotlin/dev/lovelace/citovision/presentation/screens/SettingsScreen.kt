@@ -91,6 +91,7 @@ import citovision.shared.generated.resources.feedback_error_message
 import citovision.shared.generated.resources.feedback_error_title
 import citovision.shared.generated.resources.feedback_message_label
 import citovision.shared.generated.resources.feedback_message_placeholder
+import citovision.shared.generated.resources.feedback_requires_account
 import citovision.shared.generated.resources.feedback_send
 import citovision.shared.generated.resources.feedback_sent_message
 import citovision.shared.generated.resources.feedback_sent_title
@@ -140,6 +141,7 @@ import citovision.shared.generated.resources.third_party_yolo
 import coil3.compose.AsyncImage
 import dev.lovelace.citovision.application.usecases.SessionStatus
 import dev.lovelace.citovision.domain.settings.ThemePreference
+import dev.lovelace.citovision.presentation.components.dongleIconAlign
 import dev.lovelace.citovision.presentation.events.SettingsUiEvent
 import dev.lovelace.citovision.presentation.state.SettingsUiState
 import dev.lovelace.citovision.ui.theme.LocalAppColors
@@ -633,6 +635,17 @@ private fun FeedbackDialog(
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurface,
                 )
+                // El feedback se guarda en la base remota, que solo acepta escritura con cuenta: al
+                // invitado se le explica por qué "Enviar" está deshabilitado en vez de dejarlo mudo.
+                if (uiState.feedbackRequiresAccount) {
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Text(
+                        text = stringResource(Res.string.feedback_requires_account),
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.error,
+                    )
+                }
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
                     text = stringResource(Res.string.login_email_label),
@@ -1004,7 +1017,7 @@ private fun SettingsItem(
             imageVector = icon,
             contentDescription = null,
             tint = color,
-            modifier = Modifier.size(24.dp),
+            modifier = Modifier.size(24.dp).dongleIconAlign(),
         )
         Spacer(modifier = Modifier.width(16.dp))
         Text(
@@ -1028,7 +1041,7 @@ private fun SettingsVersionItem() {
             imageVector = Icons.Default.Info,
             contentDescription = null,
             tint = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.size(24.dp),
+            modifier = Modifier.size(24.dp).dongleIconAlign(),
         )
         Spacer(modifier = Modifier.width(16.dp))
         Column {

@@ -16,9 +16,19 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import kotlin.time.Clock
+import kotlin.time.Duration.Companion.hours
+import kotlin.time.Instant
 
 class DesktopFirebaseAuthServiceTest {
     private val jsonHeaders = headersOf(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+
+    /** Reloj manipulable para provocar la caducidad del ID token sin esperar. */
+    private class MutableClock(
+        var current: Instant,
+    ) : Clock {
+        override fun now(): Instant = current
+    }
 
     private fun service(
         status: HttpStatusCode,
@@ -27,6 +37,28 @@ class DesktopFirebaseAuthServiceTest {
         val engine = MockEngine { respond(content = body, status = status, headers = jsonHeaders) }
         val remote = IdentityToolkitAuthDataSource(createHttpClient(engine), apiKey = "test-key")
         return DesktopFirebaseAuthService(remote)
+    }
+
+    /**
+     * Servicio cuyo endpoint de refresco responde algo distinto al de login: el `securetoken` es el que
+     * renueva el ID token cuando el del login ha caducado.
+     */
+    private fun serviceWithRefresh(
+        clock: Clock,
+        signInBody: String,
+        refreshStatus: HttpStatusCode,
+        refreshBody: String,
+    ): DesktopFirebaseAuthService {
+        val engine =
+            MockEngine { request ->
+                if (request.url.host == "securetoken.googleapis.com") {
+                    respond(content = refreshBody, status = refreshStatus, headers = jsonHeaders)
+                } else {
+                    respond(content = signInBody, status = HttpStatusCode.OK, headers = jsonHeaders)
+                }
+            }
+        val remote = IdentityToolkitAuthDataSource(createHttpClient(engine), apiKey = "test-key")
+        return DesktopFirebaseAuthService(remote, clock)
     }
 
     @Test
@@ -94,6 +126,68 @@ class DesktopFirebaseAuthServiceTest {
 
             service.signOut()
 
+            assertNull(service.currentUser.first())
+        }
+
+    @Test
+    fun `given no session when asking for the id token then returns null`() =
+        runTest {
+            val service = service(HttpStatusCode.OK, "{}")
+
+            assertNull(service.currentIdToken())
+            service.signInAsGuest()
+            assertNull(service.currentIdToken())
+        }
+
+    @Test
+    fun `given a fresh session when asking for the id token then returns the one from the login`() =
+        runTest {
+            val service =
+                service(
+                    HttpStatusCode.OK,
+                    """{"idToken":"id-1","refreshToken":"rt","expiresIn":"3600","localId":"uid-1"}""",
+                )
+            service.signInWithEmail("a@b.com", "secret")
+
+            assertEquals("id-1", service.currentIdToken())
+        }
+
+    @Test
+    fun `given an expired token when asking for the id token then renews it`() =
+        runTest {
+            val clock = MutableClock(Instant.fromEpochMilliseconds(0))
+            val service =
+                serviceWithRefresh(
+                    clock = clock,
+                    signInBody = """{"idToken":"id-1","refreshToken":"rt","expiresIn":"3600","localId":"uid-1"}""",
+                    refreshStatus = HttpStatusCode.OK,
+                    refreshBody =
+                        """{"id_token":"id-2","refresh_token":"rt-2","expires_in":"3600","user_id":"uid-1"}""",
+                )
+            service.signInWithEmail("a@b.com", "secret")
+
+            clock.current = clock.current + 2.hours
+
+            assertEquals("id-2", service.currentIdToken())
+            assertEquals("uid-1", service.currentUser.first()?.uid)
+        }
+
+    @Test
+    fun `given a rejected refresh token when asking for the id token then ends the session`() =
+        runTest {
+            val clock = MutableClock(Instant.fromEpochMilliseconds(0))
+            val service =
+                serviceWithRefresh(
+                    clock = clock,
+                    signInBody = """{"idToken":"id-1","refreshToken":"rt","expiresIn":"3600","localId":"uid-1"}""",
+                    refreshStatus = HttpStatusCode.BadRequest,
+                    refreshBody = """{"error":{"code":400,"message":"TOKEN_EXPIRED"}}""",
+                )
+            service.signInWithEmail("a@b.com", "secret")
+
+            clock.current = clock.current + 2.hours
+
+            assertNull(service.currentIdToken())
             assertNull(service.currentUser.first())
         }
 }

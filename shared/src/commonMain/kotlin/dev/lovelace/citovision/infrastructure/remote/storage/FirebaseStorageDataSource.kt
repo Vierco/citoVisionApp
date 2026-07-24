@@ -24,8 +24,11 @@ import kotlin.coroutines.cancellation.CancellationException
  * Sube los bytes a `analyses/{ownerUid}/{analysisId}.<ext>` y devuelve la **URL de descarga** (con el
  * token que retorna la subida), que se guarda como `imageUrl` en el documento Firestore.
  *
- * Con reglas públicas (dev) no hace falta token de auth. Al cerrar reglas se añadirá el ID token vía el
- * interceptor. El [bucket] (público, `*.firebasestorage.app`) se inyecta; los DTO no salen de aquí.
+ * El [client] inyectado es el **autorizado**: adjunta el ID token del usuario, que es lo que evalúan las
+ * reglas de Storage sobre el `{ownerUid}` del path. Ojo: la URL de descarga que se devuelve lleva el
+ * *download token* del objeto y da acceso a la imagen sin pasar por las reglas, por lo que solo debe
+ * viajar dentro del documento Firestore del análisis (ya protegido). El [bucket] (público,
+ * `*.firebasestorage.app`) se inyecta; los DTO no salen de aquí.
  */
 class FirebaseStorageDataSource(
     private val client: HttpClient,

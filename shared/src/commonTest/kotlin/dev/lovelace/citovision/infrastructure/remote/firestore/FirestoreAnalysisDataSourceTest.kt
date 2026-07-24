@@ -104,6 +104,29 @@ class FirestoreAnalysisDataSourceTest {
         }
 
     @Test
+    fun `given repeated codes when listing patients then returns them once and sorted`() =
+        runTest {
+            var capturedBody: String? = null
+            val body =
+                """
+                [
+                  {"document":{"name":"projects/p/databases/(default)/documents/analyses/a1","fields":{"patientCode":{"stringValue":"20-26"}}}},
+                  {"document":{"name":"projects/p/databases/(default)/documents/analyses/a2","fields":{"patientCode":{"stringValue":"12-34"}}}},
+                  {"document":{"name":"projects/p/databases/(default)/documents/analyses/a3","fields":{"patientCode":{"stringValue":"20-26"}}}}
+                ]
+                """.trimIndent()
+            val ds = dataSource(HttpStatusCode.OK, body) { capturedBody = it }
+
+            val result = ds.queryPatientCodes("u1")
+
+            assertTrue(result is Result.Success)
+            assertEquals(listOf("12-34", "20-26"), result.value)
+            // Proyección: la consulta pide solo el código, y filtra únicamente por dueño (RN-3).
+            assertTrue(capturedBody.orEmpty().contains("\"select\""))
+            assertFalse(capturedBody.orEmpty().contains("compositeFilter"))
+        }
+
+    @Test
     fun `given a forbidden response when querying then maps to unauthorized`() =
         runTest {
             val ds = dataSource(HttpStatusCode.Forbidden, """{"error":{"code":403,"message":"denied"}}""")

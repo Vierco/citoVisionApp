@@ -23,10 +23,12 @@ import dev.lovelace.citovision.domain.validation.isValidPatientCode
 import dev.lovelace.citovision.domain.validation.sanitizePatientCode
 import dev.lovelace.citovision.presentation.events.AnalysisUiEvent
 import dev.lovelace.citovision.presentation.state.AnalysisUiState
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.StringResource
@@ -47,6 +49,15 @@ class AnalysisViewModel(
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(AnalysisUiState())
     val uiState = _uiState.asStateFlow()
+
+    /**
+     * Evento one-shot que se emite cuando una muestra se guarda Y sincroniza con éxito: lleva el **id** del
+     * análisis para que el Historial espere a que esa card esté en la lista, haga scroll a ella y la
+     * destaque. Ante fallo de sync NO se emite (se muestra el diálogo de reintento y se permanece en
+     * Análisis).
+     */
+    private val _savedEvents = Channel<String>(Channel.BUFFERED)
+    val savedEvents = _savedEvents.receiveAsFlow()
 
     /** Último código de paciente usado, para prerrellenar el diálogo de la siguiente muestra. */
     private var lastPatientCode: String = ""
@@ -128,7 +139,9 @@ class AnalysisViewModel(
                     inferenceErrorVisible = false,
                 )
             }
-            // La imagen permanece seleccionada para poder analizar otra muestra o reintentar (RF-8).
+            // Durante el análisis y ante los desenlaces sin guardado (sin células, error de inferencia o de
+            // guardado) la imagen permanece para reintentar o cambiarla. Solo el éxito completo la limpia y
+            // navega al Historial (onAnalysisSaved, SPEC-0006 RF-5b).
             when (val outcome = analyzeSample(image, patientCode)) {
                 is AnalysisOutcome.Saved -> onAnalysisSaved(outcome.analysisId)
                 AnalysisOutcome.NoCellsDetected ->
@@ -143,12 +156,18 @@ class AnalysisViewModel(
 
     private suspend fun onAnalysisSaved(analysisId: String) {
         val outcome = syncAnalysis(analysisId)
-        _uiState.update {
-            it.copy(
-                isSaving = false,
-                savedConfirmationVisible = outcome != SyncOutcome.Failed,
-                syncErrorVisible = outcome == SyncOutcome.Failed,
-            )
+        if (outcome == SyncOutcome.Failed) {
+            // Guardado en local pero sin subir a la nube: se avisa y se permanece en Análisis para
+            // reintentar, conservando la imagen. La muestra ya está en el Historial local.
+            _uiState.update { it.copy(isSaving = false, syncErrorVisible = true) }
+        } else {
+            // Éxito completo: se limpia la imagen (vuelve al selector) y se emite el evento para navegar
+            // al Historial, donde la nueva card destella. El destello es ahora la confirmación, así que
+            // no se muestra el aviso inline.
+            _uiState.update {
+                it.copy(isSaving = false, selectedImage = null, savedConfirmationVisible = false)
+            }
+            _savedEvents.send(analysisId)
         }
     }
 

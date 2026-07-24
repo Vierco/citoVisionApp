@@ -11,11 +11,33 @@ plugins {
     alias(libs.plugins.mokkery)
     alias(libs.plugins.ksp)
     alias(libs.plugins.room)
+    alias(libs.plugins.kover)
 }
 
 // Esquema versionado de Room, para poder escribir migraciones (SPEC-0004 RNF-9).
 room {
     schemaDirectory("$projectDir/schemas")
+}
+
+// Cobertura de tests (TESTING.md §2). Kover solo instrumenta los targets JVM: mide `commonTest` y los tests
+// de Android/Desktop, NO los de iOS. Se excluye únicamente código generado, que falsearía el porcentaje sin
+// aportar información; la UI Compose SÍ cuenta, así que el número refleja también la deuda de tests de UI.
+kover {
+    reports {
+        filters {
+            excludes {
+                // Recursos y singletons que genera Compose.
+                packages("citovision.shared.generated.resources")
+                classes("*ComposableSingletons*")
+                // Implementaciones de DAO y base de datos generadas por Room.
+                classes("*_Impl")
+                // Serializadores generados por kotlinx.serialization.
+                classes("*\$\$serializer")
+                // Para medir solo la lógica, dejando fuera toda la UI, descomentar:
+                // annotatedBy("androidx.compose.runtime.Composable")
+            }
+        }
+    }
 }
 
 kotlin {

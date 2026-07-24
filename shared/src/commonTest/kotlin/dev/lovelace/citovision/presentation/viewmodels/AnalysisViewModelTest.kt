@@ -14,12 +14,14 @@ import dev.lovelace.citovision.application.usecases.ProcessPendingSyncUseCase
 import dev.lovelace.citovision.application.usecases.SaveLastPatientCodeUseCase
 import dev.lovelace.citovision.application.usecases.SyncAnalysisUseCase
 import dev.lovelace.citovision.core.result.Result
+import dev.lovelace.citovision.domain.entities.AuthUser
 import dev.lovelace.citovision.domain.entities.BoundingBox
 import dev.lovelace.citovision.domain.entities.CellClass
 import dev.lovelace.citovision.domain.entities.Detection
 import dev.lovelace.citovision.domain.entities.SelectedImage
 import dev.lovelace.citovision.domain.errors.ImageError
 import dev.lovelace.citovision.domain.errors.InferenceError
+import dev.lovelace.citovision.domain.errors.RemoteAnalysisError
 import dev.lovelace.citovision.presentation.events.AnalysisUiEvent
 import dev.mokkery.answering.returns
 import dev.mokkery.every
@@ -29,6 +31,8 @@ import dev.mokkery.mock
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -76,6 +80,9 @@ class AnalysisViewModelTest {
 
     private val validImage =
         SelectedImage(bytes = ByteArray(4), fileName = "muestra.png", mimeType = "image/png", sizeBytes = 4)
+
+    private val registeredUser =
+        AuthUser(uid = "user-1", email = "medico@clinica.com", displayName = null, isGuest = false)
 
     @BeforeTest
     fun setUp() {
@@ -214,6 +221,59 @@ class AnalysisViewModelTest {
 
             // Then
             assertTrue(viewModel.uiState.value.inferenceErrorVisible)
+        }
+
+    @Test
+    fun `given a saved and synced sample when confirming scan then clears the image and emits the saved event`() =
+        runTest(dispatcher) {
+            // Given
+            everySuspend { imagePicker.pickImage() } returns Result.Success(validImage)
+            everySuspend { cellDetector.detect(any()) } returns
+                Result.Success(listOf(detection(CellClass.LINFOCITO)))
+            everySuspend { analysisImageStore.save(any(), any()) } returns Result.Success("images/sample.png")
+            everySuspend { analysisRepository.saveAnalysis(any()) } returns Result.Success(Unit)
+            every { authService.currentUser } returns flowOf(registeredUser)
+            everySuspend { remoteAnalysisSync.enqueue(any(), any()) } returns Unit
+            val viewModel = readyToScanViewModel()
+            val savedEvents = mutableListOf<String>()
+            val collector = launch { viewModel.savedEvents.toList(savedEvents) }
+
+            // When
+            viewModel.onEvent(AnalysisUiEvent.ConfirmScan)
+            advanceUntilIdle()
+
+            // Then
+            val state = viewModel.uiState.value
+            assertNull(state.selectedImage)
+            assertFalse(state.isSaving)
+            assertFalse(state.syncErrorVisible)
+            assertEquals(1, savedEvents.size)
+            collector.cancel()
+        }
+
+    @Test
+    fun `given sync fails when confirming scan then keeps the image and shows the sync error`() =
+        runTest(dispatcher) {
+            // Given
+            everySuspend { imagePicker.pickImage() } returns Result.Success(validImage)
+            everySuspend { cellDetector.detect(any()) } returns
+                Result.Success(listOf(detection(CellClass.LINFOCITO)))
+            everySuspend { analysisImageStore.save(any(), any()) } returns Result.Success("images/sample.png")
+            everySuspend { analysisRepository.saveAnalysis(any()) } returns Result.Success(Unit)
+            every { authService.currentUser } returns flowOf(registeredUser)
+            everySuspend { remoteAnalysisSync.enqueue(any(), any()) } returns Unit
+            everySuspend { remoteAnalysisSync.processPending() } returns Result.Failure(RemoteAnalysisError.Network)
+            val viewModel = readyToScanViewModel()
+
+            // When
+            viewModel.onEvent(AnalysisUiEvent.ConfirmScan)
+            advanceUntilIdle()
+
+            // Then
+            val state = viewModel.uiState.value
+            assertEquals(validImage, state.selectedImage)
+            assertTrue(state.syncErrorVisible)
+            assertFalse(state.isSaving)
         }
 
     /** Deja el ViewModel con imagen seleccionada y un código de paciente válido, listo para confirmar. */

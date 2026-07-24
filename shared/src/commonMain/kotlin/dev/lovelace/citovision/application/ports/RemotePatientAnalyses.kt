@@ -14,6 +14,12 @@ interface RemotePatientAnalyses {
         patientCode: String,
     ): Result<List<Analysis>, RemoteAnalysisError>
 
+    /**
+     * Códigos de paciente con análisis del usuario, **sin duplicados y en orden ascendente**, para el
+     * listado seleccionable de la pestaña Pacientes (RF-4b). Acotado al `ownerUid` como el resto (RN-3).
+     */
+    suspend fun queryPatientCodes(ownerUid: String): Result<List<String>, RemoteAnalysisError>
+
     /** Borra el documento remoto del análisis. No afecta a la BD local (RF-9). */
     suspend fun deleteAnalysis(analysisId: String): Result<Unit, RemoteAnalysisError>
 }

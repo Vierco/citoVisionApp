@@ -4,11 +4,21 @@ import dev.lovelace.citovision.domain.entities.Analysis
 
 /** Acciones de la pestaña Pacientes, resueltas en PatientsViewModel.onEvent() (SPEC-0005). */
 sealed interface PatientsUiEvent {
+    /** Texto del filtro del listado de códigos. */
     data class QueryChanged(
         val code: String,
     ) : PatientsUiEvent
 
-    data object Search : PatientsUiEvent
+    /** Carga (o recarga) el listado de códigos de paciente del usuario (RF-4b). */
+    data object LoadCodes : PatientsUiEvent
+
+    /** Selección de un código del listado: único camino a los resultados (RF-4c). */
+    data class SelectCode(
+        val code: String,
+    ) : PatientsUiEvent
+
+    /** Acción "buscar" del teclado sobre el filtro: solo abre paciente si la criba deja uno (RF-4c). */
+    data object SubmitQuery : PatientsUiEvent
 
     data object NewSearch : PatientsUiEvent
 
@@ -31,8 +41,6 @@ sealed interface PatientsUiEvent {
     data object CancelDelete : PatientsUiEvent
 
     data object DismissNoResults : PatientsUiEvent
-
-    data object DismissRequiresAccount : PatientsUiEvent
 
     data object DismissError : PatientsUiEvent
 }

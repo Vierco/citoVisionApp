@@ -213,9 +213,10 @@ class SettingsViewModelTest {
     @Test
     fun `given valid feedback when submitting then it is sent and confirmation is shown`() =
         runTest(dispatcher) {
-            // Given
-            every { authService.currentUser } returns flowOf(null)
-            every { sessionRepository.isGuestSession() } returns flowOf(true)
+            // Given: el envío exige cuenta, porque las reglas remotas solo aceptan escritura autenticada
+            every { authService.currentUser } returns
+                flowOf(AuthUser("u1", "doc@clinica.com", null, isGuest = false))
+            every { sessionRepository.isGuestSession() } returns flowOf(false)
             everySuspend { remoteFeedback.submit(any()) } returns Result.Success(Unit)
             val viewModel = newViewModel()
 
@@ -229,5 +230,25 @@ class SettingsViewModelTest {
             val state = viewModel.uiState.first { it.feedbackSentVisible }
             assertFalse(state.feedbackDialogVisible)
             verifySuspend { remoteFeedback.submit(any()) }
+        }
+
+    @Test
+    fun `given a guest when submitting feedback then it is not sent and the notice is shown`() =
+        runTest(dispatcher) {
+            // Given: sin cuenta no hay ID token, así que el servidor rechazaría la escritura
+            val viewModel = buildViewModel()
+
+            // When
+            viewModel.onEvent(SettingsUiEvent.OpenFeedback)
+            viewModel.onEvent(SettingsUiEvent.FeedbackEmailChanged("doc@clinica.com"))
+            viewModel.onEvent(SettingsUiEvent.FeedbackMessageChanged("Muy buena app"))
+            viewModel.onEvent(SettingsUiEvent.SubmitFeedback)
+            advanceUntilIdle()
+
+            // Then: el envío ni se intenta (el mock de RemoteFeedback no tiene respuesta configurada)
+            val state = viewModel.uiState.first { it.feedbackDialogVisible }
+            assertTrue(state.feedbackRequiresAccount)
+            assertFalse(state.isFeedbackValid)
+            assertFalse(state.feedbackSentVisible)
         }
 }

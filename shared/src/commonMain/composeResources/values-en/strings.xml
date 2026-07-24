@@ -35,6 +35,7 @@
     <string name="reset_sent_desc">If the email is registered, we've sent you a link to reset your password.</string>
     <string name="common_cancel">Cancel</string>
     <string name="common_close">Close</string>
+    <string name="common_retry">Retry</string>
 
     <!-- Settings -->
     <string name="settings_guest">Guest</string>
@@ -62,6 +63,7 @@
     <string name="feedback_send">Send</string>
     <string name="feedback_sent_title">Thank you!</string>
     <string name="feedback_sent_message">We've received your feedback.</string>
+    <string name="feedback_requires_account">You need to sign in with an account to send feedback.</string>
     <string name="feedback_error_title">Couldn't send</string>
     <string name="feedback_error_message">Check your connection and try again.</string>
     <string name="settings_license">License</string>
@@ -107,7 +109,12 @@
     <string name="patients_search_desc_default">Quickly find clinical records and analysis results.</string>
     <string name="patients_close_file">Close record</string>
     <string name="patients_no_results_title">No active results</string>
-    <string name="patients_no_results_desc">Enter the patient code in the search bar to access their analyses.</string>
+    <string name="patients_no_results_desc">This patient no longer has analyses in the remote database.</string>
+    <string name="patients_list_title">Your patients</string>
+    <string name="patients_list_empty">No patients with analyses in the cloud yet.</string>
+    <string name="patients_list_no_matches">No code matches the filter.</string>
+    <string name="patients_list_error">The patient list could not be loaded.</string>
+    <string name="patients_open_code">View analyses for %1$s</string>
     <string name="common_back">Back</string>
     <string name="patients_id_name_label">Patient code</string>
     <string name="patients_search_placeholder">E.g.: 2026-001</string>
@@ -121,6 +128,8 @@
     <string name="analysis_select_image">Select Image</string>
     <string name="analysis_change_image">Change Image</string>
     <string name="analysis_remove_image">Remove image</string>
+    <string name="analysis_image_desc">Sample image</string>
+    <string name="analysis_image_zoom">View enlarged image</string>
     <string name="analysis_supported_formats">Supported formats: JPG, PNG</string>
     <string name="analysis_button_scan">Start Scanner</string>
     <string name="analysis_scan_hint">*Requires loading a valid image to start</string>

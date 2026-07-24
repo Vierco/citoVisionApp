@@ -27,9 +27,12 @@ import kotlin.coroutines.cancellation.CancellationException
  * - Escritura: `PATCH` sobre `analyses/{id}` → upsert idempotente por UUID (RN-6).
  * - Consulta: `:runQuery` filtrando `ownerUid` == y `patientCode` == (ambos *equality*, sin índice
  *   compuesto); el orden descendente por fecha (RN-4) se aplica en cliente.
+ * - Listado de pacientes: `:runQuery` filtrando solo `ownerUid` con **proyección** de `patientCode`
+ *   (RF-4b); los duplicados y el orden se resuelven en cliente.
  *
- * Con reglas públicas (dev) no hace falta token; la `apiKey` (Web API key, pública) identifica el
- * proyecto. Al cerrar reglas se añadirá el ID token vía el interceptor de auth. Los DTO no salen de aquí.
+ * El [client] inyectado es el **autorizado**: adjunta el ID token del usuario, que es lo que evalúan las
+ * reglas (`request.auth.uid == resource.data.ownerUid`). La `apiKey` (Web API key, pública) identifica al
+ * proyecto, no al usuario. Los DTO no salen de aquí.
  */
 class FirestoreAnalysisDataSource(
     private val client: HttpClient,
@@ -70,6 +73,28 @@ class FirestoreAnalysisDataSource(
             Result.Success(analyses)
         }
 
+    override suspend fun queryPatientCodes(ownerUid: String): Result<List<String>, RemoteAnalysisError> =
+        runCatchingFirestore {
+            val items =
+                client
+                    .post(runQueryUrl()) {
+                        parameter("key", apiKey)
+                        contentType(ContentType.Application.Json)
+                        setBody(buildOwnerCodesQuery(ownerUid))
+                    }.body<List<RunQueryResponseItem>>()
+            val codes =
+                items
+                    .mapNotNull {
+                        it.document
+                            ?.fields
+                            ?.get(PATIENT_CODE_FIELD)
+                            ?.stringValue
+                    }.filter { it.isNotBlank() }
+                    .distinct()
+                    .sorted()
+            Result.Success(codes)
+        }
+
     override suspend fun deleteAnalysis(analysisId: String): Result<Unit, RemoteAnalysisError> =
         runCatchingFirestore {
             client.delete(documentUrl(analysisId)) {
@@ -98,25 +123,36 @@ class FirestoreAnalysisDataSource(
                                     op = "AND",
                                     filters =
                                         listOf(
-                                            equalityFilter("ownerUid", ownerUid),
-                                            equalityFilter("patientCode", patientCode),
+                                            FieldFilterWrapper(equalityFilter(OWNER_UID_FIELD, ownerUid)),
+                                            FieldFilterWrapper(equalityFilter(PATIENT_CODE_FIELD, patientCode)),
                                         ),
                                 ),
                         ),
                 ),
         )
 
+    /**
+     * Todos los análisis del usuario proyectando **solo** `patientCode`: la respuesta no arrastra
+     * resúmenes, conteos ni URLs. El `distinct` y el orden se aplican en cliente.
+     */
+    private fun buildOwnerCodesQuery(ownerUid: String): RunQueryRequest =
+        RunQueryRequest(
+            structuredQuery =
+                StructuredQuery(
+                    from = listOf(CollectionSelector(collectionId = COLLECTION)),
+                    where = Filter(fieldFilter = equalityFilter(OWNER_UID_FIELD, ownerUid)),
+                    select = Projection(fields = listOf(FieldReference(fieldPath = PATIENT_CODE_FIELD))),
+                ),
+        )
+
     private fun equalityFilter(
         fieldPath: String,
         value: String,
-    ): FieldFilterWrapper =
-        FieldFilterWrapper(
-            fieldFilter =
-                FieldFilter(
-                    field = FieldReference(fieldPath = fieldPath),
-                    op = "EQUAL",
-                    value = FirestoreValue(stringValue = value),
-                ),
+    ): FieldFilter =
+        FieldFilter(
+            field = FieldReference(fieldPath = fieldPath),
+            op = "EQUAL",
+            value = FirestoreValue(stringValue = value),
         )
 
     private suspend fun <T> runCatchingFirestore(
@@ -149,5 +185,7 @@ class FirestoreAnalysisDataSource(
     private companion object {
         const val DOCUMENTS_BASE = "https://firestore.googleapis.com/v1"
         const val COLLECTION = "analyses"
+        const val OWNER_UID_FIELD = "ownerUid"
+        const val PATIENT_CODE_FIELD = "patientCode"
     }
 }

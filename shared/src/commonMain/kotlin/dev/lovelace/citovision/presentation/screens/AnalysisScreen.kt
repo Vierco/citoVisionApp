@@ -24,7 +24,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddPhotoAlternate
 import androidx.compose.material.icons.filled.FileUpload
-import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -36,6 +35,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -76,17 +76,23 @@ import citovision.shared.generated.resources.analysis_upload_title
 import citovision.shared.generated.resources.common_accept
 import citovision.shared.generated.resources.common_cancel
 import citovision.shared.generated.resources.common_close
+import citovision.shared.generated.resources.scan
 import coil3.compose.rememberAsyncImagePainter
+import dev.lovelace.citovision.presentation.components.dongleIconAlign
 import dev.lovelace.citovision.presentation.events.AnalysisUiEvent
 import dev.lovelace.citovision.presentation.state.AnalysisUiState
 import dev.lovelace.citovision.presentation.viewmodels.AnalysisViewModel
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
-fun AnalysisScreen() {
+fun AnalysisScreen(onAnalysisSaved: (analysisId: String) -> Unit) {
     val viewModel = koinViewModel<AnalysisViewModel>()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    LaunchedEffect(viewModel) {
+        viewModel.savedEvents.collect { analysisId -> onAnalysisSaved(analysisId) }
+    }
     AnalysisContent(uiState = uiState, onEvent = viewModel::onEvent)
 }
 
@@ -237,7 +243,14 @@ private fun AnalysisContent(
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(stringResource(Res.string.analysis_analyzing), style = MaterialTheme.typography.labelLarge)
                 } else {
-                    Icon(Icons.Default.QrCodeScanner, contentDescription = null)
+                    Icon(
+                        painter = painterResource(Res.drawable.scan),
+                        contentDescription = null,
+                        modifier =
+                            Modifier
+                                .size(24.dp)
+                                .dongleIconAlign(),
+                    )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(stringResource(Res.string.analysis_button_scan), style = MaterialTheme.typography.labelLarge)
                 }
@@ -317,7 +330,11 @@ private fun EmptyUploadContent(
             modifier = Modifier.heightIn(min = 56.dp).padding(horizontal = 24.dp),
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Default.AddPhotoAlternate, contentDescription = null)
+                Icon(
+                    Icons.Default.AddPhotoAlternate,
+                    contentDescription = null,
+                    modifier = Modifier.dongleIconAlign(),
+                )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(stringResource(Res.string.analysis_select_image), style = MaterialTheme.typography.labelLarge)
             }

@@ -75,6 +75,7 @@ import citovision.shared.generated.resources.login_secure_access
 import citovision.shared.generated.resources.login_show_password
 import citovision.shared.generated.resources.reset_sent_desc
 import citovision.shared.generated.resources.reset_sent_title
+import dev.lovelace.citovision.presentation.components.dongleIconAlign
 import dev.lovelace.citovision.presentation.events.LoginUiEvent
 import dev.lovelace.citovision.presentation.state.LoginUiState
 import dev.lovelace.citovision.ui.theme.LocalAppColors
@@ -308,6 +309,7 @@ fun LoginScreen(
                                     imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                                     contentDescription = null,
                                     tint = MaterialTheme.colorScheme.onPrimary,
+                                    modifier = Modifier.dongleIconAlign(),
                                 )
                             }
                         }
@@ -354,7 +356,7 @@ fun LoginScreen(
                             Icon(
                                 painter = painterResource(Res.drawable.icons_g_144),
                                 contentDescription = null,
-                                modifier = Modifier.size(24.dp),
+                                modifier = Modifier.size(24.dp).dongleIconAlign(),
                                 tint = Color.Unspecified,
                             )
                             Spacer(modifier = Modifier.width(8.dp))

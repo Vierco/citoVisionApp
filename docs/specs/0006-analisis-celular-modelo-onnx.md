@@ -82,7 +82,14 @@ lugar del mock, con estados de carga y error adecuados y **sin emitir diagnósti
 - **RF-4** Mientras el modelo procesa, la UI muestra un **estado de carga** (la imagen se conserva); la
   inferencia ocurre **fuera del hilo principal**.
 - **RF-5** Al terminar con al menos una célula, se persiste un `Analysis` real (con su `priority`; local
-  SPEC-0004; remoto vía outbox SPEC-0005 si hay cuenta) y aparece en el Historial, exactamente como hoy.
+  SPEC-0004; remoto vía outbox SPEC-0005 si hay cuenta) y aparece en el Historial.
+- **RF-5b** Tras un guardado con éxito —incluida la sincronización remota, o el guardado local silencioso
+  del invitado (SPEC-0005 RN-5)— la pantalla de Análisis **limpia la imagen seleccionada** (vuelve al
+  estado *Vacío* de SPEC-0003), la app **navega automáticamente a la pestaña Historial**, fuerza el scroll
+  **al principio de la lista** y la **nueva card** (siempre la primera) **resalta su borde** con un breve
+  destello para que el usuario la localice. Si la sincronización falla, **no** se navega: se muestra el
+  popup de reintento y se conserva la imagen (SPEC-0005 RN-8). *(Ajuste tras feedback de la 1.0-beta:
+  sustituye a la confirmación inline previa, que dejaba la imagen cargada y no cambiaba de pestaña.)*
 - **RF-6** Si la inferencia **no detecta ninguna célula en ningún nivel**, se **informa** al usuario con un
   popup ("no se han detectado células") y **no se guarda** ningún análisis (RN-7).
 - **RF-6b** Los **posibles hallazgos de baja confianza** se muestran en una **sección aparte** del detalle
@@ -178,8 +185,12 @@ lugar del mock, con estados de carga y error adecuados y **sin emitir diagnósti
 ## Estados de UI
 
 - **Analizando**: indicador de progreso tras "Iniciar Escáner"; imagen conservada; acciones deshabilitadas.
-- **Éxito**: se persiste y navega/actualiza como hoy (card en Historial), mostrando la **prioridad**
-  (indicador baja/media/alta con etiqueta + color) y el **aviso de no-diagnóstico** (RF-3b, RF-3c).
+- **Éxito**: se persiste la card en Historial con su **prioridad** (indicador baja/media/alta con etiqueta
+  + color) y el **aviso de no-diagnóstico** (RF-3b, RF-3c). Con guardado **y** sincronización correctos (o
+  invitado con guardado local silencioso), la zona de carga **limpia la imagen** (vuelve al estado *Vacío*),
+  la app **cambia a la pestaña Historial**, desplaza la lista **al principio** y la nueva card (siempre la
+  primera) **destella** su borde una vez para señalarla (RF-5b). Si la sincronización falla, se permanece en
+  Análisis con el popup de reintento y la imagen conservada (SPEC-0005 RN-8).
 - **Sin células**: popup informativo ("no se han detectado células") con botón de cerrar; **no se guarda**;
   la imagen permanece para reintentar o cambiarla (RF-6, RN-7).
 - **Error de inferencia**: popup con mensaje y botón **"Reintentar"** (+ cerrar); la imagen permanece.
@@ -316,6 +327,9 @@ Fuera de alcance. *(Posible métrica futura: tiempo de inferencia por plataforma
 
 - Cargar una imagen y pulsar "Iniciar Escáner" → estado "Analizando" → aparece en el Historial un `Analysis`
   con `cellCounts` **derivados de detecciones reales** (no mock), un `summary` descriptivo y una `priority`.
+- **Post-guardado (RF-5b)**: tras un escaneo con guardado + sync correctos, la zona de carga queda **vacía**,
+  la app muestra la **pestaña Historial** con la lista **arriba del todo** y la **primera card destella** una
+  vez. Si la sync falla, se permanece en Análisis con el popup de reintento y la imagen sigue cargada.
 - **Priorización correcta**: una muestra con un blasto presente → **ALTA**; con solo un bastonete → **MEDIA**;
   con únicamente linfocitos/neutrófilos segmentados/monocitos/eosinófilos → **BAJA**; artefactos/restos no
   alteran la prioridad (RN-8/RN-9).
@@ -341,7 +355,9 @@ Fuera de alcance. *(Posible métrica futura: tiempo de inferencia por plataforma
   detecciones (RF-2/RF-3); **`PriorityCalculator`** (función pura: cada peso individual, suma de moderados
   que alcanza ALTA, presencia de blasto → ALTA, solo habituales → BAJA, artefactos/restos no puntúan —
   cubre RN-8/RN-9); `AnalysisViewModel`/flujo de escaneo con un `CellDetector` **fake** (éxito → persiste
-  con prioridad; cero células → popup, no persiste; fallo → popup, no persiste).
+  con prioridad, **limpia la imagen y emite el evento de navegación al Historial**; **fallo de sync →
+  conserva la imagen y muestra el error de sync (RF-5b)**; cero células → popup, no persiste; fallo de
+  inferencia → popup, no persiste).
 - **Grafo Koin**: `CellDetector`, `OrtSession`/dispatcher, use cases y ViewModel resuelven
   (`AppModulesGraphTest`).
 - **Integración de plataforma** (manual o instrumentada): inferencia real sobre una imagen de muestra en

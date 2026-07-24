@@ -46,6 +46,8 @@ data class RunQueryRequest(
 data class StructuredQuery(
     val from: List<CollectionSelector>,
     val where: Filter,
+    /** Proyección opcional: limita los campos que devuelve el servidor. Se omite si es null. */
+    val select: Projection? = null,
 )
 
 @Serializable
@@ -53,9 +55,16 @@ data class CollectionSelector(
     val collectionId: String,
 )
 
+/** Filtro de la consulta: o bien uno compuesto (AND de varios) o bien uno simple. Nunca los dos. */
 @Serializable
 data class Filter(
-    val compositeFilter: CompositeFilter,
+    val compositeFilter: CompositeFilter? = null,
+    val fieldFilter: FieldFilter? = null,
+)
+
+@Serializable
+data class Projection(
+    val fields: List<FieldReference>,
 )
 
 @Serializable

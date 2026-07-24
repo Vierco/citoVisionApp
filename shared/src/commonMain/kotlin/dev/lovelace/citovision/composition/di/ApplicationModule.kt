@@ -5,6 +5,7 @@ import dev.lovelace.citovision.application.usecases.DeleteAllAnalysesUseCase
 import dev.lovelace.citovision.application.usecases.DeleteAnalysisUseCase
 import dev.lovelace.citovision.application.usecases.DeleteRemoteAnalysisUseCase
 import dev.lovelace.citovision.application.usecases.HasActiveSessionUseCase
+import dev.lovelace.citovision.application.usecases.ListPatientCodesUseCase
 import dev.lovelace.citovision.application.usecases.ObserveAnalysesUseCase
 import dev.lovelace.citovision.application.usecases.ObserveCurrentUserUseCase
 import dev.lovelace.citovision.application.usecases.ObserveLastPatientCodeUseCase
@@ -45,6 +46,7 @@ val applicationModule =
         factoryOf(::SyncAnalysisUseCase)
         factoryOf(::ProcessPendingSyncUseCase)
         factoryOf(::SearchPatientAnalysesUseCase)
+        factoryOf(::ListPatientCodesUseCase)
         factoryOf(::DeleteRemoteAnalysisUseCase)
         factoryOf(::SubmitFeedbackUseCase)
         factoryOf(::ObserveThemePreferenceUseCase)

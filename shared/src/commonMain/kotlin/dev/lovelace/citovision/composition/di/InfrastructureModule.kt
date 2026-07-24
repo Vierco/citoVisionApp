@@ -12,6 +12,7 @@ import dev.lovelace.citovision.application.ports.ThemeRepository
 import dev.lovelace.citovision.core.coroutines.defaultDispatcher
 import dev.lovelace.citovision.infrastructure.image.FileKitImagePicker
 import dev.lovelace.citovision.infrastructure.inference.CellDetectorImpl
+import dev.lovelace.citovision.infrastructure.network.createAuthorizedHttpClient
 import dev.lovelace.citovision.infrastructure.network.createHttpClient
 import dev.lovelace.citovision.infrastructure.remote.FIREBASE_PROJECT_ID
 import dev.lovelace.citovision.infrastructure.remote.FIREBASE_STORAGE_BUCKET
@@ -26,14 +27,22 @@ import dev.lovelace.citovision.infrastructure.repositories.SessionRepositoryImpl
 import dev.lovelace.citovision.infrastructure.repositories.ThemeRepositoryImpl
 import io.ktor.client.HttpClient
 import org.koin.core.module.dsl.singleOf
+import org.koin.core.qualifier.named
 import org.koin.dsl.bind
 import org.koin.dsl.module
+
+/**
+ * Cliente HTTP que adjunta el ID token del usuario. Se distingue por qualifier del cliente sin
+ * credenciales, que es el que usa el login de Identity Toolkit (donde el token aún no existe).
+ */
+internal val authorizedHttpClient = named("authorized-http-client")
 
 /**
  * Implementaciones de puertos comunes a todas las plataformas. El `DataStore<Preferences>`, el
  * `AnalysisDao`, el `AnalysisImageStore` y el `HttpClientEngine` los aporta cada [platformModule]
  * (rutas / engine son de plataforma). [FileKitImagePicker] es común porque FileKit expone API
- * multiplataforma (SPEC-0003). El `HttpClient` es único (RULES.md §Networking) y toma el engine inyectado.
+ * multiplataforma (SPEC-0003). Los dos `HttpClient` comparten engine y configuración
+ * (RULES.md §Networking); Firestore y Storage usan el autorizado porque sus reglas exigen `request.auth`.
  */
 val infrastructureModule =
     module {
@@ -47,9 +56,10 @@ val infrastructureModule =
             CellDetectorImpl(imageDecoder = get(), onnxRunner = get(), dispatcher = defaultDispatcher)
         }
         single<HttpClient> { createHttpClient(get()) }
+        single<HttpClient>(authorizedHttpClient) { createAuthorizedHttpClient(get(), get()) }
         single {
             FirestoreAnalysisDataSource(
-                client = get(),
+                client = get(authorizedHttpClient),
                 projectId = FIREBASE_PROJECT_ID,
                 apiKey = getProperty(FIREBASE_WEB_API_KEY_PROPERTY, ""),
             )
@@ -57,12 +67,14 @@ val infrastructureModule =
         single<RemotePatientAnalyses> { get<FirestoreAnalysisDataSource>() }
         single<RemoteFeedback> {
             FirestoreFeedbackDataSource(
-                client = get(),
+                client = get(authorizedHttpClient),
                 projectId = FIREBASE_PROJECT_ID,
                 apiKey = getProperty(FIREBASE_WEB_API_KEY_PROPERTY, ""),
             )
         }
-        single { FirebaseStorageDataSource(client = get(), bucket = FIREBASE_STORAGE_BUCKET) }
+        single {
+            FirebaseStorageDataSource(client = get(authorizedHttpClient), bucket = FIREBASE_STORAGE_BUCKET)
+        }
         single<RemoteAnalysisSync> {
             RemoteAnalysisSyncImpl(
                 outboxDao = get(),

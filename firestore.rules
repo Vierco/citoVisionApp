@@ -1,0 +1,47 @@
+rules_version = '2';
+
+// Reglas de Cloud Firestore de citoVision (SPEC-0005, ADR-0001).
+//
+// Principio: el cliente NUNCA es frontera de seguridad (AGENTS.md §11, SECURITY_MOBILE). Lo que la app
+// garantiza por UI ("solo con cuenta", "solo tus pacientes") se impone aquí, sobre el ID token que el
+// cliente adjunta en cada petición REST.
+//
+// Nota sobre consultas: las reglas no filtran resultados, validan la consulta entera. Una `:runQuery`
+// que no acote por `ownerUid` se rechaza completa; las de la app siempre filtran por él.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Análisis: cada documento pertenece a un único usuario, identificado por `ownerUid`.
+    match /analyses/{analysisId} {
+      allow read: if request.auth != null
+                  && resource.data.ownerUid == request.auth.uid;
+
+      // Alta: nadie puede crear un análisis a nombre de otro.
+      allow create: if request.auth != null
+                    && request.resource.data.ownerUid == request.auth.uid;
+
+      // La sincronización reescribe el documento por UUID (upsert idempotente, RN-6): el dueño no
+      // puede cambiar ni antes ni después de la escritura.
+      allow update: if request.auth != null
+                    && resource.data.ownerUid == request.auth.uid
+                    && request.resource.data.ownerUid == request.auth.uid;
+
+      // Borrado remoto (RF-10): solo el dueño del análisis.
+      allow delete: if request.auth != null
+                    && resource.data.ownerUid == request.auth.uid;
+    }
+
+    // Feedback: se envía desde Ajustes y se revisa en la consola. Requiere cuenta iniciada; nadie lee,
+    // modifica ni borra desde la app.
+    match /feedback/{feedbackId} {
+      allow create: if request.auth != null
+                    && request.resource.data.ownerUid == request.auth.uid;
+      allow read, update, delete: if false;
+    }
+
+    // Todo lo demás queda cerrado por defecto.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -5,6 +5,7 @@ import androidx.datastore.preferences.core.Preferences
 import dev.lovelace.citovision.application.ports.AnalysisImageStore
 import dev.lovelace.citovision.application.ports.AnalysisRepository
 import dev.lovelace.citovision.application.ports.AuthService
+import dev.lovelace.citovision.application.ports.AuthTokenProvider
 import dev.lovelace.citovision.application.ports.GoogleSignInLauncher
 import dev.lovelace.citovision.application.ports.ImageDecoder
 import dev.lovelace.citovision.application.ports.OnnxRunner
@@ -29,6 +30,7 @@ import dev.lovelace.citovision.application.usecases.SubmitFeedbackUseCase
 import dev.lovelace.citovision.infrastructure.persistence.database.AnalysisDao
 import dev.lovelace.citovision.infrastructure.persistence.database.RemoteUploadOutboxDao
 import dev.mokkery.mock
+import io.ktor.client.HttpClient
 import io.ktor.client.engine.HttpClientEngine
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
@@ -46,6 +48,7 @@ class AppModulesGraphTest {
     private val testPlatformModule =
         module {
             single<AuthService> { mock() }
+            single<AuthTokenProvider> { mock() }
             single<GoogleSignInLauncher> { mock() }
             single<DataStore<Preferences>> { mock() }
             single<AnalysisDao> { mock() }
@@ -86,6 +89,9 @@ class AppModulesGraphTest {
         assertNotNull(koin.get<SessionRepository>())
         assertNotNull(koin.get<AnalysisRepository>())
         assertNotNull(koin.get<RemoteAnalysisSync>())
+        // Los dos clientes HTTP conviven: el autorizado exige que el AuthTokenProvider esté cableado.
+        assertNotNull(koin.get<HttpClient>())
+        assertNotNull(koin.get<HttpClient>(authorizedHttpClient))
 
         app.close()
     }

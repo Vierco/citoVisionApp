@@ -23,8 +23,9 @@ import kotlin.time.Clock
  * DataSource remoto de feedback contra la API REST de Cloud Firestore. Escribe cada feedback como un
  * documento nuevo en la colección `feedback` mediante `PATCH` con id generado en cliente (upsert).
  *
- * Con reglas públicas (dev) no hace falta token; la `apiKey` (Web API key, pública) identifica el
- * proyecto. Los DTO no salen de aquí.
+ * El [client] inyectado es el **autorizado**: las reglas solo admiten `create` de usuarios con cuenta,
+ * así que el envío exige sesión (lo filtra antes `SubmitFeedbackUseCase`). La `apiKey` (Web API key,
+ * pública) identifica al proyecto, no al usuario. Los DTO no salen de aquí.
  */
 class FirestoreFeedbackDataSource(
     private val client: HttpClient,

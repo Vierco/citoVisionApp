@@ -34,6 +34,7 @@
     <string name="reset_sent_desc">Si el correo está registrado, te enviaremos un enlace para restablecer la contraseña.</string>
     <string name="common_cancel">Cancelar</string>
     <string name="common_close">Cerrar</string>
+    <string name="common_retry">Reintentar</string>
 
     <!-- Settings -->
     <string name="settings_guest">Invitado</string>
@@ -61,6 +62,7 @@
     <string name="feedback_send">Enviar</string>
     <string name="feedback_sent_title">¡Gracias!</string>
     <string name="feedback_sent_message">Hemos recibido tu feedback.</string>
+    <string name="feedback_requires_account">Necesitas iniciar sesión con una cuenta para enviar feedback.</string>
     <string name="feedback_error_title">No se pudo enviar</string>
     <string name="feedback_error_message">Revisa tu conexión e inténtalo de nuevo.</string>
     <string name="settings_license">Licencia</string>
@@ -106,7 +108,12 @@
     <string name="patients_search_desc_default">Encuentre rápidamente historiales clínicos y resultados de análisis.</string>
     <string name="patients_close_file">Cerrar ficha</string>
     <string name="patients_no_results_title">Sin resultados activos</string>
-    <string name="patients_no_results_desc">Introduce el código de paciente en el buscador para acceder a sus análisis.</string>
+    <string name="patients_no_results_desc">Este paciente ya no tiene análisis en la base de datos remota.</string>
+    <string name="patients_list_title">Tus pacientes</string>
+    <string name="patients_list_empty">Todavía no hay pacientes con análisis en la nube.</string>
+    <string name="patients_list_no_matches">Ningún código coincide con el filtro.</string>
+    <string name="patients_list_error">No se pudo cargar la lista de pacientes.</string>
+    <string name="patients_open_code">Ver análisis de %1$s</string>
     <string name="common_back">Volver</string>
     <string name="patients_id_name_label">Código de paciente</string>
     <string name="patients_search_placeholder">Ej: 2026-001</string>
@@ -120,6 +127,8 @@
     <string name="analysis_select_image">Seleccionar Imagen</string>
     <string name="analysis_change_image">Cambiar Imagen</string>
     <string name="analysis_remove_image">Quitar imagen</string>
+    <string name="analysis_image_desc">Imagen de la muestra</string>
+    <string name="analysis_image_zoom">Ver imagen ampliada</string>
     <string name="analysis_supported_formats">Formatos soportados: JPG, PNG</string>
     <string name="analysis_button_scan">Iniciar Escáner</string>
     <string name="analysis_scan_hint">*Requiere cargar una imagen válida para iniciar</string>

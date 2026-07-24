@@ -5,12 +5,14 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.room.Room
 import dev.lovelace.citovision.application.ports.AnalysisImageStore
 import dev.lovelace.citovision.application.ports.AuthService
+import dev.lovelace.citovision.application.ports.AuthTokenProvider
 import dev.lovelace.citovision.application.ports.GoogleSignInLauncher
 import dev.lovelace.citovision.application.ports.ImageDecoder
 import dev.lovelace.citovision.application.ports.OnnxRunner
 import dev.lovelace.citovision.application.ports.UrlOpener
 import dev.lovelace.citovision.infrastructure.auth.AndroidGoogleSignInLauncher
 import dev.lovelace.citovision.infrastructure.auth.FirebaseAuthService
+import dev.lovelace.citovision.infrastructure.auth.FirebaseAuthTokenProvider
 import dev.lovelace.citovision.infrastructure.auth.GOOGLE_WEB_CLIENT_ID_PROPERTY
 import dev.lovelace.citovision.infrastructure.image.ANALYSIS_IMAGES_DIRECTORY
 import dev.lovelace.citovision.infrastructure.image.OkioAnalysisImageStore
@@ -35,6 +37,7 @@ import org.koin.dsl.module
 actual val platformModule: Module =
     module {
         singleOf(::FirebaseAuthService) bind AuthService::class
+        singleOf(::FirebaseAuthTokenProvider) bind AuthTokenProvider::class
         single<HttpClientEngine> { OkHttp.create() }
         single { ActivityProvider() }
         single<GoogleSignInLauncher> {
