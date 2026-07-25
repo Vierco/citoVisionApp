@@ -153,10 +153,11 @@ shared/
 
 Descarga el MVP de citoVision desde el siguiente enlace:
 
-[citoVision 1.0.0-beta](https://drive.google.com/file/d/1Q2V4EaN68BrStUah4szb8TzaS1VN6eNi/view?usp=sharing))** · Android (APK) y macOS (DMG)
+➡️  **[citoVision 1.0.0-beta](https://drive.google.com/file/d/1Q2V4EaN68BrStUah4szb8TzaS1VN6eNi/view?usp=sharing)** · Android (APK) y macOS (DMG)
 
 
 > ⚠️ **Antes de instalar, lee las instrucciones de instalación adjuntadas al ZIP.**
+>
 > Al ser una app fuera de la App Store y Google Play, el sistema puede mostrar un aviso de seguridad la primera
 > vez; las instrucciones explican cómo abrirla con normalidad en cada plataforma.
 
@@ -165,7 +166,7 @@ Descarga el MVP de citoVision desde el siguiente enlace:
 
 Para probar las funciones de detección, conteo, clasificación y priorización de CitoVision, puedes descargar una selección de imágenes microscópicas de muestra desde el siguiente enlace:
 
-➡️ [**Muestras para probar la aplicación CitoVision**](https://drive.google.com/file/d/1OjNSxrATrKuYkSkE31K0ogvtN6eKJwrJ/view?usp=sharing)
+➡️  [**Muestras para probar la aplicación CitoVision**](https://drive.google.com/file/d/1OjNSxrATrKuYkSkE31K0ogvtN6eKJwrJ/view?usp=sharing)
 
 > Estas imágenes se proporcionan exclusivamente con fines académicos y de demostración. Los resultados obtenidos no constituyen un diagnóstico clínico.
 
