@@ -329,11 +329,11 @@ repositorio y es la fuente de verdad del proyecto — este README se ha redactad
 - [x] Entregables firmados: **APK + AAB** (Android) y **DMG** (macOS)
 - [x] Cobertura de tests con Kover
 - [ ] Soporte de iOS
-- [ ] Documentación final del TFM
+- [x] Documentación final del TFM
 
 ## Licencia y atribución
 
-**Desarrollado por [Lovelaced](https://github.com/Vierco/citoVision)** — Sergio Álvarez.
+Desarrollado por **Lovelaced** — Sergio Álvarez.
 
 **citoVision** — Copyright © 2026 Sergio Álvarez. Todos los derechos reservados.
 
