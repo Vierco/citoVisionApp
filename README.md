@@ -70,14 +70,14 @@ el criterio experto; reduce el tiempo hasta que ese criterio se aplica donde má
 > _Sustituir los marcadores por capturas reales de la aplicación._
 
 <p align="center">
-  <img src="external/screenshots/login.png" alt="Login" width="220" hspace="6">
-  <img src="external/screenshots/analisis.png" alt="Análisis" width="220" hspace="6">
-  <img src="external/screenshots/resultado.png" alt="Resultado del análisis" width="220" hspace="6">
+  <img src="external/screenshots/login.jpg" alt="Login" width="220" hspace="6">
+  <img src="external/screenshots/analisis.jpg" alt="Análisis" width="220" hspace="6">
+  <img src="external/screenshots/muestra.jpg" alt="Resultado del análisis" width="220" hspace="6">
 </p>
 <p align="center">
-  <img src="external/screenshots/historial.png" alt="Historial" width="220" hspace="6">
-  <img src="external/screenshots/pacientes.png" alt="Pacientes" width="220" hspace="6">
-  <img src="external/screenshots/ajustes.png" alt="Ajustes" width="220" hspace="6">
+  <img src="external/screenshots/historial.jpg" alt="Historial" width="220" hspace="6">
+  <img src="external/screenshots/pacientes.jpg" alt="Pacientes" width="220" hspace="6">
+  <img src="external/screenshots/settings.jpg" alt="Ajustes" width="220" hspace="6">
 </p>
 
 ## Funcionalidades
