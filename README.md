@@ -143,7 +143,7 @@ shared/
 <p align="center">
   <img src="external/img_002149.jpg" alt="Muestra 1" width="250" hspace="10">
   <img src="external/img_001304.jpg" alt="Muestra 2" width="250" hspace="10">
-  <img src="external/img_001701.jpg" alt="Muestra 3" width="250" hspace="10">
+  <img src="external/img_011642.jpg" alt="Muestra 3" width="250" hspace="10">
 </p>
 
 ## El modelo de IA
