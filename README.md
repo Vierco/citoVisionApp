@@ -141,9 +141,9 @@ shared/
 | Cobertura de tests | Kover |
 
 <p align="center">
-  <img src="external/img_002149.png" alt="Muestra 1" width="250" hspace="10">
-  <img src="external/img_001304.png" alt="Muestra 2" width="250" hspace="10">
-  <img src="external/img_001701.png" alt="Muestra 3" width="250" hspace="10">
+  <img src="external/img_002149.jpg" alt="Muestra 1" width="250" hspace="10">
+  <img src="external/img_001304.jpg" alt="Muestra 2" width="250" hspace="10">
+  <img src="external/img_001701.jpg" alt="Muestra 3" width="250" hspace="10">
 </p>
 
 ## El modelo de IA
