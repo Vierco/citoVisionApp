@@ -28,6 +28,7 @@
 - [Funcionalidades](#funcionalidades)
 - [Arquitectura](#arquitectura)
 - [Tecnologías](#tecnologías)
+- [Para probar citoVision](#Para-probar-CitoVision)
 - [El modelo de IA](#el-modelo-de-ia)
 - [Datos: local y remoto](#datos-local-y-remoto)
 - [Seguridad y privacidad](#seguridad-y-privacidad)
@@ -144,6 +145,14 @@ shared/
   <img src="external/img_001304.jpg" alt="Muestra 2" width="250" hspace="10">
   <img src="external/img_011642.jpg" alt="Muestra 3" width="250" hspace="10">
 </p>
+
+## Para probar CitoVision
+
+Para probar las funciones de detección, conteo, clasificación y priorización de CitoVision, puedes descargar una selección de imágenes microscópicas de muestra desde el siguiente enlace:
+
+➡️ [**Muestras para probar la aplicación CitoVision**](https://drive.google.com/file/d/1OjNSxrATrKuYkSkE31K0ogvtN6eKJwrJ/view?usp=sharing)
+
+> Estas imágenes se proporcionan exclusivamente con fines académicos y de demostración. Los resultados obtenidos no constituyen un diagnóstico clínico.
 
 ## El modelo de IA
 
