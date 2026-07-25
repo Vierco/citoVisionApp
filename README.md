@@ -28,7 +28,8 @@
 - [Funcionalidades](#funcionalidades)
 - [Arquitectura](#arquitectura)
 - [Tecnologías](#tecnologías)
-- [Para probar citoVision](#Para-probar-CitoVision)
+- [Descargar citoVision](#Descargar-citoVision)
+- [Para probar citoVision](#Para-probar-citoVision)
 - [El modelo de IA](#el-modelo-de-ia)
 - [Datos: local y remoto](#datos-local-y-remoto)
 - [Seguridad y privacidad](#seguridad-y-privacidad)
@@ -146,7 +147,16 @@ shared/
   <img src="external/img_011642.jpg" alt="Muestra 3" width="250" hspace="10">
 </p>
 
-## Para probar CitoVision
+** Descarga el MVP de citoVision desde el siguiente enlace:
+
+➡️ [Descargar citoVision]([URL_PENDIENTE](https://drive.google.com/file/d/1Q2V4EaN68BrStUah4szb8TzaS1VN6eNi/view?usp=sharing))** · Android (APK) y macOS (DMG)
+
+> ⚠️ **Antes de instalar, lee las instrucciones de instalación adjuntadas al ZIP.**
+> Al ser una app fuera de la App Store y Google Play, el sistema puede mostrar un aviso de seguridad la primera
+> vez; las instrucciones explican cómo abrirla con normalidad en cada plataforma.
+
+
+## Para probar citoVision
 
 Para probar las funciones de detección, conteo, clasificación y priorización de CitoVision, puedes descargar una selección de imágenes microscópicas de muestra desde el siguiente enlace:
 
