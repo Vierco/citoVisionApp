@@ -147,9 +147,14 @@ shared/
   <img src="external/img_011642.jpg" alt="Muestra 3" width="250" hspace="10">
 </p>
 
-** Descarga el MVP de citoVision desde el siguiente enlace:
 
-➡️ [Descargar citoVision]([URL_PENDIENTE](https://drive.google.com/file/d/1Q2V4EaN68BrStUah4szb8TzaS1VN6eNi/view?usp=sharing))** · Android (APK) y macOS (DMG)
+
+## Descargar citoVision
+
+Descarga el MVP de citoVision desde el siguiente enlace:
+
+[citoVision 1.0.0-beta](https://drive.google.com/file/d/1Q2V4EaN68BrStUah4szb8TzaS1VN6eNi/view?usp=sharing))** · Android (APK) y macOS (DMG)
+
 
 > ⚠️ **Antes de instalar, lee las instrucciones de instalación adjuntadas al ZIP.**
 > Al ser una app fuera de la App Store y Google Play, el sistema puede mostrar un aviso de seguridad la primera
