@@ -178,8 +178,8 @@ evalúan con un **umbral de confianza rebajado** para no perder hallazgos débil
 diferenciada y con un efecto **acotado** sobre la prioridad (nunca elevan por sí solos una muestra a
 prioridad alta).
 
-> 📄 **Informe de entrenamiento del modelo:** [entrenamiento del modelo](docs/entrenamiento-modelo.md)
-> _(sustituir por el enlace definitivo al informe)._
+> 📄 **Informe de entrenamiento del modelo:** [entrenamiento del modelo](/external/INFORME_TECNICO_ENTRENAMIENTO_MODELO_CITOVISION.md)
+
 
 ## Datos: local y remoto
 
