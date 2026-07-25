@@ -57,6 +57,8 @@ realista y técnicamente sólido.
 > y no es un producto sanitario. Su función es **priorizar** qué muestras conviene revisar antes; la
 > decisión clínica corresponde siempre al profesional.
 
+**[Video: Un recorrido por citoVision](https://drive.google.com/file/d/12zMgc6C16O8i1xfBK5qQKEIHlPTzvPyQ/view?usp=sharing)**
+
 ## Qué necesidad cubre
 
 La revisión morfológica de un frotis al microscopio es **manual, lenta y dependiente de la experiencia**
