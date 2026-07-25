@@ -67,17 +67,16 @@ el criterio experto; reduce el tiempo hasta que ese criterio se aplica donde má
 
 ## Capturas
 
-> _Sustituir los marcadores por capturas reales de la aplicación._
 
 <p align="center">
-  <img src="external/screenshots/login.jpg" alt="Login" width="220" hspace="6">
-  <img src="external/screenshots/analisis.jpg" alt="Análisis" width="220" hspace="6">
-  <img src="external/screenshots/muestra.jpg" alt="Resultado del análisis" width="220" hspace="6">
+  <img src="external/login.png" alt="Login" width="220" hspace="6">
+  <img src="external/analisis.png" alt="Análisis" width="220" hspace="6">
+  <img src="external/muestra.png" alt="Resultado del análisis" width="220" hspace="6">
 </p>
 <p align="center">
-  <img src="external/screenshots/historial.jpg" alt="Historial" width="220" hspace="6">
-  <img src="external/screenshots/pacientes.jpg" alt="Pacientes" width="220" hspace="6">
-  <img src="external/screenshots/settings.jpg" alt="Ajustes" width="220" hspace="6">
+  <img src="external/historial.png" alt="Historial" width="220" hspace="6">
+  <img src="external/pacientes.png" alt="Pacientes" width="220" hspace="6">
+  <img src="external/settings.png" alt="Ajustes" width="220" hspace="6">
 </p>
 
 ## Funcionalidades
@@ -98,8 +97,8 @@ el criterio experto; reduce el tiempo hasta que ese criterio se aplica donde má
 > 👤 **Acceso con cuenta.** Por seguridad, el registro está cerrado: los usuarios **no pueden crearse desde
 > la aplicación**. Es **Lovelaced**, desarrolladora de citoVision, quien genera las cuentas a petición. Sin
 > cuenta puedes usar la app en **modo invitado** (análisis e historial locales). Si te interesa probar
-> citoVision con cuenta de usuario, escríbenos a **[correo@pendiente](mailto:correo@pendiente)**
-> _(sustituir por el correo definitivo)._
+> citoVision con cuenta de usuario, escríbenos a **[citovision.mvp@gmail.com](mailto:citovision.mvp@gmail.com)**
+
 
 ## Arquitectura
 
