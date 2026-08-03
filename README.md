@@ -6,7 +6,7 @@
 
 <p align="center">
   <em>Cribado morfológico hematológico asistido por IA: detecta, segmenta y clasifica células
-  sanguíneas para <strong>priorizar</strong> la revisión del profesional, nunca para sustituirla.</em>
+  sanguíneas para <strong>priorizar</strong> la revisión del profesional.</em>
 </p>
 
 <p align="center">
