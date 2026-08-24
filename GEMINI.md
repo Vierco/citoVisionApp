@@ -18,7 +18,7 @@ Antes de tocar código, el agente debe:
    - `TESTING.md`: Decisiones acerca de implementación, modificación, adición o relacionados al testing de las partes del proyecto.
    - `docs/adr/*.md`: propuestas técnicas aprobadas e implementadads que han de ser documentadas.
    - `docs/rfc/*.md`: propuestas y documentación de decisiones de modificaciones técnicas, estructurales, de arquitectura, etc… 
-   - `/Users/sergioalvarez/AI/Skills/<nombre_del_skill>/SKILL.md`: procedimientos operativos específicos.
+   - `.claude/skills/<nombre_del_skill>/SKILL.md`: procedimientos operativos específicos.
 3. No inventar reglas de negocio.
 4. No modificar specs, ADRs, RFCs, Ni ficheros de reglas (DESING, RULES, AGENTS, etc…) sin confirmación humana.
 5. Si código y documentación discrepan, detenerse y reportar el conflicto.
@@ -197,27 +197,27 @@ docs/rfc/0001-short-title.md
 
 > **Instrucción para la IA:** los Skills listados a continuación **no se cargan por defecto**. Cada Skill debe cargarse únicamente cuando la tarea en curso lo requiera de forma directa, según la columna "Cuándo cargarlo". No cargues un Skill solo porque el nombre de una librería aparece mencionado de pasada en la conversación: carga `room-multiplatform` solo si la tarea implica trabajar con persistencia local Room, no por el mero hecho de que la palabra "Room" aparezca en el contexto. Si una tarea requiere varios Skills a la vez (por ejemplo, crear un Repository implica `repository-pattern` + `result-pattern` + posiblemente `room-multiplatform`/`ktor-client`), carga todos los que apliquen, pero ninguno que no aporte valor directo a esa tarea concreta. Ante la duda, prioriza no cargar un Skill innecesario antes que cargar varios sin necesidad real.
 
-Cada skill vive en `/Users/sergioalvarez/AI/Skills/<nombre_del_skill>/SKILL.md`.
+Cada skill vive en `.claude/skills/<nombre_del_skill>/SKILL.md` y Claude Code las descubre de forma nativa. **Excepción:** `android-official` es una colección externa de Google (Apache 2.0), **no incluida en el repo**; se instala aparte con Android CLI.
 
 | Skill | Ruta | Archivo | Cuándo cargarlo |
 |---|---|---|---|
-| Skill Creator | `AI/Skills/skill-creator` | `SKILL.md` | Crear nuevos Skills a partir de funciones, tareas o librerías del proyecto que aún no tengan uno. |
-| Clean Architecture KMP | `AI/Skills/clean_architecture_kmp` | `SKILL.md` | Diseñar la arquitectura de una nueva feature, decidir en qué capa (Presentation/Application/Domain/Infrastructure/Composition) vive una clase, o revisar si una PR respeta los límites entre capas. |
-| MVVM Compose KMP | `AI/Skills/mvvm-compose-kmp` | `SKILL.md` | Crear o revisar un ViewModel, su `UiState`/`UiEvent`, o conectar un Composable con la capa Application. |
-| Dependency Injection Koin | `AI/Skills/dependency-injection-koin` | `SKILL.md` | Configurar Koin, registrar un nuevo Repository/UseCase/ViewModel en un módulo, o resolver una dependencia específica de plataforma (Context, Keychain, drivers). |
-| Result Pattern | `AI/Skills/result-pattern` | `SKILL.md` | Definir la firma de un método que puede fallar (Repository, UseCase, DataSource), tipar un error de Domain/Application, o decidir si algo debe lanzar excepción o devolver `Result`. |
-| Repository Pattern | `AI/Skills/repository-pattern` | `SKILL.md` | Crear o revisar un Repository, decidir cómo combina un `RemoteDataSource` y un `LocalDataSource`, o decidir si una operación debe ser `Flow` o `suspend`. |
-| Room Multiplatform | `AI/Skills/room-multiplatform` | `SKILL.md` | Definir o modificar el esquema de base de datos local (entidades, DAOs), configurar Room KMP, o implementar el `LocalDataSource` de un Repository. |
-| Ktor Client | `AI/Skills/ktor-client` | `SKILL.md` | Configurar el cliente HTTP, implementar un `RemoteDataSource`, decidir plugins (logging, timeout, auth) o mapear una excepción de red a un error de dominio. |
-| Testing KMP | `AI/Skills/testing-kmp` | `SKILL.md` | Escribir o revisar los tests de cualquier capa, decidir qué mockear con Mokkery, o verificar el grafo de Koin antes de mergear. |
-| Navigation Compose KMP | `AI/Skills/navigation-compose-kmp` | `SKILL.md` | Definir cómo navegar entre pantallas de una nueva feature, elegir entre Navigation 3 y Navigation 2 Compose Multiplatform, o implementar el paso de parámetros entre pantallas. |
-| Theming Compose KMP | `AI/Skills/theming-compose-kmp` | `SKILL.md` | Crear el sistema de tema por primera vez, crear un nuevo componente reutilizable de UI (botón, card, estado de pantalla), o decidir qué color/spacing/radio usar en una pantalla. |
-| Compose Resources KMP | `AI/Skills/compose-resources-kmp` | `SKILL.md` | Añadir una imagen, icono o fuente compartida entre plataformas, o añadir/traducir un string de interfaz. |
-| DataStore Multiplatform | `AI/Skills/datastore-multiplatform` | `SKILL.md` | Guardar preferencias de usuario no sensibles (tema, idioma, onboarding, flags), o implementar el Repository de configuración de la app. |
-| Napier Logging KMP | `AI/Skills/napier-logging-kmp` | `SKILL.md` | Inicializar el logging del proyecto, decidir el nivel de log adecuado para un mensaje, o loguear una excepción capturada en un UseCase/Repository/ViewModel. |
-| Gradle Conventions KMP | `AI/Skills/gradle-conventions-kmp` | `SKILL.md` | Configurar o auditar la estructura de módulos del proyecto, añadir una dependencia/plugin nuevo al catálogo, o decidir si introducir convention plugins (`build-logic`). |
-| Build Config KMP | `AI/Skills/build-config-kmp` | `SKILL.md` | Definir la URL base de la API por entorno, gestionar claves de API u otros secretos de compilación, o definir feature flags fijados en tiempo de compilación. |
-| Android Official | `AI/Skills/android-official` | `SKILL.md` | Consultar guías o convenciones oficiales específicas de Android no cubiertas por los Skills multiplataforma anteriores. |
+| Skill Creator | `.claude/skills/skill-creator` | `SKILL.md` | Crear nuevos Skills a partir de funciones, tareas o librerías del proyecto que aún no tengan uno. |
+| Clean Architecture KMP | `.claude/skills/clean-architecture-kmp` | `SKILL.md` | Diseñar la arquitectura de una nueva feature, decidir en qué capa (Presentation/Application/Domain/Infrastructure/Composition) vive una clase, o revisar si una PR respeta los límites entre capas. |
+| MVVM Compose KMP | `.claude/skills/mvvm-compose-kmp` | `SKILL.md` | Crear o revisar un ViewModel, su `UiState`/`UiEvent`, o conectar un Composable con la capa Application. |
+| Dependency Injection Koin | `.claude/skills/dependency-injection-koin` | `SKILL.md` | Configurar Koin, registrar un nuevo Repository/UseCase/ViewModel en un módulo, o resolver una dependencia específica de plataforma (Context, Keychain, drivers). |
+| Result Pattern | `.claude/skills/result-pattern` | `SKILL.md` | Definir la firma de un método que puede fallar (Repository, UseCase, DataSource), tipar un error de Domain/Application, o decidir si algo debe lanzar excepción o devolver `Result`. |
+| Repository Pattern | `.claude/skills/repository-pattern` | `SKILL.md` | Crear o revisar un Repository, decidir cómo combina un `RemoteDataSource` y un `LocalDataSource`, o decidir si una operación debe ser `Flow` o `suspend`. |
+| Room Multiplatform | `.claude/skills/room-multiplatform` | `SKILL.md` | Definir o modificar el esquema de base de datos local (entidades, DAOs), configurar Room KMP, o implementar el `LocalDataSource` de un Repository. |
+| Ktor Client | `.claude/skills/ktor-client` | `SKILL.md` | Configurar el cliente HTTP, implementar un `RemoteDataSource`, decidir plugins (logging, timeout, auth) o mapear una excepción de red a un error de dominio. |
+| Testing KMP | `.claude/skills/testing-kmp` | `SKILL.md` | Escribir o revisar los tests de cualquier capa, decidir qué mockear con Mokkery, o verificar el grafo de Koin antes de mergear. |
+| Navigation Compose KMP | `.claude/skills/navigation-compose-kmp` | `SKILL.md` | Definir cómo navegar entre pantallas de una nueva feature, elegir entre Navigation 3 y Navigation 2 Compose Multiplatform, o implementar el paso de parámetros entre pantallas. |
+| Theming Compose KMP | `.claude/skills/theming-compose-kmp` | `SKILL.md` | Crear el sistema de tema por primera vez, crear un nuevo componente reutilizable de UI (botón, card, estado de pantalla), o decidir qué color/spacing/radio usar en una pantalla. |
+| Compose Resources KMP | `.claude/skills/compose-resources-kmp` | `SKILL.md` | Añadir una imagen, icono o fuente compartida entre plataformas, o añadir/traducir un string de interfaz. |
+| DataStore Multiplatform | `.claude/skills/datastore-multiplatform` | `SKILL.md` | Guardar preferencias de usuario no sensibles (tema, idioma, onboarding, flags), o implementar el Repository de configuración de la app. |
+| Napier Logging KMP | `.claude/skills/napier-logging-kmp` | `SKILL.md` | Inicializar el logging del proyecto, decidir el nivel de log adecuado para un mensaje, o loguear una excepción capturada en un UseCase/Repository/ViewModel. |
+| Gradle Conventions KMP | `.claude/skills/gradle-conventions-kmp` | `SKILL.md` | Configurar o auditar la estructura de módulos del proyecto, añadir una dependencia/plugin nuevo al catálogo, o decidir si introducir convention plugins (`build-logic`). |
+| Build Config KMP | `.claude/skills/build-config-kmp` | `SKILL.md` | Definir la URL base de la API por entorno, gestionar claves de API u otros secretos de compilación, o definir feature flags fijados en tiempo de compilación. |
+| Android Official | _Colección externa (Google, Apache 2.0)_ — se instala aparte con Android CLI; **no incluida en el repo** | — | Consultar guías o convenciones oficiales específicas de Android no cubiertas por los Skills multiplataforma anteriores. |
 
 ---
 
@@ -332,8 +332,8 @@ Aparte, tener siempre presente:
 
 Antes de tocar persistencia:
 
-1. En caso de base de datos, leer skill `/Users/sergioalvarez/AI/Skills/room-multiplatform` 
-2. En caso de almacenamiento local de datos en el dispositivo, leer skill `/Users/sergioalvarez/AI/Skills/datastore-multiplatform`
+1. En caso de base de datos, leer skill `.claude/skills/room-multiplatform` 
+2. En caso de almacenamiento local de datos en el dispositivo, leer skill `.claude/skills/datastore-multiplatform`
 2. Clasificar dato: cache, estado local, crítico o sensible.
 3. Definir expiración, sincronización, conflictos, migraciones y cifrado.
 4. Añadir tests de migración si cambia esquema.
