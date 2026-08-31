@@ -14,13 +14,14 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Instant
 
-class DesktopFirebaseAuthServiceTest {
+class RestFirebaseAuthServiceTest {
     private val jsonHeaders = headersOf(HttpHeaders.ContentType, ContentType.Application.Json.toString())
 
     /** Reloj manipulable para provocar la caducidad del ID token sin esperar. */
@@ -33,10 +34,11 @@ class DesktopFirebaseAuthServiceTest {
     private fun service(
         status: HttpStatusCode,
         body: String,
-    ): DesktopFirebaseAuthService {
+        tokenStore: TokenStore = InMemoryTokenStore(),
+    ): RestFirebaseAuthService {
         val engine = MockEngine { respond(content = body, status = status, headers = jsonHeaders) }
         val remote = IdentityToolkitAuthDataSource(createHttpClient(engine), apiKey = "test-key")
-        return DesktopFirebaseAuthService(remote)
+        return RestFirebaseAuthService(remote, tokenStore)
     }
 
     /**
@@ -48,7 +50,7 @@ class DesktopFirebaseAuthServiceTest {
         signInBody: String,
         refreshStatus: HttpStatusCode,
         refreshBody: String,
-    ): DesktopFirebaseAuthService {
+    ): RestFirebaseAuthService {
         val engine =
             MockEngine { request ->
                 if (request.url.host == "securetoken.googleapis.com") {
@@ -58,7 +60,7 @@ class DesktopFirebaseAuthServiceTest {
                 }
             }
         val remote = IdentityToolkitAuthDataSource(createHttpClient(engine), apiKey = "test-key")
-        return DesktopFirebaseAuthService(remote, clock)
+        return RestFirebaseAuthService(remote, InMemoryTokenStore(), clock)
     }
 
     @Test
@@ -93,13 +95,35 @@ class DesktopFirebaseAuthServiceTest {
         }
 
     @Test
-    fun `given desktop when signing in with google then is not supported`() =
+    fun `given a google id token when signing in then exchanges it for a firebase session`() =
         runTest {
-            val service = service(HttpStatusCode.OK, "{}")
+            val service =
+                service(
+                    HttpStatusCode.OK,
+                    """{"idToken":"id","refreshToken":"rt","expiresIn":"3600","localId":"uid-g",""" +
+                        """"email":"g@b.com","photoUrl":"https://pic"}""",
+                )
 
-            val result = service.signInWithGoogle("token")
+            val result = service.signInWithGoogle("google-id-token")
 
-            assertEquals(Result.Failure(AuthError.NotSupportedOnPlatform), result)
+            assertTrue(result is Result.Success)
+            assertEquals("uid-g", result.value.uid)
+            assertEquals("https://pic", result.value.photoUrl)
+        }
+
+    @Test
+    fun `given a rejected google credential when signing in then fails as google sign in`() =
+        runTest {
+            val service =
+                service(
+                    HttpStatusCode.BadRequest,
+                    """{"error":{"code":400,"message":"INVALID_IDP_RESPONSE"}}""",
+                )
+
+            val result = service.signInWithGoogle("bad-token")
+
+            assertEquals(Result.Failure(AuthError.GoogleSignInFailed), result)
+            assertNull(service.currentUser.first())
         }
 
     @Test
@@ -189,5 +213,62 @@ class DesktopFirebaseAuthServiceTest {
 
             assertNull(service.currentIdToken())
             assertNull(service.currentUser.first())
+        }
+
+    // --- Persistencia de sesión (SPEC-0001 RF-8, ADR-0006) ---
+
+    @Test
+    fun `given a login when it succeeds then the session is written to the store`() =
+        runTest {
+            val store = InMemoryTokenStore()
+            val service =
+                service(
+                    HttpStatusCode.OK,
+                    """{"idToken":"id","refreshToken":"rt","expiresIn":"3600","localId":"uid-1","email":"a@b.com"}""",
+                    tokenStore = store,
+                )
+
+            service.signInWithEmail("a@b.com", "secret")
+
+            val stored = assertNotNull(store.load())
+            assertEquals("uid-1", stored.uid)
+            assertEquals("rt", stored.refreshToken)
+        }
+
+    @Test
+    fun `given a stored session when the app restarts then it is restored without logging in again`() =
+        runTest {
+            val store = InMemoryTokenStore()
+            store.save(
+                StoredSession(
+                    idToken = "id-stored",
+                    refreshToken = "rt-stored",
+                    // Año 2100: lejos en el futuro, así que no debe intentar refrescarlo.
+                    expiresAtEpochSeconds = 4_102_444_800L,
+                    uid = "uid-restored",
+                    email = "restored@b.com",
+                ),
+            )
+            val service = service(HttpStatusCode.OK, "{}", tokenStore = store)
+
+            assertEquals("uid-restored", service.currentUser.first()?.uid)
+            assertEquals("id-stored", service.currentIdToken())
+        }
+
+    @Test
+    fun `given a stored session when signing out then the store is emptied`() =
+        runTest {
+            val store = InMemoryTokenStore()
+            val service =
+                service(
+                    HttpStatusCode.OK,
+                    """{"idToken":"id","refreshToken":"rt","expiresIn":"3600","localId":"uid-1"}""",
+                    tokenStore = store,
+                )
+            service.signInWithEmail("a@b.com", "secret")
+
+            service.signOut()
+
+            assertNull(store.load())
         }
 }

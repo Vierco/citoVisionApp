@@ -45,6 +45,23 @@ class IdentityToolkitAuthDataSource(
             Result.Success(response)
         }
 
+    /**
+     * Canjea el ID token de Google por una sesión de Firebase (ADR-0006, SPEC-0001 RF-2). El `idToken`
+     * lo obtiene el flujo nativo de cada plataforma a través de `GoogleSignInLauncher`; aquí solo se
+     * intercambia. Nunca se loguea su valor.
+     */
+    suspend fun signInWithGoogleIdToken(idToken: String): Result<SignInResponse, AuthError> =
+        runCatchingRest(::mapIdpErrorCode) {
+            val response =
+                client
+                    .post("${IDENTITY_TOOLKIT_BASE}accounts:signInWithIdp") {
+                        parameter("key", apiKey)
+                        contentType(ContentType.Application.Json)
+                        setBody(SignInWithIdpRequest(postBody = "id_token=$idToken&providerId=$GOOGLE_PROVIDER_ID"))
+                    }.body<SignInResponse>()
+            Result.Success(response)
+        }
+
     suspend fun sendPasswordResetEmail(email: String): Result<Unit, AuthError> =
         runCatchingRest(::mapResetErrorCode) {
             client.post("${IDENTITY_TOOLKIT_BASE}accounts:sendOobCode") {
@@ -125,6 +142,19 @@ class IdentityToolkitAuthDataSource(
             else -> AuthError.Unknown(code)
         }
 
+    /**
+     * Un fallo del canje federado no es culpa de unas credenciales mal escritas por el usuario: la
+     * credencial de Google ya era válida cuando llegó aquí. Se traduce a [AuthError.GoogleSignInFailed]
+     * salvo los casos genéricos de cuenta.
+     */
+    private fun mapIdpErrorCode(code: String?): AuthError =
+        when {
+            code == null -> AuthError.GoogleSignInFailed
+            code.startsWith(TOO_MANY_ATTEMPTS_PREFIX) -> AuthError.TooManyRequests
+            code in IDP_USER_CODES -> AuthError.UserNotFound
+            else -> AuthError.GoogleSignInFailed
+        }
+
     private fun mapRefreshErrorCode(code: String?): AuthError =
         when {
             code == null -> AuthError.Unknown(null)
@@ -136,6 +166,7 @@ class IdentityToolkitAuthDataSource(
         const val IDENTITY_TOOLKIT_BASE = "https://identitytoolkit.googleapis.com/v1/"
         const val SECURE_TOKEN_URL = "https://securetoken.googleapis.com/v1/token"
         const val PASSWORD_RESET_REQUEST_TYPE = "PASSWORD_RESET"
+        const val GOOGLE_PROVIDER_ID = "google.com"
         const val TOO_MANY_ATTEMPTS_PREFIX = "TOO_MANY_ATTEMPTS_TRY_LATER"
         const val RESET_PASSWORD_EXCEED_LIMIT = "RESET_PASSWORD_EXCEED_LIMIT"
         const val EMAIL_NOT_FOUND = "EMAIL_NOT_FOUND"
@@ -148,6 +179,13 @@ class IdentityToolkitAuthDataSource(
                 "INVALID_EMAIL",
                 "MISSING_PASSWORD",
                 "USER_DISABLED",
+            )
+
+        val IDP_USER_CODES =
+            setOf(
+                "USER_DISABLED",
+                "USER_NOT_FOUND",
+                "OPERATION_NOT_ALLOWED",
             )
 
         val REFRESH_REAUTH_CODES =

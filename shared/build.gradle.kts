@@ -19,6 +19,53 @@ room {
     schemaDirectory("$projectDir/schemas")
 }
 
+// --- Build config de iOS: Web API key de Firebase (auth REST + Firestore/Storage, ADR-0006) ---
+// Mismo mecanismo que en `desktopApp` y `androidApp`: se lee de local.properties (no versionado) o de la
+// variable de entorno FIREBASE_WEB_API_KEY y se hornea en un objeto generado, de modo que la clave nunca
+// entra en el repositorio. No es un secreto de servidor: identifica el proyecto Firebase; la autorización
+// real vive en las reglas de seguridad (ADR-0001). El parseo ocurre en la ejecución de la task, no en
+// configuración, para ser compatible con el configuration cache.
+val localPropertiesText =
+    providers
+        .fileContents(rootProject.layout.projectDirectory.file("local.properties"))
+        .asText
+        .orElse("")
+
+val firebaseWebApiKeyFromEnv = providers.environmentVariable("FIREBASE_WEB_API_KEY").orElse("")
+
+val generateIosBuildConfig by tasks.registering {
+    val propertiesText = localPropertiesText
+    val envApiKey = firebaseWebApiKeyFromEnv
+    val outputDir = layout.buildDirectory.dir("generated/iosBuildConfig")
+    inputs.property("localProperties", propertiesText)
+    inputs.property("envApiKey", envApiKey)
+    outputs.dir(outputDir)
+    doLast {
+        val fromProperties =
+            propertiesText
+                .get()
+                .lineSequence()
+                .map { it.trim() }
+                .firstOrNull { it.startsWith("firebaseWebApiKey=") }
+                ?.substringAfter('=')
+                ?.trim()
+                .orEmpty()
+        val apiKey = fromProperties.ifEmpty { envApiKey.get() }
+        val file = outputDir.get().asFile.resolve("dev/lovelace/citovision/config/IosBuildConfig.kt")
+        file.parentFile.mkdirs()
+        file.writeText(
+            """
+            |package dev.lovelace.citovision.config
+            |
+            |internal object IosBuildConfig {
+            |    const val FIREBASE_WEB_API_KEY: String = "$apiKey"
+            |}
+            |
+            """.trimMargin(),
+        )
+    }
+}
+
 // Cobertura de tests (TESTING.md §2). Kover solo instrumenta los targets JVM: mide `commonTest` y los tests
 // de Android/Desktop, NO los de iOS. Se excluye únicamente código generado, que falsearía el porcentaje sin
 // aportar información; la UI Compose SÍ cuenta, así que el número refleja también la deuda de tests de UI.
@@ -63,7 +110,12 @@ kotlin {
     ).forEach { iosTarget ->
         iosTarget.binaries.framework {
             baseName = "shared"
-            isStatic = true
+            // Dinámico (no estático): con framework estático, Xcode 26 rechaza el enlazado del app
+            // contra frameworks privados del sistema que arrastra Compose ("cannot link directly with
+            // 'SwiftUICore'... not an allowed client", "framework 'UIUtilities' not found"). En dinámico,
+            // ese enlazado lo resuelve el propio framework y esos errores desaparecen. `embedAndSign`
+            // (build phase del proyecto Xcode) lo embebe y firma en el bundle de la app.
+            isStatic = false
         }
     }
 
@@ -147,8 +199,13 @@ kotlin {
             }
         }
 
-        iosMain.dependencies {
-            implementation(libs.ktor.client.darwin)
+        iosMain {
+            // El objeto generado con la Web API key (ver `generateIosBuildConfig`). Pasar el provider de la
+            // task hace que Gradle encadene la generación antes de compilar.
+            kotlin.srcDir(generateIosBuildConfig)
+            dependencies {
+                implementation(libs.ktor.client.darwin)
+            }
         }
     }
 }

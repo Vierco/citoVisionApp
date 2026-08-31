@@ -21,3 +21,10 @@ local.properties
 keystore.properties
 .claude/settings.local.json
 
+# Xcode / iOS (proyecto iosApp): datos de usuario y salidas locales, no versionables.
+xcuserdata/
+*.xcuserstate
+*.xcuserdatad
+DerivedData/
+.xcode.env.local
+

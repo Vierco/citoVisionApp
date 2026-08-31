@@ -9,8 +9,10 @@ import dev.lovelace.citovision.application.ports.GoogleSignInLauncher
 import dev.lovelace.citovision.application.ports.ImageDecoder
 import dev.lovelace.citovision.application.ports.OnnxRunner
 import dev.lovelace.citovision.application.ports.UrlOpener
-import dev.lovelace.citovision.infrastructure.auth.DesktopFirebaseAuthService
+import dev.lovelace.citovision.infrastructure.auth.InMemoryTokenStore
+import dev.lovelace.citovision.infrastructure.auth.RestFirebaseAuthService
 import dev.lovelace.citovision.infrastructure.auth.StubGoogleSignInLauncher
+import dev.lovelace.citovision.infrastructure.auth.TokenStore
 import dev.lovelace.citovision.infrastructure.auth.remote.IdentityToolkitAuthDataSource
 import dev.lovelace.citovision.infrastructure.image.OkioAnalysisImageStore
 import dev.lovelace.citovision.infrastructure.image.analysisImagesPath
@@ -37,10 +39,12 @@ actual val platformModule: Module =
         single {
             IdentityToolkitAuthDataSource(client = get(), apiKey = getProperty(FIREBASE_WEB_API_KEY_PROPERTY, ""))
         }
+        // Desktop no persiste la sesión: al reiniciar se vuelve a pedir login (ADR-0002).
+        single<TokenStore> { InMemoryTokenStore() }
         // Misma instancia como puerto de sesión y como proveedor de token: los tokens del login viven en
         // memoria dentro de ella (ADR-0002) y desde ahí autorizan las llamadas a Firestore/Storage.
         single {
-            DesktopFirebaseAuthService(remote = get())
+            RestFirebaseAuthService(remote = get(), tokenStore = get())
         }.binds(arrayOf(AuthService::class, AuthTokenProvider::class))
         singleOf(::StubGoogleSignInLauncher) bind GoogleSignInLauncher::class
         single<HttpClientEngine> { OkHttp.create() }

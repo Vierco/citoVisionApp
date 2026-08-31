@@ -1,0 +1,8 @@
+// Configuración compartida del proyecto iOS. Editable sin tocar el .pbxproj.
+//
+// TEAM_ID: déjalo vacío para el simulador. Para dispositivo físico, pon aquí tu Apple Developer
+// Team ID (o selecciona el Team en Xcode → Signing & Capabilities y Xcode lo rellenará). El agente
+// no gestiona certificados ni provisioning (AGENTS.md §22).
+TEAM_ID=
+BUNDLE_ID=dev.lovelace.citovision
+APP_NAME=citoVision

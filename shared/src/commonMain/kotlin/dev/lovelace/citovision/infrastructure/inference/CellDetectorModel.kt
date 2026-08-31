@@ -12,3 +12,11 @@ private const val MODEL_PATH = "files/citovision_yolo11s_seg_univali_stratified_
  */
 @OptIn(ExperimentalResourceApi::class)
 suspend fun loadCellDetectorModel(): ByteArray = Res.readBytes(MODEL_PATH)
+
+/**
+ * URI del mismo modelo dentro del paquete de la aplicación. La necesita iOS (ADR-0007), donde `ORTSession`
+ * solo admite una **ruta de fichero**: resolverla evita copiar los 39 MB del modelo a disco. Vive junto a
+ * [loadCellDetectorModel] para que el nombre del fichero tenga una única fuente.
+ */
+@OptIn(ExperimentalResourceApi::class)
+fun cellDetectorModelUri(): String = Res.getUri(MODEL_PATH)
