@@ -328,7 +328,7 @@ repositorio y es la fuente de verdad del proyecto — este README se ha redactad
 - [x] Tema claro/oscuro y pulido de UI
 - [x] Entregables firmados: **APK + AAB** (Android) y **DMG** (macOS)
 - [x] Cobertura de tests con Kover
-- [ ] Soporte de iOS
+- [ ] Soporte de iOS - __01/09/2026 Work in progress__
 - [x] Documentación final del TFM
 
 ## Licencia y atribución
