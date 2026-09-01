@@ -329,6 +329,8 @@ repositorio y es la fuente de verdad del proyecto — este README se ha redactad
 - [x] Entregables firmados: **APK + AAB** (Android) y **DMG** (macOS)
 - [x] Cobertura de tests con Kover
 - [ ] Soporte de iOS - __01/09/2026 Work in progress__
+- [ ] Selección de bloques de imágenes
+- [ ] Selección de imágenes de ubicaciones externas
 - [x] Documentación final del TFM
 
 ## Licencia y atribución
