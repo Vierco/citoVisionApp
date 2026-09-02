@@ -331,7 +331,7 @@ repositorio y es la fuente de verdad del proyecto — este README se ha redactad
 - [ ] Soporte de iOS - __01/09/2026 Work in progress__
 - [ ] Soporte Windows
 - [ ] Selección de bloques de imágenes
-- [ ] Selección de imágenes de ubicaciones externas
+- [ ] Selección de imágenes de ubicaciones externas __02/09/2026 Work in progress__
 - [x] Documentación final del TFM
 
 ## Licencia y atribución
