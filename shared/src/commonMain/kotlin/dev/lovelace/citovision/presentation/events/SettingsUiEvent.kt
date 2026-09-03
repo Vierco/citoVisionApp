@@ -1,5 +1,6 @@
 package dev.lovelace.citovision.presentation.events
 
+import dev.lovelace.citovision.domain.settings.ImageSourcePreference
 import dev.lovelace.citovision.domain.settings.ThemePreference
 
 /** Acciones de la pantalla de Ajustes. */
@@ -49,6 +50,11 @@ sealed interface SettingsUiEvent {
     /** El usuario elige el tema de la app (Claro/Oscuro/Seguir sistema). */
     data class SetTheme(
         val preference: ThemePreference,
+    ) : SettingsUiEvent
+
+    /** El usuario elige de dónde tomar las imágenes de muestra (fototeca o ficheros). */
+    data class SetImageSource(
+        val preference: ImageSourcePreference,
     ) : SettingsUiEvent
 
     /** Volver a la pantalla anterior. */

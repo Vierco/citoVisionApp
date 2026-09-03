@@ -15,6 +15,7 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.serialization.ContentConvertException
+import kotlinx.io.IOException
 import kotlin.coroutines.cancellation.CancellationException
 import kotlin.random.Random
 import kotlin.time.Clock
@@ -73,9 +74,15 @@ class FirestoreFeedbackDataSource(
         } catch (e: ContentConvertException) {
             Napier.w("Respuesta de Firestore ilegible", e, tag = "Firestore")
             Result.Failure(RemoteFeedbackError.Serialization)
-        } catch (e: Exception) {
-            Napier.w("Fallo no tipado en Firestore", e, tag = "Firestore")
+        } catch (e: IOException) {
+            // Fallo real de entrada/salida: sin conexión, DNS que no resuelve, socket cortado, TLS.
+            Napier.w("Fallo de red en Firestore", e, tag = "Firestore")
             Result.Failure(RemoteFeedbackError.Network)
+        } catch (e: Exception) {
+            // Lo desconocido se admite como desconocido: anunciarlo como falta de conexión manda a buscar
+            // donde no está. El tipo va al log, nunca a la UI.
+            Napier.w("Fallo inesperado en Firestore", e, tag = "Firestore")
+            Result.Failure(RemoteFeedbackError.Unknown(e::class.simpleName))
         }
 
     private companion object {

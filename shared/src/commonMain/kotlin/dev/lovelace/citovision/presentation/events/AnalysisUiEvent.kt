@@ -8,6 +8,9 @@ sealed interface AnalysisUiEvent {
     /** Quitar la imagen seleccionada y volver al estado vacío (RF-6). */
     data object RemoveImage : AnalysisUiEvent
 
+    /** Cierra el aviso único del origen de las imágenes y continúa abriendo el selector. */
+    data object DismissImageSourceNotice : AnalysisUiEvent
+
     /** Cerrar el mensaje de error. */
     data object DismissError : AnalysisUiEvent
 

@@ -3,7 +3,6 @@ package dev.lovelace.citovision.presentation.screens
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Person
@@ -12,9 +11,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -32,13 +28,15 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
-import androidx.compose.ui.unit.dp
 import citovision.shared.generated.resources.Res
 import citovision.shared.generated.resources.microsc
 import citovision.shared.generated.resources.nav_analysis
 import citovision.shared.generated.resources.nav_history
 import citovision.shared.generated.resources.nav_patients
 import citovision.shared.generated.resources.nav_settings
+import dev.lovelace.citovision.presentation.components.AppNavigationBar
+import dev.lovelace.citovision.presentation.components.AppNavigationItem
+import dev.lovelace.citovision.presentation.components.appScaffoldContentInsets
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -112,6 +110,9 @@ fun MainScreen(onNavigateToSettings: () -> Unit) {
     ) {
         Scaffold(
             containerColor = Color.Transparent,
+            // En iOS estos insets excluyen el borde inferior, para que el contenido llegue hasta abajo y
+            // pase por debajo de la barra flotante (ADR-0008). En Android y Desktop son los de siempre.
+            contentWindowInsets = appScaffoldContentInsets(),
             topBar = {
                 TopAppBar(
                     title = { Text(stringResource(selectedTab.labelRes)) },
@@ -130,35 +131,24 @@ fun MainScreen(onNavigateToSettings: () -> Unit) {
                 )
             },
             bottomBar = {
-                NavigationBar(
-                    containerColor = Color.Transparent,
-                ) {
-                    MainTab.entries.forEach { tab ->
-                        NavigationBarItem(
-                            selected = selectedTabIndex == tab.ordinal,
-                            onClick = { selectedTabIndex = tab.ordinal },
-                            icon = {
-                                val painter =
+                // Cada plataforma dibuja la suya (ADR-0008): Material 3 en Android y Desktop, y en iOS una
+                // barra flotante nativa que pinta SwiftUI por encima. El estado se queda aquí.
+                AppNavigationBar(
+                    items =
+                        MainTab.entries.map { tab ->
+                            AppNavigationItem(
+                                label = stringResource(tab.labelRes),
+                                icon =
                                     when (tab) {
                                         MainTab.ANALYSIS -> painterResource(Res.drawable.microsc)
                                         MainTab.HISTORY -> rememberVectorPainter(Icons.Default.List)
                                         MainTab.PATIENTS -> rememberVectorPainter(Icons.Default.Person)
-                                    }
-                                Icon(
-                                    painter = painter,
-                                    contentDescription = stringResource(tab.labelRes),
-                                    modifier = Modifier.size(24.dp),
-                                )
-                            },
-                            label = { Text(stringResource(tab.labelRes)) },
-                            colors =
-                                NavigationBarItemDefaults.colors(
-                                    selectedIconColor = MaterialTheme.colorScheme.onSecondary,
-                                    indicatorColor = MaterialTheme.colorScheme.secondary,
-                                ),
-                        )
-                    }
-                }
+                                    },
+                            )
+                        },
+                    selectedIndex = selectedTabIndex,
+                    onSelect = { selectedTabIndex = it },
+                )
             },
         ) { innerPadding ->
             Box(

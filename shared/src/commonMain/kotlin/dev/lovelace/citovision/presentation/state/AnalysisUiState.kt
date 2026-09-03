@@ -19,6 +19,13 @@ data class AnalysisUiState(
     val syncErrorVisible: Boolean = false,
     val noCellsVisible: Boolean = false,
     val inferenceErrorVisible: Boolean = false,
+    /** Aviso único que explica dónde se cambia el origen de las imágenes (SPEC-0003). */
+    val imageSourceNoticeVisible: Boolean = false,
+    /**
+     * Si al cerrar el aviso hay que pedir al usuario que vuelva a pulsar. Solo en iOS, donde el selector
+     * no puede abrirse en la misma acción que cierra un diálogo (ver `AnalysisViewModel`).
+     */
+    val imageSourceNoticeNeedsRetap: Boolean = false,
 ) {
     val canScan: Boolean get() = selectedImage != null && !isSaving
 }

@@ -37,8 +37,13 @@ import org.koin.dsl.binds
 import org.koin.dsl.module
 import platform.Foundation.setValue
 
-// Auth por Identity Toolkit REST, compartida con Desktop (ADR-0006): iOS no enlaza el SDK nativo de
-// Firebase. Google Sign-In sigue en stub hasta que exista el puente Swift con el cliente OAuth de iOS.
+// Regla de oro de este módulo: **Kotlin no enlaza ningún SDK nativo en iOS**. Los que hacen falta viven en
+// Swift y entregan su resultado por un puente:
+//   - Auth (ADR-0006): Identity Toolkit REST, compartida con Desktop; Google Sign-In lo lanza Swift y pasa
+//     el ID token a `IosGoogleSignInLauncher`, que lo canjea contra `accounts:signInWithIdp`.
+//   - Inferencia (ADR-0007): ONNX Runtime entra por SPM en el target de Xcode y `OnnxRunnerImpl` le cruza
+//     el tensor.
+// Así el framework compartido puede seguir siendo dinámico, que es lo que exige Xcode 26 (ADR-0005).
 actual val platformModule: Module =
     module {
         single {

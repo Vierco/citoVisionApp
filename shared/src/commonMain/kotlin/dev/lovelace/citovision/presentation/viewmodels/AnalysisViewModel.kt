@@ -10,6 +10,9 @@ import citovision.shared.generated.resources.analysis_error_too_large
 import citovision.shared.generated.resources.analysis_error_unsupported_format
 import dev.lovelace.citovision.application.usecases.AnalysisOutcome
 import dev.lovelace.citovision.application.usecases.AnalyzeSampleUseCase
+import dev.lovelace.citovision.application.usecases.CanOpenPickerAfterNoticeUseCase
+import dev.lovelace.citovision.application.usecases.MarkImageSourceNoticeShownUseCase
+import dev.lovelace.citovision.application.usecases.ObserveImageSourceNoticeUseCase
 import dev.lovelace.citovision.application.usecases.ObserveLastPatientCodeUseCase
 import dev.lovelace.citovision.application.usecases.PickImageUseCase
 import dev.lovelace.citovision.application.usecases.ProcessPendingSyncUseCase
@@ -26,6 +29,7 @@ import dev.lovelace.citovision.presentation.state.AnalysisUiState
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -46,6 +50,9 @@ class AnalysisViewModel(
     private val processPendingSync: ProcessPendingSyncUseCase,
     private val observeLastPatientCode: ObserveLastPatientCodeUseCase,
     private val saveLastPatientCode: SaveLastPatientCodeUseCase,
+    private val observeImageSourceNotice: ObserveImageSourceNoticeUseCase,
+    private val markImageSourceNoticeShown: MarkImageSourceNoticeShownUseCase,
+    private val canOpenPickerAfterNotice: CanOpenPickerAfterNoticeUseCase,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(AnalysisUiState())
     val uiState = _uiState.asStateFlow()
@@ -71,6 +78,7 @@ class AnalysisViewModel(
     fun onEvent(event: AnalysisUiEvent) {
         when (event) {
             AnalysisUiEvent.SelectImage -> selectImage()
+            AnalysisUiEvent.DismissImageSourceNotice -> dismissImageSourceNotice()
             AnalysisUiEvent.RemoveImage -> _uiState.update { it.copy(selectedImage = null, error = null) }
             AnalysisUiEvent.DismissError -> _uiState.update { it.copy(error = null) }
             AnalysisUiEvent.StartScan -> openCodeDialog()
@@ -182,26 +190,64 @@ class AnalysisViewModel(
         }
     }
 
+    /**
+     * La primera vez muestra el aviso que explica dónde se cambia el origen de las imágenes (SPEC-0003)
+     * **en lugar** de abrir el selector; a partir de ahí va directo.
+     */
     private fun selectImage() {
         if (_uiState.value.isPicking) return
         viewModelScope.launch {
-            _uiState.update { it.copy(isPicking = true, error = null) }
-            pickImage().fold(
-                onSuccess = { image ->
-                    // image == null → el usuario canceló: se conserva el estado previo (RF-7).
-                    _uiState.update { state ->
-                        if (image == null) {
-                            state.copy(isPicking = false)
-                        } else {
-                            state.copy(isPicking = false, selectedImage = image, error = null)
-                        }
-                    }
-                },
-                onFailure = { error ->
-                    _uiState.update { it.copy(isPicking = false, error = error.toMessage()) }
-                },
-            )
+            // Se consulta al pulsar, no con un valor cacheado desde el `init`: si el usuario toca antes de
+            // que DataStore haya emitido, un caché todavía a `false` se saltaría el aviso.
+            if (observeImageSourceNotice().first()) {
+                _uiState.update {
+                    it.copy(
+                        imageSourceNoticeVisible = true,
+                        imageSourceNoticeNeedsRetap = !canOpenPickerAfterNotice(),
+                    )
+                }
+            } else {
+                pickAndApplyImage()
+            }
         }
+    }
+
+    /**
+     * Cierra el aviso, lo marca como visto y —**solo donde la plataforma lo permite**— sigue al selector
+     * en la misma acción.
+     *
+     * En iOS no se encadena, y no es un capricho: allí los diálogos de Compose viven en una `UIWindow`
+     * aparte a nivel alerta, y FileKit presenta el selector sobre la *key window*. Pedirlo mientras esa
+     * ventana se desmonta lo deja presentado sobre algo que desaparece, así que no llega a verse; y como
+     * FileKit presenta con `topMostViewController()?.present(...)`, si no hay controlador **no hace nada
+     * y su `suspendCoroutine` no se reanuda jamás**: la corrutina queda colgada e `isPicking` en `true`
+     * para siempre. Por eso allí el aviso pide al usuario que vuelva a pulsar.
+     */
+    private fun dismissImageSourceNotice() {
+        viewModelScope.launch {
+            markImageSourceNoticeShown()
+            _uiState.update { it.copy(imageSourceNoticeVisible = false) }
+            if (canOpenPickerAfterNotice()) pickAndApplyImage()
+        }
+    }
+
+    private suspend fun pickAndApplyImage() {
+        _uiState.update { it.copy(isPicking = true, error = null) }
+        pickImage().fold(
+            onSuccess = { image ->
+                // image == null → el usuario canceló: se conserva el estado previo (RF-7).
+                _uiState.update { state ->
+                    if (image == null) {
+                        state.copy(isPicking = false)
+                    } else {
+                        state.copy(isPicking = false, selectedImage = image, error = null)
+                    }
+                }
+            },
+            onFailure = { error ->
+                _uiState.update { it.copy(isPicking = false, error = error.toMessage()) }
+            },
+        )
     }
 
     private fun ImageError.toMessage(): StringResource =

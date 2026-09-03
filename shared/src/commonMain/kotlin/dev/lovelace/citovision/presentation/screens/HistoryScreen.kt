@@ -46,6 +46,8 @@ import citovision.shared.generated.resources.history_empty_desc
 import citovision.shared.generated.resources.history_empty_title
 import dev.lovelace.citovision.presentation.components.AnalysisCard
 import dev.lovelace.citovision.presentation.components.AnalysisDetailDialog
+import dev.lovelace.citovision.presentation.components.ModalOverlayEffect
+import dev.lovelace.citovision.presentation.components.floatingNavigationBarPadding
 import dev.lovelace.citovision.presentation.events.HistoryUiEvent
 import dev.lovelace.citovision.presentation.format.formatAnalysisDateTime
 import dev.lovelace.citovision.presentation.state.HistoryUiState
@@ -125,7 +127,15 @@ private fun HistoryContent(
                 LazyColumn(
                     state = listState,
                     modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(16.dp),
+                    // El extra inferior deja que la última card se despegue de la barra flotante de iOS
+                    // (0 en Android y Desktop, donde la barra ocupa su hueco).
+                    contentPadding =
+                        PaddingValues(
+                            start = 16.dp,
+                            end = 16.dp,
+                            top = 16.dp,
+                            bottom = 16.dp + floatingNavigationBarPadding(),
+                        ),
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
                     items(items = uiState.analyses, key = { it.id }) { analysis ->
@@ -214,6 +224,7 @@ private fun DeleteConfirmationDialog(
     onConfirm: () -> Unit,
     onDismiss: () -> Unit,
 ) {
+    ModalOverlayEffect()
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(Res.string.history_delete_title)) },

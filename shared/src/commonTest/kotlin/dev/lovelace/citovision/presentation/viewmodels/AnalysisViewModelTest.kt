@@ -5,9 +5,13 @@ import dev.lovelace.citovision.application.ports.AnalysisRepository
 import dev.lovelace.citovision.application.ports.AuthService
 import dev.lovelace.citovision.application.ports.CellDetector
 import dev.lovelace.citovision.application.ports.ImagePicker
+import dev.lovelace.citovision.application.ports.ImageSourceRepository
 import dev.lovelace.citovision.application.ports.PatientCodeRepository
 import dev.lovelace.citovision.application.ports.RemoteAnalysisSync
 import dev.lovelace.citovision.application.usecases.AnalyzeSampleUseCase
+import dev.lovelace.citovision.application.usecases.CanOpenPickerAfterNoticeUseCase
+import dev.lovelace.citovision.application.usecases.MarkImageSourceNoticeShownUseCase
+import dev.lovelace.citovision.application.usecases.ObserveImageSourceNoticeUseCase
 import dev.lovelace.citovision.application.usecases.ObserveLastPatientCodeUseCase
 import dev.lovelace.citovision.application.usecases.PickImageUseCase
 import dev.lovelace.citovision.application.usecases.ProcessPendingSyncUseCase
@@ -22,12 +26,14 @@ import dev.lovelace.citovision.domain.entities.SelectedImage
 import dev.lovelace.citovision.domain.errors.ImageError
 import dev.lovelace.citovision.domain.errors.InferenceError
 import dev.lovelace.citovision.domain.errors.RemoteAnalysisError
+import dev.lovelace.citovision.domain.settings.ImageSourcePreference
 import dev.lovelace.citovision.presentation.events.AnalysisUiEvent
 import dev.mokkery.answering.returns
 import dev.mokkery.every
 import dev.mokkery.everySuspend
 import dev.mokkery.matcher.any
 import dev.mokkery.mock
+import dev.mokkery.verifySuspend
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
@@ -60,7 +66,12 @@ class AnalysisViewModelTest {
     private val authService = mock<AuthService>()
     private val remoteAnalysisSync = mock<RemoteAnalysisSync>()
     private val patientCodeRepository = mock<PatientCodeRepository>()
-    private val pickImage = PickImageUseCase(imagePicker)
+    private val imageSourceRepository = mock<ImageSourceRepository>()
+    private val pickImage = PickImageUseCase(imagePicker, imageSourceRepository)
+    private val observeImageSourceNotice =
+        ObserveImageSourceNoticeUseCase(imageSourceRepository, imagePicker)
+    private val markImageSourceNoticeShown = MarkImageSourceNoticeShownUseCase(imageSourceRepository)
+    private val canOpenPickerAfterNotice = CanOpenPickerAfterNoticeUseCase(imagePicker)
     private val analyzeSample = AnalyzeSampleUseCase(cellDetector, analysisRepository, analysisImageStore)
     private val syncAnalysis = SyncAnalysisUseCase(authService, remoteAnalysisSync)
     private val processPendingSync = ProcessPendingSyncUseCase(remoteAnalysisSync)
@@ -70,12 +81,15 @@ class AnalysisViewModelTest {
 
     private fun buildViewModel() =
         AnalysisViewModel(
-            pickImage,
-            analyzeSample,
-            syncAnalysis,
-            processPendingSync,
-            observeLastPatientCode,
-            saveLastPatientCode,
+            pickImage = pickImage,
+            analyzeSample = analyzeSample,
+            syncAnalysis = syncAnalysis,
+            processPendingSync = processPendingSync,
+            observeLastPatientCode = observeLastPatientCode,
+            saveLastPatientCode = saveLastPatientCode,
+            observeImageSourceNotice = observeImageSourceNotice,
+            markImageSourceNoticeShown = markImageSourceNoticeShown,
+            canOpenPickerAfterNotice = canOpenPickerAfterNotice,
         )
 
     private val validImage =
@@ -90,6 +104,13 @@ class AnalysisViewModelTest {
         everySuspend { remoteAnalysisSync.processPending() } returns Result.Success(Unit)
         every { patientCodeRepository.lastPatientCode() } returns flowOf("")
         everySuspend { patientCodeRepository.setLastPatientCode(any()) } returns Unit
+        every { imagePicker.hasDistinctSources } returns true
+        // Por defecto, plataforma que SÍ puede encadenar el selector (Android/Desktop).
+        every { imagePicker.canOpenPickerAfterDialog } returns true
+        every { imageSourceRepository.imageSource() } returns flowOf(ImageSourcePreference.GALLERY)
+        // Por defecto el aviso ya se mostró: los tests existentes van directos al selector.
+        every { imageSourceRepository.isSourceNoticePending() } returns flowOf(false)
+        everySuspend { imageSourceRepository.markSourceNoticeShown() } returns Unit
     }
 
     @AfterTest
@@ -98,10 +119,79 @@ class AnalysisViewModelTest {
     }
 
     @Test
+    fun `given the notice is pending when selecting then shows it instead of opening the picker`() =
+        runTest(dispatcher) {
+            // Given
+            every { imageSourceRepository.isSourceNoticePending() } returns flowOf(true)
+            everySuspend { imagePicker.pickImage(any()) } returns Result.Success(validImage)
+            val viewModel = buildViewModel()
+            advanceUntilIdle()
+
+            // When
+            viewModel.onEvent(AnalysisUiEvent.SelectImage)
+            advanceUntilIdle()
+
+            // Then: el selector NO llegó a abrirse, o el mock habría dejado la imagen en el estado.
+            assertTrue(viewModel.uiState.value.imageSourceNoticeVisible)
+            assertNull(viewModel.uiState.value.selectedImage)
+        }
+
+    @Test
+    fun `given a platform that can chain when dismissing the notice then opens the picker`() =
+        runTest(dispatcher) {
+            // Given: Android y Desktop. Un solo toque: aceptar el aviso ya trae la imagen.
+            every { imageSourceRepository.isSourceNoticePending() } returns flowOf(true)
+            everySuspend { imagePicker.pickImage(any()) } returns Result.Success(validImage)
+            val viewModel = buildViewModel()
+            viewModel.onEvent(AnalysisUiEvent.SelectImage)
+            advanceUntilIdle()
+            // Comprobar que el aviso está DELANTE evita que el test pase por no haberse mostrado nunca.
+            assertTrue(viewModel.uiState.value.imageSourceNoticeVisible)
+            assertFalse(viewModel.uiState.value.imageSourceNoticeNeedsRetap)
+
+            // When
+            viewModel.onEvent(AnalysisUiEvent.DismissImageSourceNotice)
+            advanceUntilIdle()
+
+            // Then
+            assertFalse(viewModel.uiState.value.imageSourceNoticeVisible)
+            assertEquals(validImage, viewModel.uiState.value.selectedImage)
+            verifySuspend { imageSourceRepository.markSourceNoticeShown() }
+        }
+
+    /**
+     * En iOS encadenar cuelga a FileKit sin recuperación posible (ver `dismissImageSourceNotice`), así
+     * que el aviso avisa de que hay que volver a pulsar y el selector no se abre solo.
+     */
+    @Test
+    fun `given a platform that cannot chain when dismissing the notice then waits for another tap`() =
+        runTest(dispatcher) {
+            // Given: iOS.
+            every { imagePicker.canOpenPickerAfterDialog } returns false
+            every { imageSourceRepository.isSourceNoticePending() } returns flowOf(true)
+            everySuspend { imagePicker.pickImage(any()) } returns Result.Success(validImage)
+            val viewModel = buildViewModel()
+            viewModel.onEvent(AnalysisUiEvent.SelectImage)
+            advanceUntilIdle()
+            assertTrue(viewModel.uiState.value.imageSourceNoticeVisible)
+            assertTrue(viewModel.uiState.value.imageSourceNoticeNeedsRetap)
+
+            // When
+            viewModel.onEvent(AnalysisUiEvent.DismissImageSourceNotice)
+            advanceUntilIdle()
+
+            // Then: sin imagen y sin quedarse "picking", listo para la segunda pulsación.
+            assertFalse(viewModel.uiState.value.imageSourceNoticeVisible)
+            assertNull(viewModel.uiState.value.selectedImage)
+            assertFalse(viewModel.uiState.value.isPicking)
+            verifySuspend { imageSourceRepository.markSourceNoticeShown() }
+        }
+
+    @Test
     fun `given a valid image when selecting then stores it and enables scan`() =
         runTest(dispatcher) {
             // Given
-            everySuspend { imagePicker.pickImage() } returns Result.Success(validImage)
+            everySuspend { imagePicker.pickImage(any()) } returns Result.Success(validImage)
             val viewModel = buildViewModel()
 
             // When
@@ -120,7 +210,7 @@ class AnalysisViewModelTest {
     fun `given the user cancels when selecting then keeps the previous state`() =
         runTest(dispatcher) {
             // Given
-            everySuspend { imagePicker.pickImage() } returns Result.Success(null)
+            everySuspend { imagePicker.pickImage(any()) } returns Result.Success(null)
             val viewModel = buildViewModel()
 
             // When
@@ -139,7 +229,7 @@ class AnalysisViewModelTest {
     fun `given an unsupported format when selecting then shows an error and does not enable scan`() =
         runTest(dispatcher) {
             // Given
-            everySuspend { imagePicker.pickImage() } returns
+            everySuspend { imagePicker.pickImage(any()) } returns
                 Result.Success(SelectedImage(ByteArray(1), "muestra.gif", "image/gif", 1))
             val viewModel = buildViewModel()
 
@@ -158,7 +248,7 @@ class AnalysisViewModelTest {
     fun `given a selected image when removing then returns to the empty state`() =
         runTest(dispatcher) {
             // Given
-            everySuspend { imagePicker.pickImage() } returns Result.Success(validImage)
+            everySuspend { imagePicker.pickImage(any()) } returns Result.Success(validImage)
             val viewModel = buildViewModel()
             viewModel.onEvent(AnalysisUiEvent.SelectImage)
             advanceUntilIdle()
@@ -176,7 +266,7 @@ class AnalysisViewModelTest {
     fun `given an error is shown when dismissing then clears the error`() =
         runTest(dispatcher) {
             // Given
-            everySuspend { imagePicker.pickImage() } returns Result.Failure(ImageError.ReadFailed)
+            everySuspend { imagePicker.pickImage(any()) } returns Result.Failure(ImageError.ReadFailed)
             val viewModel = buildViewModel()
             viewModel.onEvent(AnalysisUiEvent.SelectImage)
             advanceUntilIdle()
@@ -192,7 +282,7 @@ class AnalysisViewModelTest {
     fun `given only non-cell detections when confirming scan then shows the no-cells popup`() =
         runTest(dispatcher) {
             // Given
-            everySuspend { imagePicker.pickImage() } returns Result.Success(validImage)
+            everySuspend { imagePicker.pickImage(any()) } returns Result.Success(validImage)
             everySuspend { cellDetector.detect(any()) } returns
                 Result.Success(listOf(detection(CellClass.ARTEFACTO)))
             val viewModel = readyToScanViewModel()
@@ -211,7 +301,7 @@ class AnalysisViewModelTest {
     fun `given inference fails when confirming scan then shows the inference error popup`() =
         runTest(dispatcher) {
             // Given
-            everySuspend { imagePicker.pickImage() } returns Result.Success(validImage)
+            everySuspend { imagePicker.pickImage(any()) } returns Result.Success(validImage)
             everySuspend { cellDetector.detect(any()) } returns Result.Failure(InferenceError.InferenceFailed)
             val viewModel = readyToScanViewModel()
 
@@ -227,7 +317,7 @@ class AnalysisViewModelTest {
     fun `given a saved and synced sample when confirming scan then clears the image and emits the saved event`() =
         runTest(dispatcher) {
             // Given
-            everySuspend { imagePicker.pickImage() } returns Result.Success(validImage)
+            everySuspend { imagePicker.pickImage(any()) } returns Result.Success(validImage)
             everySuspend { cellDetector.detect(any()) } returns
                 Result.Success(listOf(detection(CellClass.LINFOCITO)))
             everySuspend { analysisImageStore.save(any(), any()) } returns Result.Success("images/sample.png")
@@ -255,7 +345,7 @@ class AnalysisViewModelTest {
     fun `given sync fails when confirming scan then keeps the image and shows the sync error`() =
         runTest(dispatcher) {
             // Given
-            everySuspend { imagePicker.pickImage() } returns Result.Success(validImage)
+            everySuspend { imagePicker.pickImage(any()) } returns Result.Success(validImage)
             everySuspend { cellDetector.detect(any()) } returns
                 Result.Success(listOf(detection(CellClass.LINFOCITO)))
             everySuspend { analysisImageStore.save(any(), any()) } returns Result.Success("images/sample.png")

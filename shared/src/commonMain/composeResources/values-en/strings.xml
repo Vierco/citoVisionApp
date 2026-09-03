@@ -50,6 +50,9 @@
     <string name="settings_theme_light">Light</string>
     <string name="settings_theme_dark">Dark</string>
     <string name="settings_theme_system">Follow system</string>
+    <string name="settings_image_source_title">Image source</string>
+    <string name="settings_image_source_gallery">Photo gallery</string>
+    <string name="settings_image_source_files">Files</string>
     <string name="settings_clear_analysis">Clear all local analysis</string>
     <string name="settings_clear_confirm_title">Delete all local analyses?</string>
     <string name="settings_clear_confirm_message">All analyses stored on this device will be removed. This action cannot be undone.</string>
@@ -146,6 +149,9 @@
     <string name="analysis_sync_error_message">The analysis was saved to your local history, but could not be uploaded to the cloud. Retry?</string>
     <string name="analysis_sync_retry">Retry</string>
     <string name="analysis_analyzing">Analyzing sample…</string>
+    <string name="analysis_image_source_notice_title">Image source</string>
+    <string name="analysis_image_source_notice_retap">Tap “Select Image” again to continue.</string>
+    <string name="analysis_image_source_notice_message">Samples are looked up in the photo gallery. If yours are stored as files in a folder, change the source in Settings.</string>
     <string name="analysis_no_cells_title">No cells</string>
     <string name="analysis_no_cells_message">No cells were detected in the image. Try another sample.</string>
     <string name="analysis_inference_error_title">Analysis error</string>

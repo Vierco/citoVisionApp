@@ -3,6 +3,7 @@ package dev.lovelace.citovision
 import androidx.compose.ui.window.ComposeUIViewController
 import dev.lovelace.citovision.composition.di.initKoin
 import dev.lovelace.citovision.config.IosBuildConfig
+import dev.lovelace.citovision.infrastructure.auth.FreshInstallSessionGuard
 import dev.lovelace.citovision.infrastructure.remote.FIREBASE_WEB_API_KEY_PROPERTY
 import io.github.aakira.napier.DebugAntilog
 import io.github.aakira.napier.Napier
@@ -23,6 +24,9 @@ fun bootstrap() {
     if (initialized) return
     initialized = true
     Napier.base(DebugAntilog())
+    // Antes de montar el grafo, porque el Keychain sobrevive a la desinstalación y podría conservar la
+    // sesión de una instalación anterior. En cuanto exista Koin, alguien puede leerla.
+    FreshInstallSessionGuard().clearSessionIfReinstalled()
     initKoin {
         // Identifica el proyecto Firebase en las llamadas REST (auth, Firestore y Storage). No es un
         // secreto de servidor y nunca se loguea; se hornea en build desde local.properties.

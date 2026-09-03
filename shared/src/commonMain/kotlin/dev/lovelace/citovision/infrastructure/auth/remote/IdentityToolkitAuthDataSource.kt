@@ -16,6 +16,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.http.parameters
 import io.ktor.serialization.ContentConvertException
+import kotlinx.io.IOException
 import kotlin.coroutines.cancellation.CancellationException
 
 /**
@@ -107,10 +108,16 @@ class IdentityToolkitAuthDataSource(
             // Respuesta ilegible / contrato inesperado: NO es un fallo de red.
             Napier.w("Respuesta de auth REST ilegible", e, tag = "IdentityToolkit")
             Result.Failure(AuthError.Unknown("serialization"))
-        } catch (e: Exception) {
-            // Boundary de red del RemoteDataSource: sin conexión o socket.
-            Napier.w("Fallo no tipado en auth REST", e, tag = "IdentityToolkit")
+        } catch (e: IOException) {
+            // Fallo real de entrada/salida: sin conexión, DNS que no resuelve, socket cortado, TLS.
+            Napier.w("Fallo de red en auth REST", e, tag = "IdentityToolkit")
             Result.Failure(AuthError.Network)
+        } catch (e: Exception) {
+            // Cualquier otra cosa NO es la red, y anunciarla como tal manda a buscar donde no está: con
+            // KTOR-7943 el servidor respondía 200 y la app decía "comprueba tu conexión". Un error
+            // desconocido se admite como desconocido; el tipo va al log, nunca a la UI.
+            Napier.w("Fallo inesperado en auth REST", e, tag = "IdentityToolkit")
+            Result.Failure(AuthError.Unknown(e::class.simpleName))
         }
 
     private suspend fun ClientRequestException.identityToolkitErrorCode(): String? =

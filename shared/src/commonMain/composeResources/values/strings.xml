@@ -49,6 +49,9 @@
     <string name="settings_theme_light">Claro</string>
     <string name="settings_theme_dark">Oscuro</string>
     <string name="settings_theme_system">Seguir sistema</string>
+    <string name="settings_image_source_title">Origen de las imágenes</string>
+    <string name="settings_image_source_gallery">Galería de fotos</string>
+    <string name="settings_image_source_files">Archivos</string>
     <string name="settings_clear_analysis">Borrar todos los análisis locales</string>
     <string name="settings_clear_confirm_title">¿Borrar todos los análisis locales?</string>
     <string name="settings_clear_confirm_message">Se eliminarán todos los análisis guardados en este dispositivo. Esta acción no se puede deshacer.</string>
@@ -145,6 +148,9 @@
     <string name="analysis_sync_error_message">El análisis se guardó en tu historial local, pero no pudo subirse a la nube. ¿Reintentar?</string>
     <string name="analysis_sync_retry">Reintentar</string>
     <string name="analysis_analyzing">Analizando muestra…</string>
+    <string name="analysis_image_source_notice_title">Origen de las imágenes</string>
+    <string name="analysis_image_source_notice_retap">Pulsa de nuevo «Seleccionar Imagen» para continuar.</string>
+    <string name="analysis_image_source_notice_message">Las muestras se buscan en la galería de fotos. Si las tuyas están guardadas como ficheros en una carpeta, cambia el origen en Ajustes.</string>
     <string name="analysis_no_cells_title">Sin células</string>
     <string name="analysis_no_cells_message">No se han detectado células en la imagen. Prueba con otra muestra.</string>
     <string name="analysis_inference_error_title">Error de análisis</string>

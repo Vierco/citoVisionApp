@@ -13,6 +13,8 @@
 		AA0000000000000000000043 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000033 /* Preview Assets.xcassets */; };
 		AA0000000000000000000044 /* GoogleSignInPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000036 /* GoogleSignInPresenter.swift */; };
 		AA0000000000000000000045 /* OnnxRuntimeBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000037 /* OnnxRuntimeBridge.swift */; };
+		AA0000000000000000000046 /* NativeTabBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000038 /* NativeTabBar.swift */; };
+		AA0000000000000000000047 /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000039 /* AppIcon.icon */; };
 		D35D0224303F5DA700F2E758 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = D35D0223303F5DA700F2E758 /* GoogleSignIn */; };
 		D3F023FC3045DD3200FCC521 /* onnxruntime in Frameworks */ = {isa = PBXBuildFile; productRef = D3F023FB3045DD3200FCC521 /* onnxruntime */; };
 /* End PBXBuildFile section */
@@ -27,6 +29,8 @@
 		AA0000000000000000000035 /* Config.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
 		AA0000000000000000000036 /* GoogleSignInPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoogleSignInPresenter.swift; sourceTree = "<group>"; };
 		AA0000000000000000000037 /* OnnxRuntimeBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnnxRuntimeBridge.swift; sourceTree = "<group>"; };
+		AA0000000000000000000038 /* NativeTabBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeTabBar.swift; sourceTree = "<group>"; };
+		AA0000000000000000000039 /* AppIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = AppIcon.icon; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -66,6 +70,8 @@
 				AA0000000000000000000031 /* ContentView.swift */,
 				AA0000000000000000000036 /* GoogleSignInPresenter.swift */,
 				AA0000000000000000000037 /* OnnxRuntimeBridge.swift */,
+				AA0000000000000000000038 /* NativeTabBar.swift */,
+				AA0000000000000000000039 /* AppIcon.icon */,
 				AA0000000000000000000032 /* Assets.xcassets */,
 				AA0000000000000000000006 /* Preview Content */,
 				AA0000000000000000000034 /* Info.plist */,
@@ -154,6 +160,7 @@
 			files = (
 				AA0000000000000000000043 /* Preview Assets.xcassets in Resources */,
 				AA0000000000000000000042 /* Assets.xcassets in Resources */,
+				AA0000000000000000000047 /* AppIcon.icon in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -189,6 +196,7 @@
 				AA0000000000000000000041 /* ContentView.swift in Sources */,
 				AA0000000000000000000044 /* GoogleSignInPresenter.swift in Sources */,
 				AA0000000000000000000045 /* OnnxRuntimeBridge.swift in Sources */,
+				AA0000000000000000000046 /* NativeTabBar.swift in Sources */,
 				AA0000000000000000000040 /* iOSApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

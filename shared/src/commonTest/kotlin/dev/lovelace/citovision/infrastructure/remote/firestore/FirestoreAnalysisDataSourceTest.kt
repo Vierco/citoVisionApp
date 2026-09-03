@@ -13,9 +13,11 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.content.TextContent
 import io.ktor.http.headersOf
 import kotlinx.coroutines.test.runTest
+import kotlinx.io.IOException
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertIs
 import kotlin.test.assertTrue
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
@@ -135,4 +137,31 @@ class FirestoreAnalysisDataSourceTest {
 
             assertEquals(Result.Failure(RemoteAnalysisError.Unauthorized), result)
         }
+
+    @Test
+    fun `given a network failure when saving then maps to network error`() =
+        runTest {
+            val ds = failingDataSource(IOException("no network"))
+
+            val result = ds.saveAnalysis(ownerUid = "u1", analysis = analysis, imageUrl = "https://img/a1")
+
+            assertEquals(Result.Failure(RemoteAnalysisError.Network), result)
+        }
+
+    /** Solo un fallo de E/S es "sin conexión"; lo demás se admite como desconocido. */
+    @Test
+    fun `given an unexpected failure when saving then maps to unknown instead of network`() =
+        runTest {
+            val ds = failingDataSource(IllegalStateException("bug"))
+
+            val result = ds.saveAnalysis(ownerUid = "u1", analysis = analysis, imageUrl = "https://img/a1")
+
+            assertTrue(result is Result.Failure)
+            assertIs<RemoteAnalysisError.Unknown>(result.error)
+        }
+
+    private fun failingDataSource(failure: Throwable): FirestoreAnalysisDataSource {
+        val engine = MockEngine { throw failure }
+        return FirestoreAnalysisDataSource(createHttpClient(engine), projectId = "p", apiKey = "k")
+    }
 }

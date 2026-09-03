@@ -11,6 +11,8 @@ struct iOSApp: App {
         GoogleSignInPresenter.install()
         // ONNX Runtime también vive en Swift; Kotlin le pasa el tensor por el puente (ADR-0007).
         OnnxRuntimeBridge.install()
+        // La barra de pestañas la dibuja SwiftUI encima de Compose, que le publica su estado (ADR-0008).
+        TabBarModel.shared.install()
     }
 
     var body: some Scene {

@@ -11,8 +11,10 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.content.TextContent
 import io.ktor.http.headersOf
 import kotlinx.coroutines.test.runTest
+import kotlinx.io.IOException
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertIs
 import kotlin.test.assertTrue
 
 class IdentityToolkitAuthDataSourceTest {
@@ -133,11 +135,29 @@ class IdentityToolkitAuthDataSourceTest {
     @Test
     fun `given a network failure when signing in then maps to network error`() =
         runTest {
-            val engine = MockEngine { throw RuntimeException("no network") }
+            val engine = MockEngine { throw IOException("no network") }
             val ds = IdentityToolkitAuthDataSource(createHttpClient(engine), apiKey = "test-key")
 
             val result = ds.signInWithPassword("a@b.com", "secret")
 
             assertEquals(Result.Failure(AuthError.Network), result)
+        }
+
+    /**
+     * Antes cualquier excepción inesperada se anunciaba como falta de conexión, y eso mandaba al usuario
+     * —y a quien depuraba— a mirar la red cuando el fallo estaba en otro sitio (así se camufló KTOR-7943).
+     */
+    @Test
+    fun `given an unexpected failure when signing in then maps to unknown instead of network`() =
+        runTest {
+            val engine = MockEngine { throw IllegalStateException("bug") }
+            val ds = IdentityToolkitAuthDataSource(createHttpClient(engine), apiKey = "test-key")
+
+            val result = ds.signInWithPassword("a@b.com", "secret")
+
+            // Se comprueba el caso, no el nombre concreto de la excepción: ese detalle depende de si el
+            // motor de Ktor la envuelve, y no es lo que esta regla protege.
+            assertTrue(result is Result.Failure)
+            assertIs<AuthError.Unknown>(result.error)
         }
 }

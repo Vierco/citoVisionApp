@@ -1,20 +1,26 @@
 package dev.lovelace.citovision.application.usecases
 
 import dev.lovelace.citovision.application.ports.ImagePicker
+import dev.lovelace.citovision.application.ports.ImageSourceRepository
 import dev.lovelace.citovision.core.result.Result
 import dev.lovelace.citovision.core.result.fold
 import dev.lovelace.citovision.domain.entities.SelectedImage
 import dev.lovelace.citovision.domain.errors.ImageError
+import kotlinx.coroutines.flow.first
 
 /**
  * Abre el selector de imagen y valida el resultado contra las reglas de negocio (SPEC-0003):
  * formato permitido (RN-1) y tamaño máximo (RN-2). Una cancelación se propaga como `Success(null)`.
+ *
+ * La fuente (fototeca o ficheros) se resuelve **aquí**, leyendo la preferencia de Ajustes, para que la
+ * pantalla de Análisis no tenga que saber de dónde salen las imágenes: solo pide una.
  */
 class PickImageUseCase(
     private val imagePicker: ImagePicker,
+    private val imageSourceRepository: ImageSourceRepository,
 ) {
     suspend operator fun invoke(): Result<SelectedImage?, ImageError> =
-        imagePicker.pickImage().fold(
+        imagePicker.pickImage(imageSourceRepository.imageSource().first()).fold(
             onSuccess = { image ->
                 when {
                     image == null -> Result.Success(null) // cancelado

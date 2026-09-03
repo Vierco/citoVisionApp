@@ -1,13 +1,18 @@
 package dev.lovelace.citovision.composition.di
 
 import dev.lovelace.citovision.application.usecases.AnalyzeSampleUseCase
+import dev.lovelace.citovision.application.usecases.CanOpenPickerAfterNoticeUseCase
 import dev.lovelace.citovision.application.usecases.DeleteAllAnalysesUseCase
 import dev.lovelace.citovision.application.usecases.DeleteAnalysisUseCase
 import dev.lovelace.citovision.application.usecases.DeleteRemoteAnalysisUseCase
 import dev.lovelace.citovision.application.usecases.HasActiveSessionUseCase
+import dev.lovelace.citovision.application.usecases.ImageSourceOptionsAvailableUseCase
 import dev.lovelace.citovision.application.usecases.ListPatientCodesUseCase
+import dev.lovelace.citovision.application.usecases.MarkImageSourceNoticeShownUseCase
 import dev.lovelace.citovision.application.usecases.ObserveAnalysesUseCase
 import dev.lovelace.citovision.application.usecases.ObserveCurrentUserUseCase
+import dev.lovelace.citovision.application.usecases.ObserveImageSourceNoticeUseCase
+import dev.lovelace.citovision.application.usecases.ObserveImageSourceUseCase
 import dev.lovelace.citovision.application.usecases.ObserveLastPatientCodeUseCase
 import dev.lovelace.citovision.application.usecases.ObserveSessionStatusUseCase
 import dev.lovelace.citovision.application.usecases.ObserveThemePreferenceUseCase
@@ -16,6 +21,7 @@ import dev.lovelace.citovision.application.usecases.ProcessPendingSyncUseCase
 import dev.lovelace.citovision.application.usecases.SaveLastPatientCodeUseCase
 import dev.lovelace.citovision.application.usecases.SearchPatientAnalysesUseCase
 import dev.lovelace.citovision.application.usecases.SendPasswordResetUseCase
+import dev.lovelace.citovision.application.usecases.SetImageSourceUseCase
 import dev.lovelace.citovision.application.usecases.SetThemePreferenceUseCase
 import dev.lovelace.citovision.application.usecases.SignInAsGuestUseCase
 import dev.lovelace.citovision.application.usecases.SignInWithEmailUseCase
@@ -53,4 +59,10 @@ val applicationModule =
         factoryOf(::SetThemePreferenceUseCase)
         factoryOf(::ObserveLastPatientCodeUseCase)
         factoryOf(::SaveLastPatientCodeUseCase)
+        factoryOf(::ObserveImageSourceUseCase)
+        factoryOf(::SetImageSourceUseCase)
+        factoryOf(::ObserveImageSourceNoticeUseCase)
+        factoryOf(::MarkImageSourceNoticeShownUseCase)
+        factoryOf(::ImageSourceOptionsAvailableUseCase)
+        factoryOf(::CanOpenPickerAfterNoticeUseCase)
     }

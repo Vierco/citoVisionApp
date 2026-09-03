@@ -12,9 +12,11 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.content.TextContent
 import io.ktor.http.headersOf
 import kotlinx.coroutines.test.runTest
+import kotlinx.io.IOException
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertIs
 import kotlin.test.assertTrue
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
@@ -82,4 +84,31 @@ class FirestoreFeedbackDataSourceTest {
             assertTrue(result is Result.Failure)
             assertTrue(result.error is RemoteFeedbackError.Unknown)
         }
+
+    @Test
+    fun `given a network failure when submitting then maps to network error`() =
+        runTest {
+            val ds = failingDataSource(IOException("no network"))
+
+            val result = ds.submit(feedback(ownerUid = "u1"))
+
+            assertEquals(Result.Failure(RemoteFeedbackError.Network), result)
+        }
+
+    /** Solo un fallo de E/S es "sin conexión"; lo demás se admite como desconocido. */
+    @Test
+    fun `given an unexpected failure when submitting then maps to unknown instead of network`() =
+        runTest {
+            val ds = failingDataSource(IllegalStateException("bug"))
+
+            val result = ds.submit(feedback(ownerUid = "u1"))
+
+            assertTrue(result is Result.Failure)
+            assertIs<RemoteFeedbackError.Unknown>(result.error)
+        }
+
+    private fun failingDataSource(failure: Throwable): FirestoreFeedbackDataSource {
+        val engine = MockEngine { throw failure }
+        return FirestoreFeedbackDataSource(createHttpClient(engine), projectId = "p", apiKey = "k")
+    }
 }

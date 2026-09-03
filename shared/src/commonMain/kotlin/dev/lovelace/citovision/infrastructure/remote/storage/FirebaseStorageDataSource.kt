@@ -16,6 +16,7 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.http.encodeURLParameter
 import io.ktor.serialization.ContentConvertException
+import kotlinx.io.IOException
 import kotlinx.serialization.Serializable
 import kotlin.coroutines.cancellation.CancellationException
 
@@ -91,9 +92,15 @@ class FirebaseStorageDataSource(
         } catch (e: ContentConvertException) {
             Napier.w("Respuesta de Storage ilegible", e, tag = "Storage")
             Result.Failure(RemoteAnalysisError.Serialization)
-        } catch (e: Exception) {
-            Napier.w("Fallo no tipado en Storage", e, tag = "Storage")
+        } catch (e: IOException) {
+            // Fallo real de entrada/salida: sin conexión, DNS que no resuelve, socket cortado, TLS.
+            Napier.w("Fallo de red en Storage", e, tag = "Storage")
             Result.Failure(RemoteAnalysisError.Network)
+        } catch (e: Exception) {
+            // Lo desconocido se admite como desconocido: anunciarlo como falta de conexión manda a buscar
+            // donde no está. El tipo va al log, nunca a la UI.
+            Napier.w("Fallo inesperado en Storage", e, tag = "Storage")
+            Result.Failure(RemoteAnalysisError.Unknown(e::class.simpleName))
         }
 
     private companion object {

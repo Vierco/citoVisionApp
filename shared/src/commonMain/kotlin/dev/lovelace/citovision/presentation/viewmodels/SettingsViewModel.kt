@@ -5,13 +5,18 @@ import androidx.lifecycle.viewModelScope
 import dev.lovelace.citovision.application.ports.UrlOpener
 import dev.lovelace.citovision.application.usecases.DeleteAllAnalysesUseCase
 import dev.lovelace.citovision.application.usecases.FeedbackResult
+import dev.lovelace.citovision.application.usecases.ImageSourceOptionsAvailableUseCase
 import dev.lovelace.citovision.application.usecases.ObserveCurrentUserUseCase
+import dev.lovelace.citovision.application.usecases.ObserveImageSourceUseCase
 import dev.lovelace.citovision.application.usecases.ObserveSessionStatusUseCase
 import dev.lovelace.citovision.application.usecases.ObserveThemePreferenceUseCase
 import dev.lovelace.citovision.application.usecases.SessionStatus
+import dev.lovelace.citovision.application.usecases.SetImageSourceUseCase
 import dev.lovelace.citovision.application.usecases.SetThemePreferenceUseCase
 import dev.lovelace.citovision.application.usecases.SignOutUseCase
 import dev.lovelace.citovision.application.usecases.SubmitFeedbackUseCase
+import dev.lovelace.citovision.domain.settings.ImageSourcePreference
+import dev.lovelace.citovision.domain.settings.ThemePreference
 import dev.lovelace.citovision.domain.validation.isValidEmail
 import dev.lovelace.citovision.presentation.events.SettingsUiEvent
 import dev.lovelace.citovision.presentation.navigation.NavigationEvent
@@ -38,9 +43,12 @@ class SettingsViewModel(
     private val submitFeedback: SubmitFeedbackUseCase,
     private val urlOpener: UrlOpener,
     private val setThemePreference: SetThemePreferenceUseCase,
+    private val setImageSource: SetImageSourceUseCase,
     observeSessionStatus: ObserveSessionStatusUseCase,
     observeCurrentUser: ObserveCurrentUserUseCase,
     observeThemePreference: ObserveThemePreferenceUseCase,
+    observeImageSource: ObserveImageSourceUseCase,
+    imageSourceOptionsAvailable: ImageSourceOptionsAvailableUseCase,
 ) : ViewModel() {
     private val clearedConfirmation = MutableStateFlow(false)
     private val feedbackForm = MutableStateFlow(FeedbackForm())
@@ -51,8 +59,9 @@ class SettingsViewModel(
             observeCurrentUser(),
             clearedConfirmation,
             feedbackForm,
-            observeThemePreference(),
-        ) { status, user, cleared, feedback, theme ->
+            // `combine` solo tipa hasta cinco flujos, así que las dos preferencias viajan juntas.
+            combine(observeThemePreference(), observeImageSource(), ::UserPreferences),
+        ) { status, user, cleared, feedback, preferences ->
             SettingsUiState(
                 sessionStatus = status,
                 email = user?.email,
@@ -69,7 +78,9 @@ class SettingsViewModel(
                 feedbackSentVisible = feedback.sentVisible,
                 feedbackErrorVisible = feedback.errorVisible,
                 feedbackRequiresAccount = status != SessionStatus.ACCOUNT || feedback.requiresAccountVisible,
-                themePreference = theme,
+                themePreference = preferences.theme,
+                imageSource = preferences.imageSource,
+                imageSourceOptionsVisible = imageSourceOptionsAvailable(),
             )
         }.stateIn(
             scope = viewModelScope,
@@ -141,12 +152,21 @@ class SettingsViewModel(
             is SettingsUiEvent.SetTheme ->
                 viewModelScope.launch { setThemePreference(event.preference) }
 
+            is SettingsUiEvent.SetImageSource ->
+                viewModelScope.launch { setImageSource(event.preference) }
+
             SettingsUiEvent.NavigateBack ->
                 viewModelScope.launch {
                     _navigationEvents.send(NavigationEvent.Back)
                 }
         }
     }
+
+    /** Empaqueta las preferencias de Ajustes para no agotar los cinco flujos que `combine` tipa. */
+    private data class UserPreferences(
+        val theme: ThemePreference,
+        val imageSource: ImageSourcePreference,
+    )
 
     private data class FeedbackForm(
         val visible: Boolean = false,

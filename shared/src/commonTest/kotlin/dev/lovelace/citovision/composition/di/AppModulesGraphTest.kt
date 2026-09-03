@@ -12,15 +12,21 @@ import dev.lovelace.citovision.application.ports.OnnxRunner
 import dev.lovelace.citovision.application.ports.RemoteAnalysisSync
 import dev.lovelace.citovision.application.ports.SessionRepository
 import dev.lovelace.citovision.application.usecases.AnalyzeSampleUseCase
+import dev.lovelace.citovision.application.usecases.CanOpenPickerAfterNoticeUseCase
 import dev.lovelace.citovision.application.usecases.DeleteAnalysisUseCase
 import dev.lovelace.citovision.application.usecases.HasActiveSessionUseCase
+import dev.lovelace.citovision.application.usecases.ImageSourceOptionsAvailableUseCase
+import dev.lovelace.citovision.application.usecases.MarkImageSourceNoticeShownUseCase
 import dev.lovelace.citovision.application.usecases.ObserveAnalysesUseCase
+import dev.lovelace.citovision.application.usecases.ObserveImageSourceNoticeUseCase
+import dev.lovelace.citovision.application.usecases.ObserveImageSourceUseCase
 import dev.lovelace.citovision.application.usecases.ObserveLastPatientCodeUseCase
 import dev.lovelace.citovision.application.usecases.ObserveSessionStatusUseCase
 import dev.lovelace.citovision.application.usecases.ObserveThemePreferenceUseCase
 import dev.lovelace.citovision.application.usecases.PickImageUseCase
 import dev.lovelace.citovision.application.usecases.SaveLastPatientCodeUseCase
 import dev.lovelace.citovision.application.usecases.SendPasswordResetUseCase
+import dev.lovelace.citovision.application.usecases.SetImageSourceUseCase
 import dev.lovelace.citovision.application.usecases.SetThemePreferenceUseCase
 import dev.lovelace.citovision.application.usecases.SignInAsGuestUseCase
 import dev.lovelace.citovision.application.usecases.SignInWithEmailUseCase
@@ -84,6 +90,12 @@ class AppModulesGraphTest {
         assertNotNull(koin.get<SubmitFeedbackUseCase>())
         assertNotNull(koin.get<ObserveThemePreferenceUseCase>())
         assertNotNull(koin.get<SetThemePreferenceUseCase>())
+        assertNotNull(koin.get<ObserveImageSourceUseCase>())
+        assertNotNull(koin.get<SetImageSourceUseCase>())
+        assertNotNull(koin.get<ObserveImageSourceNoticeUseCase>())
+        assertNotNull(koin.get<MarkImageSourceNoticeShownUseCase>())
+        assertNotNull(koin.get<ImageSourceOptionsAvailableUseCase>())
+        assertNotNull(koin.get<CanOpenPickerAfterNoticeUseCase>())
         assertNotNull(koin.get<ObserveLastPatientCodeUseCase>())
         assertNotNull(koin.get<SaveLastPatientCodeUseCase>())
         assertNotNull(koin.get<SessionRepository>())

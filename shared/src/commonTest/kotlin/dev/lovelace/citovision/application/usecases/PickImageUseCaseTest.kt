@@ -1,13 +1,19 @@
 package dev.lovelace.citovision.application.usecases
 
 import dev.lovelace.citovision.application.ports.ImagePicker
+import dev.lovelace.citovision.application.ports.ImageSourceRepository
 import dev.lovelace.citovision.core.result.Result
 import dev.lovelace.citovision.domain.entities.SelectedImage
 import dev.lovelace.citovision.domain.errors.ImageError
+import dev.lovelace.citovision.domain.settings.ImageSourcePreference
 import dev.mokkery.answering.returns
+import dev.mokkery.every
 import dev.mokkery.everySuspend
+import dev.mokkery.matcher.any
 import dev.mokkery.mock
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -17,7 +23,15 @@ import kotlin.test.assertEquals
  */
 class PickImageUseCaseTest {
     private val imagePicker = mock<ImagePicker>()
-    private val useCase = PickImageUseCase(imagePicker)
+    private val imageSourceRepository = mock<ImageSourceRepository>()
+    private val useCase = PickImageUseCase(imagePicker, imageSourceRepository)
+
+    @BeforeTest
+    fun setUp() {
+        // El use case lee la fuente elegida en Ajustes antes de abrir el selector; aquí da igual cuál
+        // sea, porque lo que se comprueba son las reglas de validación sobre el resultado.
+        every { imageSourceRepository.imageSource() } returns flowOf(ImageSourcePreference.GALLERY)
+    }
 
     private fun image(
         mimeType: String,
@@ -29,7 +43,7 @@ class PickImageUseCaseTest {
         runTest {
             // Given
             val picked = image("image/jpeg", sizeBytes = 1_000)
-            everySuspend { imagePicker.pickImage() } returns Result.Success(picked)
+            everySuspend { imagePicker.pickImage(any()) } returns Result.Success(picked)
 
             // When
             val result = useCase()
@@ -42,7 +56,7 @@ class PickImageUseCaseTest {
     fun `given the user cancels when picking then returns success with null`() =
         runTest {
             // Given
-            everySuspend { imagePicker.pickImage() } returns Result.Success(null)
+            everySuspend { imagePicker.pickImage(any()) } returns Result.Success(null)
 
             // When
             val result = useCase()
@@ -55,7 +69,7 @@ class PickImageUseCaseTest {
     fun `given an unsupported format when picking then fails with UnsupportedFormat`() =
         runTest {
             // Given
-            everySuspend { imagePicker.pickImage() } returns Result.Success(image("image/gif", sizeBytes = 1_000))
+            everySuspend { imagePicker.pickImage(any()) } returns Result.Success(image("image/gif", sizeBytes = 1_000))
 
             // When
             val result = useCase()
@@ -69,7 +83,7 @@ class PickImageUseCaseTest {
         runTest {
             // Given
             val tooBig = PickImageUseCase.MAX_SIZE_BYTES + 1
-            everySuspend { imagePicker.pickImage() } returns Result.Success(image("image/png", sizeBytes = tooBig))
+            everySuspend { imagePicker.pickImage(any()) } returns Result.Success(image("image/png", sizeBytes = tooBig))
 
             // When
             val result = useCase()
@@ -82,7 +96,7 @@ class PickImageUseCaseTest {
     fun `given the picker fails when picking then propagates the failure`() =
         runTest {
             // Given
-            everySuspend { imagePicker.pickImage() } returns Result.Failure(ImageError.ReadFailed)
+            everySuspend { imagePicker.pickImage(any()) } returns Result.Failure(ImageError.ReadFailed)
 
             // When
             val result = useCase()

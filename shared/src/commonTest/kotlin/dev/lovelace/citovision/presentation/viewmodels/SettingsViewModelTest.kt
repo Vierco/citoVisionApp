@@ -2,21 +2,27 @@ package dev.lovelace.citovision.presentation.viewmodels
 
 import dev.lovelace.citovision.application.ports.AnalysisRepository
 import dev.lovelace.citovision.application.ports.AuthService
+import dev.lovelace.citovision.application.ports.ImagePicker
+import dev.lovelace.citovision.application.ports.ImageSourceRepository
 import dev.lovelace.citovision.application.ports.PatientCodeRepository
 import dev.lovelace.citovision.application.ports.RemoteFeedback
 import dev.lovelace.citovision.application.ports.SessionRepository
 import dev.lovelace.citovision.application.ports.ThemeRepository
 import dev.lovelace.citovision.application.ports.UrlOpener
 import dev.lovelace.citovision.application.usecases.DeleteAllAnalysesUseCase
+import dev.lovelace.citovision.application.usecases.ImageSourceOptionsAvailableUseCase
 import dev.lovelace.citovision.application.usecases.ObserveCurrentUserUseCase
+import dev.lovelace.citovision.application.usecases.ObserveImageSourceUseCase
 import dev.lovelace.citovision.application.usecases.ObserveSessionStatusUseCase
 import dev.lovelace.citovision.application.usecases.ObserveThemePreferenceUseCase
 import dev.lovelace.citovision.application.usecases.SessionStatus
+import dev.lovelace.citovision.application.usecases.SetImageSourceUseCase
 import dev.lovelace.citovision.application.usecases.SetThemePreferenceUseCase
 import dev.lovelace.citovision.application.usecases.SignOutUseCase
 import dev.lovelace.citovision.application.usecases.SubmitFeedbackUseCase
 import dev.lovelace.citovision.core.result.Result
 import dev.lovelace.citovision.domain.entities.AuthUser
+import dev.lovelace.citovision.domain.settings.ImageSourcePreference
 import dev.lovelace.citovision.domain.settings.ThemePreference
 import dev.lovelace.citovision.presentation.events.SettingsUiEvent
 import dev.lovelace.citovision.presentation.navigation.NavigationEvent
@@ -57,6 +63,8 @@ class SettingsViewModelTest {
     private val urlOpener = mock<UrlOpener>()
     private val themeRepository = mock<ThemeRepository>()
     private val patientCodeRepository = mock<PatientCodeRepository>()
+    private val imageSourceRepository = mock<ImageSourceRepository>()
+    private val imagePicker = mock<ImagePicker>()
     private val signOut = SignOutUseCase(authService, sessionRepository, patientCodeRepository)
     private val deleteAllAnalyses = DeleteAllAnalysesUseCase(analysisRepository)
     private val submitFeedback = SubmitFeedbackUseCase(remoteFeedback, authService)
@@ -64,6 +72,9 @@ class SettingsViewModelTest {
     private val observeCurrentUser = ObserveCurrentUserUseCase(authService)
     private val observeThemePreference = ObserveThemePreferenceUseCase(themeRepository)
     private val setThemePreference = SetThemePreferenceUseCase(themeRepository)
+    private val observeImageSource = ObserveImageSourceUseCase(imageSourceRepository)
+    private val setImageSource = SetImageSourceUseCase(imageSourceRepository)
+    private val imageSourceOptionsAvailable = ImageSourceOptionsAvailableUseCase(imagePicker)
     private val dispatcher = StandardTestDispatcher()
 
     @BeforeTest
@@ -71,6 +82,9 @@ class SettingsViewModelTest {
         Dispatchers.setMain(dispatcher)
         // El combine del estado incluye la preferencia de tema; se estabiliza en SYSTEM por defecto.
         every { themeRepository.themePreference() } returns flowOf(ThemePreference.SYSTEM)
+        // Y también el origen de las imágenes, que viaja en el mismo combine.
+        every { imageSourceRepository.imageSource() } returns flowOf(ImageSourcePreference.GALLERY)
+        every { imagePicker.hasDistinctSources } returns true
     }
 
     @AfterTest
@@ -88,6 +102,9 @@ class SettingsViewModelTest {
             observeSessionStatus = observeSessionStatus,
             observeCurrentUser = observeCurrentUser,
             observeThemePreference = observeThemePreference,
+            setImageSource = setImageSource,
+            observeImageSource = observeImageSource,
+            imageSourceOptionsAvailable = imageSourceOptionsAvailable,
         )
 
     private fun buildViewModel(): SettingsViewModel {

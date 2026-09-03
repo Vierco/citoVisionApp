@@ -11,8 +11,10 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.headersOf
 import kotlinx.coroutines.test.runTest
+import kotlinx.io.IOException
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertIs
 import kotlin.test.assertTrue
 
 class FirebaseStorageDataSourceTest {
@@ -88,4 +90,31 @@ class FirebaseStorageDataSourceTest {
 
             assertEquals(Result.Failure(RemoteAnalysisError.Unauthorized), result)
         }
+
+    @Test
+    fun `given a network failure when uploading then maps to network error`() =
+        runTest {
+            val ds = failingDataSource(IOException("no network"))
+
+            val result = ds.uploadImage("u1", "a1", byteArrayOf(1), "image/jpeg")
+
+            assertEquals(Result.Failure(RemoteAnalysisError.Network), result)
+        }
+
+    /** Solo un fallo de E/S es "sin conexión"; lo demás se admite como desconocido. */
+    @Test
+    fun `given an unexpected failure when uploading then maps to unknown instead of network`() =
+        runTest {
+            val ds = failingDataSource(IllegalStateException("bug"))
+
+            val result = ds.uploadImage("u1", "a1", byteArrayOf(1), "image/jpeg")
+
+            assertTrue(result is Result.Failure)
+            assertIs<RemoteAnalysisError.Unknown>(result.error)
+        }
+
+    private fun failingDataSource(failure: Throwable): FirebaseStorageDataSource {
+        val engine = MockEngine { throw failure }
+        return FirebaseStorageDataSource(createHttpClient(engine), bucket = "bkt")
+    }
 }

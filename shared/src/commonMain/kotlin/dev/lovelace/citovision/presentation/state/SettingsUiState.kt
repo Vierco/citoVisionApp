@@ -1,6 +1,7 @@
 package dev.lovelace.citovision.presentation.state
 
 import dev.lovelace.citovision.application.usecases.SessionStatus
+import dev.lovelace.citovision.domain.settings.ImageSourcePreference
 import dev.lovelace.citovision.domain.settings.ThemePreference
 
 /**
@@ -24,4 +25,7 @@ data class SettingsUiState(
     /** El feedback se guarda en la base remota y esta solo admite escritura con cuenta iniciada. */
     val feedbackRequiresAccount: Boolean = false,
     val themePreference: ThemePreference = ThemePreference.SYSTEM,
+    val imageSource: ImageSourcePreference = ImageSourcePreference.GALLERY,
+    /** La sección solo se pinta donde fototeca y ficheros son selectores distintos: no en Desktop. */
+    val imageSourceOptionsVisible: Boolean = false,
 )

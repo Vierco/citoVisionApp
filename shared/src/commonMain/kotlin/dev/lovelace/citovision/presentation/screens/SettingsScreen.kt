@@ -112,6 +112,9 @@ import citovision.shared.generated.resources.settings_cleared_title
 import citovision.shared.generated.resources.settings_copyright
 import citovision.shared.generated.resources.settings_feedback
 import citovision.shared.generated.resources.settings_guest
+import citovision.shared.generated.resources.settings_image_source_files
+import citovision.shared.generated.resources.settings_image_source_gallery
+import citovision.shared.generated.resources.settings_image_source_title
 import citovision.shared.generated.resources.settings_license
 import citovision.shared.generated.resources.settings_login
 import citovision.shared.generated.resources.settings_logout
@@ -140,6 +143,7 @@ import citovision.shared.generated.resources.third_party_univali
 import citovision.shared.generated.resources.third_party_yolo
 import coil3.compose.AsyncImage
 import dev.lovelace.citovision.application.usecases.SessionStatus
+import dev.lovelace.citovision.domain.settings.ImageSourcePreference
 import dev.lovelace.citovision.domain.settings.ThemePreference
 import dev.lovelace.citovision.presentation.components.dongleIconAlign
 import dev.lovelace.citovision.presentation.events.SettingsUiEvent
@@ -504,23 +508,42 @@ fun SettingsScreen(
 
             // Sección Tema
             SettingsSectionCard(title = stringResource(Res.string.settings_theme_title)) {
-                ThemeOption(
+                SettingsRadioOption(
                     label = stringResource(Res.string.settings_theme_light),
                     selected = uiState.themePreference == ThemePreference.LIGHT,
                     onClick = { onEvent(SettingsUiEvent.SetTheme(ThemePreference.LIGHT)) },
                 )
                 HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), thickness = 0.5.dp)
-                ThemeOption(
+                SettingsRadioOption(
                     label = stringResource(Res.string.settings_theme_dark),
                     selected = uiState.themePreference == ThemePreference.DARK,
                     onClick = { onEvent(SettingsUiEvent.SetTheme(ThemePreference.DARK)) },
                 )
                 HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), thickness = 0.5.dp)
-                ThemeOption(
+                SettingsRadioOption(
                     label = stringResource(Res.string.settings_theme_system),
                     selected = uiState.themePreference == ThemePreference.SYSTEM,
                     onClick = { onEvent(SettingsUiEvent.SetTheme(ThemePreference.SYSTEM)) },
                 )
+            }
+
+            // Sección Origen de las imágenes: solo donde fototeca y ficheros son selectores distintos
+            // (Android e iOS). En Desktop el diálogo de fichero ya llega a todo y no hay nada que elegir.
+            if (uiState.imageSourceOptionsVisible) {
+                Spacer(modifier = Modifier.height(16.dp))
+                SettingsSectionCard(title = stringResource(Res.string.settings_image_source_title)) {
+                    SettingsRadioOption(
+                        label = stringResource(Res.string.settings_image_source_gallery),
+                        selected = uiState.imageSource == ImageSourcePreference.GALLERY,
+                        onClick = { onEvent(SettingsUiEvent.SetImageSource(ImageSourcePreference.GALLERY)) },
+                    )
+                    HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), thickness = 0.5.dp)
+                    SettingsRadioOption(
+                        label = stringResource(Res.string.settings_image_source_files),
+                        selected = uiState.imageSource == ImageSourcePreference.FILES,
+                        onClick = { onEvent(SettingsUiEvent.SetImageSource(ImageSourcePreference.FILES)) },
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -951,7 +974,7 @@ private fun rememberDialogPrimaryFocus(): FocusRequester {
 
 /** Una opción de tema (Claro/Oscuro/Seguir sistema): fila seleccionable con radio + etiqueta. */
 @Composable
-private fun ThemeOption(
+private fun SettingsRadioOption(
     label: String,
     selected: Boolean,
     onClick: () -> Unit,

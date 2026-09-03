@@ -40,6 +40,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
@@ -76,7 +77,9 @@ import citovision.shared.generated.resources.patients_search_title
 import dev.lovelace.citovision.domain.entities.Analysis
 import dev.lovelace.citovision.presentation.components.AnalysisCard
 import dev.lovelace.citovision.presentation.components.AnalysisDetailDialog
+import dev.lovelace.citovision.presentation.components.ModalOverlayEffect
 import dev.lovelace.citovision.presentation.components.dongleIconAlign
+import dev.lovelace.citovision.presentation.components.floatingNavigationBarPadding
 import dev.lovelace.citovision.presentation.events.PatientsUiEvent
 import dev.lovelace.citovision.presentation.format.formatAnalysisDateTime
 import dev.lovelace.citovision.presentation.state.PatientsUiState
@@ -173,6 +176,7 @@ private fun PatientPicker(
     uiState: PatientsUiState,
     onEvent: (PatientsUiEvent) -> Unit,
 ) {
+    val focusManager = LocalFocusManager.current
     Column(modifier = Modifier.fillMaxSize()) {
         Text(
             text = stringResource(Res.string.patients_search_desc_default),
@@ -197,7 +201,17 @@ private fun PatientPicker(
             singleLine = true,
             shape = RoundedCornerShape(16.dp),
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-            keyboardActions = KeyboardActions(onSearch = { onEvent(PatientsUiEvent.SubmitQuery) }),
+            // Cerrar el teclado tiene que ser explícito: Compose solo lo oculta por defecto con
+            // `ImeAction.Done`; para `Search` no hace nada (ver `KeyboardActionRunner`). Antes solo
+            // desaparecía de rebote, cuando `SubmitQuery` resolvía un paciente y este campo salía de la
+            // composición. Si el filtro no dejaba un único código, no pasaba nada y no había salida.
+            keyboardActions =
+                KeyboardActions(
+                    onSearch = {
+                        focusManager.clearFocus()
+                        onEvent(PatientsUiEvent.SubmitQuery)
+                    },
+                ),
             colors =
                 OutlinedTextFieldDefaults.colors(
                     unfocusedContainerColor = MaterialTheme.colorScheme.surface,
@@ -259,7 +273,7 @@ private fun ColumnScope.PatientCodeList(
             else ->
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(bottom = 16.dp),
+                    contentPadding = PaddingValues(bottom = 16.dp + floatingNavigationBarPadding()),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     items(items = uiState.filteredCodes, key = { it }) { code ->
@@ -401,7 +415,7 @@ private fun ResultsView(
         Spacer(modifier = Modifier.height(16.dp))
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(bottom = 16.dp),
+            contentPadding = PaddingValues(bottom = 16.dp + floatingNavigationBarPadding()),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             items(results) { analysis ->
@@ -426,6 +440,7 @@ private fun InfoDialog(
     message: String,
     onDismiss: () -> Unit,
 ) {
+    ModalOverlayEffect()
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(title) },
@@ -443,6 +458,7 @@ private fun DeleteConfirmationDialog(
     onConfirm: () -> Unit,
     onCancel: () -> Unit,
 ) {
+    ModalOverlayEffect()
     AlertDialog(
         onDismissRequest = onCancel,
         title = { Text(stringResource(Res.string.history_delete_title)) },

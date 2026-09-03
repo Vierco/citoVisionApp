@@ -1,19 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?><!--
-   Sample data extraction rules file; uncomment and customize as necessary.
-   See https://developer.android.com/about/versions/12/backup-restore#xml-changes
-   for details.
+   Reglas de extracción de datos (Android 12 / API 31 y superiores).
+
+   citoVision NO participa en ninguna forma de copia ni de transferencia: los datos que maneja son
+   clínicos (códigos de paciente, análisis e imágenes de muestra) y una reinstalación no debe
+   reponerlos, ni siquiera en el mismo dispositivo (SECURITY_MOBILE §Persistencia).
+
+   Aquí no basta con `android:allowBackup="false"` del manifiesto: a partir de API 31 ese atributo
+   desactiva la copia en la nube, pero NO la transferencia entre dispositivos, que se controla en
+   exclusiva desde el bloque <device-transfer> de este fichero.
+
+   Tampoco basta con excluir `root`: `database` y `sharedpref` son dominios propios y hay que
+   declararlos por separado, o la base de Room y las preferencias seguirían siendo elegibles.
+
+   Consecuencia asumida: tras reinstalar, el Historial local arranca vacío. Los análisis no se pierden
+   —están en Firestore (SPEC-0005)— pero se llega a ellos desde Pacientes, no se repueblan solos.
 -->
 <data-extraction-rules>
     <cloud-backup>
-        <!-- TODO: Use <include> and <exclude> to control what is backed up.
-        <include .../>
-        <exclude .../>
-        -->
+        <exclude domain="root" path="." />
+        <exclude domain="file" path="." />
+        <exclude domain="database" path="." />
+        <exclude domain="sharedpref" path="." />
+        <exclude domain="external" path="." />
+        <exclude domain="device_root" path="." />
+        <exclude domain="device_file" path="." />
+        <exclude domain="device_database" path="." />
+        <exclude domain="device_sharedpref" path="." />
     </cloud-backup>
-    <!--
     <device-transfer>
-        <include .../>
-        <exclude .../>
+        <exclude domain="root" path="." />
+        <exclude domain="file" path="." />
+        <exclude domain="database" path="." />
+        <exclude domain="sharedpref" path="." />
+        <exclude domain="external" path="." />
+        <exclude domain="device_root" path="." />
+        <exclude domain="device_file" path="." />
+        <exclude domain="device_database" path="." />
+        <exclude domain="device_sharedpref" path="." />
     </device-transfer>
-    -->
 </data-extraction-rules>

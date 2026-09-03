@@ -108,6 +108,7 @@ fun AnalysisDetailDialog(
     cellCounts: List<CellCount>,
     onDismissRequest: () -> Unit,
 ) {
+    ModalOverlayEffect()
     var showFullImage by remember { mutableStateOf(false) }
     AlertDialog(
         onDismissRequest = onDismissRequest,
@@ -244,6 +245,7 @@ private fun FullScreenImageDialog(
     imagePath: String,
     onDismiss: () -> Unit,
 ) {
+    ModalOverlayEffect()
     Dialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(usePlatformDefaultWidth = false),
