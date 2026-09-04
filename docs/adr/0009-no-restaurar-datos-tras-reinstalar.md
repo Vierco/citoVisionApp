@@ -2,7 +2,7 @@
 
 ## Estado
 
-Aceptada — 2026-09-02
+Aceptada — 2026-09-02 · con una **actualización del 2026-09-03** al final del documento
 
 ## Contexto
 
@@ -140,6 +140,38 @@ La ejecuta el desarrollador (AGENTS.md §16):
 5. **Android**: comprobar que el Historial y las preferencias funcionan con normalidad en uso corriente.
 6. Que el manifiesto fusione sin conflicto en `android:allowBackup` (ninguna librería lo declaraba, así
    que no debería hacer falta `tools:replace`).
+
+## Actualización — 2026-09-03
+
+El texto anterior se conserva tal como se escribió. Dos de sus afirmaciones dejaron de ser ciertas al día
+siguiente, y se deja constancia del cambio en lugar de reescribir la decisión.
+
+**1. La deuda de tests está saldada.** Las «Consecuencias» decían que `FreshInstallSessionGuard` no tenía
+test porque el *source set* `iosTest` no existía en el proyecto. Ya existe: se creó con **tres tests del
+guardián** —purga en instalación nueva, sesión respetada una vez escrita la marca, y persistencia de la
+marca leída desde otra instancia de `NSUserDefaults`— y **ocho de `KeychainTokenStore`**, entre ellos el
+del dato corrupto que fuerza un login limpio, que hasta entonces no se había ejecutado nunca.
+
+**2. `purge()` ya no existe.** El apartado «1. iOS: purgar el Keychain en el primer arranque» describe que
+`KeychainTokenStore` expone un `purge()` no suspendido del que cuelga `clear()`. Ese mecanismo se
+sustituyó al escribir los tests, por un motivo que merece quedar registrado: **el Keychain no está
+disponible para un binario de test de Kotlin/Native**. En el simulador devuelve `errSecNotAvailable`
+(-25291), porque el proceso no es una app con *application-identifier*; y si se le firman los
+*entitlements* que lo arreglarían, el simulador lo mata con SIGKILL. Ambas cosas se comprobaron
+ejecutando el binario a mano, no por conjetura.
+
+Por eso el interop con `Security.framework` se extrajo a una interfaz **`KeychainStorage`**
+(`read`/`write`/`delete`) con su implementación real, `SecItemKeychainStorage`. El guardián depende ahora
+de esa interfaz —solo necesita borrar, no deserializar— y `clear()` delega en `delete()`. La contrapartida
+es que los tests ya no ejercitan el interop en sí, que queda cubierto por la verificación en dispositivo
+real: si fallara, la sesión no sobreviviría a cerrar y abrir la app.
+
+**Lo que NO ha cambiado es la decisión.** Una instalación nueva sigue empezando limpia; la detección
+sigue apoyándose en que el Keychain sobrevive a la desinstalación y `NSUserDefaults` no; y el guardián se
+sigue invocando desde `bootstrap()` **antes de `initKoin`**. Solo ha cambiado el colaborador del que
+depende.
+
+Commit: `18349d6`.
 
 ## Referencias
 

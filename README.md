@@ -153,15 +153,23 @@ shared/
 
 ## Descargar citoVision
 
-Descarga el MVP de citoVision desde el siguiente enlace:
+| Plataforma | Cómo se obtiene | Requisito mínimo |
+|---|---|---|
+| **Android** (APK) | ➡️ **[citoVision 1.0.0-beta](https://drive.google.com/file/d/1Q2V4EaN68BrStUah4szb8TzaS1VN6eNi/view?usp=sharing)** | Android 8.1 (API 27) |
+| **macOS** (DMG) | ➡️ El mismo enlace: ambos van en el ZIP | macOS |
+| **iOS** | ➡️ Invitación de **TestFlight** · _enlace pendiente de la primera build_ | iPhone con iOS 18.6 |
 
-➡️  **[citoVision 1.0.0-beta](https://drive.google.com/file/d/1Q2V4EaN68BrStUah4szb8TzaS1VN6eNi/view?usp=sharing)** · Android (APK) y macOS (DMG)
-
-
-> ⚠️ **Antes de instalar, lee las instrucciones de instalación adjuntadas al ZIP.**
+> ⚠️ **En Android y macOS, lee antes las instrucciones de instalación adjuntadas al ZIP.**
 >
 > Al ser una app fuera de la App Store y Google Play, el sistema puede mostrar un aviso de seguridad la primera
 > vez; las instrucciones explican cómo abrirla con normalidad en cada plataforma.
+
+> ℹ️ **Por qué iOS se reparte de otra forma.** Android y macOS permiten instalar software fuera de su tienda;
+> iOS no: un iPhone solo ejecuta aplicaciones firmadas por un perfil que lo autorice, así que no existe un
+> equivalente al APK suelto. La versión de iOS se distribuye por **TestFlight**, el canal de betas de Apple:
+> se instala la app TestFlight y se acepta la invitación, sin necesidad de Mac ni de Xcode. El razonamiento
+> completo y las alternativas descartadas están en
+> [ADR-0010](docs/adr/0010-distribucion-ios-testflight.md).
 
 
 ## Para probar citoVision
@@ -257,6 +265,7 @@ Splash → Login → Pantalla principal
 - JDK 17
 - Android Studio (versión reciente) o el SDK de Android con `compileSdk 36`
 - Para el empaquetado de macOS, un JDK con `jpackage` disponible
+- Para iOS, un Mac con Xcode reciente
 
 **Configuración local**
 
@@ -286,7 +295,14 @@ para las builds de release firmadas, un `keystore.properties` propio (ambos fuer
 ./gradlew :desktopApp:packageDmg
 ```
 
-> Requisitos mínimos de ejecución: **Android 8.1 (API 27)** o superior · **macOS** (paquete DMG).
+**iOS** no se compila con Gradle: se abre `iosApp/iosApp.xcodeproj` en Xcode y se ejecuta desde ahí. El
+framework `shared` lo genera el propio proyecto mediante una fase de compilación que invoca
+`:shared:embedAndSignAppleFrameworkForXcode`, así que no hay que construirlo por separado. Para ejecutar
+en un iPhone físico hace falta indicar el `TEAM_ID` en `iosApp/Configuration/Config.xcconfig`; en el
+simulador puede quedarse vacío.
+
+> Requisitos mínimos de ejecución: **Android 8.1 (API 27)** o superior · **iOS 18.6** o superior ·
+> **macOS** (paquete DMG).
 
 ## Testing
 
@@ -328,10 +344,11 @@ repositorio y es la fuente de verdad del proyecto — este README se ha redactad
 - [x] Tema claro/oscuro y pulido de UI
 - [x] Entregables firmados: **APK + AAB** (Android) y **DMG** (macOS)
 - [x] Cobertura de tests con Kover
-- [ ] Soporte de iOS - __01/09/2026 Work in progress__
+- [x] Soporte de iOS
+- [ ] Distribución de iOS por TestFlight - __03/09/2026 Work in progress__
 - [ ] Soporte Windows
 - [ ] Selección de bloques de imágenes
-- [ ] Selección de imágenes de ubicaciones externas __02/09/2026 Work in progress__
+- [x] Selección de imágenes de ubicaciones externas
 - [x] Documentación final del TFM
 
 ## Licencia y atribución

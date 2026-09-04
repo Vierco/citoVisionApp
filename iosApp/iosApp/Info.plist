@@ -21,10 +21,19 @@
 	<string>citoVision</string>
 	<key>CFBundlePackageType</key>
 	<string>$(PRODUCT_BUNDLE_PACKAGE_TYPE)</string>
+	<!-- Las versiones vienen de los ajustes de compilación y no escritas aquí a mano: con
+	     `GENERATE_INFOPLIST_FILE = NO` manda este fichero, así que un literal dejaría inertes
+	     `MARKETING_VERSION` y `CURRENT_PROJECT_VERSION`. Importa porque **TestFlight rechaza toda build
+	     cuyo `CFBundleVersion` ya se haya subido**, y ese número hay que poder cambiarlo desde Xcode. -->
 	<key>CFBundleShortVersionString</key>
-	<string>1.0</string>
+	<string>$(MARKETING_VERSION)</string>
 	<key>CFBundleVersion</key>
-	<string>1</string>
+	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<!-- Cumplimiento de exportación. La app solo usa el HTTPS/TLS del sistema para hablar con Firebase,
+	     que es criptografía exenta. Declararlo aquí evita que App Store Connect lo pregunte en cada
+	     subida; si algún día se añadiera cifrado propio, habría que revisar esta declaración. -->
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<!-- Google Sign-In (SPEC-0001 RF-2, ADR-0006). El SDK de Google lee `GIDClientID` de aquí, así que no
 	     hace falta configurarlo por código. Es el cliente OAuth de iOS del proyecto Firebase: un
 	     identificador público, igual que el `google-services.json` de Android que ya está versionado. -->
