@@ -106,6 +106,7 @@
 				AA0000000000000000000050 /* Sources */,
 				AA0000000000000000000051 /* Frameworks */,
 				AA0000000000000000000052 /* Resources */,
+				D3EFDA3E304B33DD00D4C758 /* Fix ONNX Runtime MinimumOSVersion */,
 			);
 			buildRules = (
 			);
@@ -185,6 +186,25 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "if [ \"YES\" = \"$OVERRIDE_KOTLIN_BUILD_IDE_SUPPORTED\" ]; then\n  echo \"Skipping Gradle build task invocation due to OVERRIDE_KOTLIN_BUILD_IDE_SUPPORTED environment variable set to \\\"YES\\\"\"\n  exit 0\nfi\ncd \"$SRCROOT/..\"\n# Xcode puede no propagar JAVA_HOME; si falta, usar el JDK por defecto del sistema.\nexport JAVA_HOME=\"${JAVA_HOME:-$(/usr/libexec/java_home)}\"\n./gradlew :shared:embedAndSignAppleFrameworkForXcode";
+		};
+		D3EFDA3E304B33DD00D4C758 /* Fix ONNX Runtime MinimumOSVersion */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Fix ONNX Runtime MinimumOSVersion";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -e\nFRAMEWORKS_PATH=\"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}\"\nfor framework in onnxruntime onnxruntime_extensions; do\n    PLIST=\"${FRAMEWORKS_PATH}/${framework}.framework/Info.plist\"\n    [ -f \"$PLIST\" ] || continue\n    /usr/libexec/PlistBuddy -c \"Delete :MinimumOSVersion\" \"$PLIST\" 2>/dev/null || true\n    /usr/libexec/PlistBuddy -c \"Add :MinimumOSVersion string ${IPHONEOS_DEPLOYMENT_TARGET}\" \"$PLIST\"\n    if [ -n \"${EXPANDED_CODE_SIGN_IDENTITY:-}\" ] && [ \"${CODE_SIGNING_REQUIRED:-YES}\" != \"NO\" ]; then\n        codesign --force --sign \"${EXPANDED_CODE_SIGN_IDENTITY}\" \\\n            --preserve-metadata=identifier,entitlements,flags \\\n            \"${FRAMEWORKS_PATH}/${framework}.framework\"\n    fi\ndone\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -266,7 +286,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_ASSET_PATHS = "\"iosApp/Preview Content\"";
 				DEVELOPMENT_TEAM = 9CCBF9QSZ4;
 				ENABLE_PREVIEWS = YES;
@@ -302,7 +322,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_ASSET_PATHS = "\"iosApp/Preview Content\"";
 				DEVELOPMENT_TEAM = 9CCBF9QSZ4;
 				ENABLE_PREVIEWS = YES;
