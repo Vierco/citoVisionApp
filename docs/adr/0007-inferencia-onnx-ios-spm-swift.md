@@ -2,7 +2,7 @@
 
 ## Estado
 
-Aceptada — 2026-08-31
+Aceptada — 2026-08-31 · con una **actualización del 2026-09-04** al final del documento
 
 ## Contexto
 
@@ -224,9 +224,66 @@ varianza por reparto entre hilos, a costa de velocidad. No elimina la debida a *
 > pero no necesariamente entre dispositivos distintos. La spec está aprobada y **no se modifica aquí**;
 > queda señalado por si el owner quiere matizarla (AGENTS.md §0.4).
 
+## Actualización — 2026-09-04: el paquete SPM impide subir la app a App Store Connect
+
+El texto anterior se conserva tal como se escribió. La decisión **no cambia**: ONNX Runtime sigue entrando
+por SPM y ejecutándose desde Swift. Lo que aparece aquí es un **coste de esa vía que no se había
+manifestado**, porque hasta ahora nunca se había archivado la app para distribuirla (ADR-0010).
+
+**Apple rechazó la primera build** enviada a TestFlight, ya procesada, con este error:
+
+> ITMS-90208: Invalid Bundle - The bundle `citoVision.app/Frameworks/onnxruntime.framework` does not
+> support the minimum OS Version specified in the Info.plist.
+
+La causa se localizó **inspeccionando el `.xcarchive` y el artefacto del paquete**, no por conjetura:
+
+| | `MinimumOSVersion` del `Info.plist` | binario (`minos`) | SDK |
+|---|---|---|---|
+| `onnxruntime.xcframework` original (SPM) | 15.1 | 15.1 | 18.2 |
+| `onnxruntime.framework` dentro del archivo | 15.1 | **18.6** | **26.5** |
+
+El `Info.plist` viaja **intacto** desde el paquete, mientras que el binario se produce con el
+`IPHONEOS_DEPLOYMENT_TARGET` del proyecto. El framework acaba declarando que soporta iOS 15.1 cuando su
+binario exige 18.6, y la validación de Apple rechaza esa incoherencia.
+
+**Es un defecto conocido de la distribución por SPM de ONNX Runtime**, no del proyecto: issue
+[microsoft/onnxruntime#27396](https://github.com/microsoft/onnxruntime/issues/27396), abierta y sin
+corregir en el paquete. **No se reproduce integrando por CocoaPods**, que aquí no es una salida por el veto
+de ADR-0006.
+
+### Solución adoptada
+
+Una fase *Run Script* en el target `iosApp`, **`Fix ONNX Runtime MinimumOSVersion`**, colocada **la última**,
+que reescribe el `MinimumOSVersion` del framework con `${IPHONEOS_DEPLOYMENT_TARGET}` mediante `PlistBuddy`
+y **vuelve a firmar el bundle**. Se ejecuta siempre (`alwaysOutOfDate`). Commit `2cf8344`.
+
+Dos detalles que el *workaround* de la issue no menciona y sin los cuales no funciona:
+
+1. **Hay que re-firmar el framework.** Modificar el `Info.plist` de un bundle ya firmado invalida su firma,
+   lo que produciría un rechazo distinto y menos evidente que el original. De ahí el `codesign --force
+   --preserve-metadata=identifier,entitlements,flags`.
+2. **Este target no tiene fase «Embed Frameworks».** Los productos de SPM marcados *Embed & Sign* los copia
+   Xcode por su cuenta, sin fase visible, así que **no había forma de saber sobre el papel** si el script
+   correría antes o después de esa copia. Se comprobó sobre el archivo generado: `MinimumOSVersion` = 18.6 y
+   `codesign --verify --deep --strict` válido en el framework y en el bundle completo.
+
+### Consecuencias
+
+- **El número de build de la entrega rechazada se pierde.** `CFBundleVersion` no puede reutilizarse aunque
+  la build nunca llegue a TestFlight, así que la subida buena fue la `1.0.0 (2)`.
+- **Procedimiento recomendado para futuras subidas:** archivar → inspeccionar el `.xcarchive` → **Validate
+  App** en el Organizer, que valida contra Apple **sin consumir el número de build** → *Distribute*.
+- **Aviso benigno permanente:** cada subida y cada validación informan de *«Upload Symbols Failed — the
+  archive did not include a dSYM for onnxruntime.framework»*. El framework llega precompilado y sin dSYM.
+  No impide la subida; solo implica trazas sin simbolizar dentro de ONNX Runtime.
+- Si Microsoft corrige el paquete, esta fase puede retirarse. Mientras tanto es **imprescindible para
+  distribuir**, no una optimización.
+
 ## Referencias
 
 - **ADR-0003** (ONNX Runtime on-device): decisión que este ADR completa para iOS.
+- **ADR-0010** (distribución por TestFlight): contexto en el que apareció el ITMS-90208.
+- Defecto del paquete SPM: `https://github.com/microsoft/onnxruntime/issues/27396`.
 - **SPEC-0006** (análisis celular): RF-1, RF-4, RF-6, RF-7, RF-8, RN-2, RN-5; casos de referencia.
 - **ADR-0004** (bring-up iOS) y **ADR-0005** (toolchain y framework dinámico): origen de la restricción de
   enlazado.
