@@ -592,7 +592,7 @@ private fun AnalysisImage(
     contentScale: ContentScale,
     modifier: Modifier = Modifier,
 ) {
-    val model = if (imagePath.startsWith("http")) imagePath else "file://$imagePath"
+    val model = if (imagePath.startsWith("http")) imagePath else imagePath.toFileUri()
     SubcomposeAsyncImage(
         model = model,
         contentDescription = contentDescription,

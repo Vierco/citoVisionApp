@@ -125,8 +125,9 @@ shared/
 |------------|------------------|
 | Android    | ✅ Soportada (APK/AAB firmados) |
 | macOS (Desktop / JVM) | ✅ Soportada (DMG) |
-| iOS        | ⏸️ Fuera del MVP |
-| Windows / Linux | ⏸️ Fuera del MVP |
+| Windows (Desktop / JVM) | ✅ Soportada (ZIP ejecutable) |
+| iOS        | ✅ Soportada (TestFlight) |
+| Linux      | ⏸️ Fuera del MVP |
 
 ## Tecnologías
 
@@ -138,7 +139,7 @@ shared/
 | Persistencia local | Room 2.8 (Multiplatform) · DataStore |
 | Imágenes | Coil 3 |
 | Logging | Napier |
-| IA (inferencia) | ONNX Runtime 1.22 (on-device, Android + Desktop) |
+| IA (inferencia) | ONNX Runtime 1.22 (on-device, Android + iOS + Desktop) |
 | IA (entrenamiento) | Python · Ultralytics YOLO11 · Transfer Learning (fine-tuning) |
 | Backend | Firebase Authentication · Cloud Firestore · Firebase Storage (vía API REST) |
 | Cobertura de tests | Kover |
@@ -157,19 +158,27 @@ shared/
 |---|---|---|
 | **Android** (APK) | ➡️ **[citoVision 1.0.0-beta](https://drive.google.com/file/d/1Q2V4EaN68BrStUah4szb8TzaS1VN6eNi/view?usp=sharing)** | Android 8.1 (API 27) |
 | **macOS** (DMG) | ➡️ El mismo enlace: ambos van en el ZIP | macOS |
-| **iOS** | ➡️ Invitación de **TestFlight** · _enlace pendiente de la primera build_ | iPhone con iOS 18.6 |
+| **Windows** (ZIP ejecutable) | ➡️ El mismo enlace | Windows 10 o superior (64 bits) |
+| **iOS** | ➡️ **[Unirse a la beta por TestFlight](https://testflight.apple.com/join/Q5HKBm6E)** · plazas limitadas | iPhone con iOS 18.6 |
 
-> ⚠️ **En Android y macOS, lee antes las instrucciones de instalación adjuntadas al ZIP.**
+> ⚠️ **En Android, macOS y Windows, lee antes las instrucciones de instalación adjuntadas al ZIP.**
 >
 > Al ser una app fuera de la App Store y Google Play, el sistema puede mostrar un aviso de seguridad la primera
 > vez; las instrucciones explican cómo abrirla con normalidad en cada plataforma.
 
-> ℹ️ **Por qué iOS se reparte de otra forma.** Android y macOS permiten instalar software fuera de su tienda;
-> iOS no: un iPhone solo ejecuta aplicaciones firmadas por un perfil que lo autorice, así que no existe un
-> equivalente al APK suelto. La versión de iOS se distribuye por **TestFlight**, el canal de betas de Apple:
-> se instala la app TestFlight y se acepta la invitación, sin necesidad de Mac ni de Xcode. El razonamiento
-> completo y las alternativas descartadas están en
-> [ADR-0010](docs/adr/0010-distribucion-ios-testflight.md).
+> ℹ️ **La versión de Windows no se instala.** Se descomprime el ZIP y se ejecuta `citoVision.exe` desde la
+> carpeta: lleva su propio entorno de ejecución dentro, así que no hace falta instalar Java ni permisos de
+> administrador. La primera vez, Windows puede mostrar el aviso «Windows protegió su PC» porque el ejecutable
+> no está firmado; se abre con **Más información → Ejecutar de todas formas**. El razonamiento completo está
+> en [ADR-0011](docs/adr/0011-soporte-windows-desktop.md).
+
+> ℹ️ **Por qué iOS se reparte de otra forma.** Android, macOS y Windows permiten instalar software fuera de
+> su tienda; iOS no: un iPhone solo ejecuta aplicaciones firmadas por un perfil que lo autorice, así que no
+> existe un equivalente al APK suelto. La versión de iOS se distribuye por **TestFlight**, el canal de betas
+> de Apple: basta con instalar la app TestFlight desde la App Store y abrir el enlace de arriba desde el
+> iPhone, sin necesidad de Mac ni de Xcode. Ten en cuenta dos límites propios del canal: **las builds caducan
+> a los 90 días** de publicarse, y el grupo de pruebas tiene un aforo fijado. El razonamiento completo y las
+> alternativas descartadas están en [ADR-0010](docs/adr/0010-distribucion-ios-testflight.md).
 
 
 ## Para probar citoVision
@@ -295,6 +304,10 @@ para las builds de release firmadas, un `keystore.properties` propio (ambos fuer
 ./gradlew :desktopApp:packageDmg
 ```
 
+Los paquetes de **Windows** y **Linux** no pueden generarse desde macOS: `jpackage` solo empaqueta para el
+sistema en el que se ejecuta. Se construyen con el workflow **Desktop package**, que se lanza a mano desde la
+pestaña *Actions* del repositorio y deja el resultado como artefacto descargable.
+
 **iOS** no se compila con Gradle: se abre `iosApp/iosApp.xcodeproj` en Xcode y se ejecuta desde ahí. El
 framework `shared` lo genera el propio proyecto mediante una fase de compilación que invoca
 `:shared:embedAndSignAppleFrameworkForXcode`, así que no hay que construirlo por separado. Para ejecutar
@@ -345,8 +358,8 @@ repositorio y es la fuente de verdad del proyecto — este README se ha redactad
 - [x] Entregables firmados: **APK + AAB** (Android) y **DMG** (macOS)
 - [x] Cobertura de tests con Kover
 - [x] Soporte de iOS
-- [ ] Distribución de iOS por TestFlight - __03/09/2026 Work in progress__
-- [ ] Soporte Windows
+- [x] Distribución de iOS por TestFlight
+- [x] Soporte Windows
 - [ ] Selección de bloques de imágenes
 - [x] Selección de imágenes de ubicaciones externas
 - [x] Documentación final del TFM
