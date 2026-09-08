@@ -154,17 +154,25 @@ shared/
 
 ## Descargar citoVision
 
-| Plataforma | Cómo se obtiene | Requisito mínimo |
+Los ejecutables se publican en la **[sección *Releases* del repositorio](https://github.com/Vierco/citoVision/releases)**,
+que es la fuente oficial de descarga. La versión actual es
+**[v1.0.0-beta](https://github.com/Vierco/citoVision/releases/tag/v1.0.0-beta)**, con un fichero por plataforma y
+las instrucciones de instalación de cada sistema en la propia página de la release.
+
+| Plataforma | Descarga | Requisito mínimo |
 |---|---|---|
-| **Android** (APK) | ➡️ **[citoVision 1.0.0-beta](https://drive.google.com/file/d/1Q2V4EaN68BrStUah4szb8TzaS1VN6eNi/view?usp=sharing)** | Android 8.1 (API 27) |
-| **macOS** (DMG) | ➡️ El mismo enlace: ambos van en el ZIP | macOS |
-| **Windows** (ZIP ejecutable) | ➡️ El mismo enlace | Windows 10 o superior (64 bits) |
+| **Android** (APK) | ➡️ **[citoVision-1.0.0-beta-android.apk](https://github.com/Vierco/citoVision/releases/download/v1.0.0-beta/citoVision-1.0.0-beta-android.apk)** | Android 8.1 (API 27) |
+| **macOS** (DMG) | ➡️ **[citoVision-1.0.0-beta-macos.dmg](https://github.com/Vierco/citoVision/releases/download/v1.0.0-beta/citoVision-1.0.0-beta-macos.dmg)** | macOS (Apple Silicon o Intel) |
+| **Windows** (ZIP ejecutable) | ➡️ **[citoVision-1.0.0-beta-windows-x64.zip](https://github.com/Vierco/citoVision/releases/download/v1.0.0-beta/citoVision-1.0.0-beta-windows-x64.zip)** | Windows 10 o superior (64 bits) |
 | **iOS** | ➡️ **[Unirse a la beta por TestFlight](https://testflight.apple.com/join/Q5HKBm6E)** · plazas limitadas | iPhone con iOS 18.6 |
 
-> ⚠️ **En Android, macOS y Windows, lee antes las instrucciones de instalación adjuntadas al ZIP.**
->
-> Al ser una app fuera de la App Store y Google Play, el sistema puede mostrar un aviso de seguridad la primera
-> vez; las instrucciones explican cómo abrirla con normalidad en cada plataforma.
+> 🔬 **También se facilitan imágenes de muestra para probar la aplicación.** citoVision analiza fotografías de
+> frotis sanguíneos al microscopio, que no son fáciles de conseguir: en
+> [Para probar citoVision](#para-probar-citovision) hay un conjunto listo para descargar.
+
+> ⚠️ **Android, macOS y Windows muestran un aviso de seguridad la primera vez.** Es lo habitual en software
+> distribuido fuera de la App Store y de Google Play, y no indica ningún problema con la aplicación. La página
+> de la release explica cómo abrirla con normalidad en cada sistema.
 
 > ℹ️ **La versión de Windows no se instala.** Se descomprime el ZIP y se ejecuta `citoVision.exe` desde la
 > carpeta: lleva su propio entorno de ejecución dentro, así que no hace falta instalar Java ni permisos de

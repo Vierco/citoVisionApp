@@ -1,5 +1,6 @@
 package dev.lovelace.citovision.presentation.screens
 
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -46,6 +47,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.scale
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -88,6 +90,16 @@ fun LoginScreen(
     onEvent: (LoginUiEvent) -> Unit,
 ) {
     val focusManager = LocalFocusManager.current
+    // El teclado solo se cierra si alguien suelta el foco de forma explícita. Compose lo oculta por su
+    // cuenta con `ImeAction.Done`, pero no con `Next` ni con `Go` (ver `KeyboardActionRunner`), y pulsar
+    // un botón tampoco se lo quita al campo que lo tenía. En Android el fallo pasaba desapercibido porque
+    // el botón atrás del sistema cierra el teclado; en iOS no existe esa salida y se quedaba tapando la
+    // pantalla. Es el mismo defecto que se corrigió en `PatientsScreen`, aquí en dos frentes: toda acción
+    // que no sea seguir escribiendo pasa por `onActionEvent`, y tocar fuera de los campos también libera.
+    val onActionEvent: (LoginUiEvent) -> Unit = { event ->
+        focusManager.clearFocus()
+        onEvent(event)
+    }
     val backgroundColor = MaterialTheme.colorScheme.background
     val primaryColor = MaterialTheme.colorScheme.primary
     val tertiaryColor = MaterialTheme.colorScheme.tertiary
@@ -95,7 +107,11 @@ fun LoginScreen(
         modifier =
             Modifier
                 .fillMaxSize()
-                .drawBehind {
+                // Los gestos de los hijos (scroll de la columna, botones, campos) consumen el toque
+                // antes de llegar aquí, así que esto solo se dispara al tocar el fondo.
+                .pointerInput(Unit) {
+                    detectTapGestures(onTap = { focusManager.clearFocus() })
+                }.drawBehind {
                     // Fondo base del tema
                     drawRect(backgroundColor)
 
@@ -251,7 +267,7 @@ fun LoginScreen(
                         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Go),
                         keyboardActions =
                             KeyboardActions(
-                                onGo = { if (!uiState.isLoading) onEvent(LoginUiEvent.Submit) },
+                                onGo = { if (!uiState.isLoading) onActionEvent(LoginUiEvent.Submit) },
                             ),
                         colors =
                             OutlinedTextFieldDefaults.colors(
@@ -262,7 +278,7 @@ fun LoginScreen(
                     )
 
                     TextButton(
-                        onClick = { onEvent(LoginUiEvent.OpenForgotPassword) },
+                        onClick = { onActionEvent(LoginUiEvent.OpenForgotPassword) },
                         modifier = Modifier.align(Alignment.End),
                         enabled = !uiState.isLoading,
                     ) {
@@ -277,7 +293,7 @@ fun LoginScreen(
 
                     // Botón Iniciar Sesión (Primary)
                     Button(
-                        onClick = { onEvent(LoginUiEvent.Submit) },
+                        onClick = { onActionEvent(LoginUiEvent.Submit) },
                         modifier =
                             Modifier
                                 .fillMaxWidth()
@@ -341,7 +357,7 @@ fun LoginScreen(
 
                     // Login con Google
                     OutlinedButton(
-                        onClick = { onEvent(LoginUiEvent.GoogleSignIn) },
+                        onClick = { onActionEvent(LoginUiEvent.GoogleSignIn) },
                         modifier =
                             Modifier
                                 .fillMaxWidth()
@@ -373,7 +389,7 @@ fun LoginScreen(
 
             // Footer Continuar como invitado
             TextButton(
-                onClick = { onEvent(LoginUiEvent.GuestAccess) },
+                onClick = { onActionEvent(LoginUiEvent.GuestAccess) },
                 enabled = !uiState.isLoading,
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
