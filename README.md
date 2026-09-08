@@ -44,7 +44,7 @@
 
 ## ¿Qué es citoVision?
 
-**citoVision** es una aplicación multiplataforma (Android y macOS) que analiza imágenes microscópicas de
+**citoVision** es una aplicación multiplataforma (Android, macOS, iOS y Windows) que analiza imágenes microscópicas de
 frotis sanguíneo y, sobre cada muestra, **detecta y clasifica las células**, las **cuenta por tipo** y
 calcula una **prioridad de revisión** según los hallazgos morfológicos encontrados. La inferencia se
 ejecuta **en el propio dispositivo** (on-device), sin enviar la imagen a ningún servidor para analizarla.
