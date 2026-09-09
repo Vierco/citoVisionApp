@@ -53,25 +53,25 @@ When generating a screen, it should aim to:
 ## Primary
 
 ```yaml
-primary: "#2FA7F0"        # Azul principal (ej. botón sin pulsar)
-primaryPressed: "#227FC0" # Azul pulsado
-onPrimary: "#FFFFFF"      # Texto sobre azul
+primary: "#4E54EA"        # Azul violeta principal (ej. botón sin pulsar)
+primaryPressed: "#292FD5" # Azul violeta pulsado
+onPrimary: "#FFFFFF"      # Texto sobre azul violeta
 ```
 
 ## Secondary
 
 ```yaml
-secondary: "#2FD38A"        # Verde (ej. botón secundario sin pulsar)
-secondaryPressed: "#1E9E67" # Verde pulsado
-secondaryDark: "#177552"    # Verde oscuro (Dark secondary): texto/etiquetas sobre fondo claro (ej. prioridad BAJA)
-onSecondary: "#FFFFFF"      # Texto sobre verde
+secondary: "#252466"        # Azul marino (ej. botón Analizar, indicador de pestaña activa)
+secondaryPressed: "#171643" # Azul marino pulsado
+secondaryDark: "#177552"    # Verde oscuro: texto/etiquetas de la prioridad BAJA sobre fondo claro. NO deriva de `secondary`; es un color semántico del semáforo de prioridad y por eso permanece verde
+onSecondary: "#FFFFFF"      # Texto sobre azul marino
 ```
 
 ## Tertiary
 
 ```yaml
-tertiary: "#A56AE3"   # Morado (ej. outline de cards)
-onTertiary: "#FFFFFF" # Texto sobre morado
+tertiary: "#252466"   # Azul marino: nombre de la aplicación, resplandor de fondo, avatar de inicial
+onTertiary: "#FFFFFF" # Texto sobre azul marino
 ```
 
 ## Background
@@ -88,13 +88,14 @@ hint: "#9E9E9E"         # Texto suave: placeholders/hints de campos de texto (te
 ## Semantic Colors
 
 ```yaml
-success: "#2FD38A"      # Verde (coincide con secondary)
+success: "#2FD38A"      # Verde de éxito
 warning: "#F59E3A"      # Naranja proporcionado
 error: "#F53A63"        # Rojo principal
 errorPressed: "#C71C43" # Rojo de card pulsado
-info: "#2FA7F0"         # Azul (coincide con primary)
+info: "#2FA7F0"         # Azul informativo
 ```
 - Nota sobre el color: el nombre de la aplicación, siempre que aparezca, irá en el color terciario.
+- Los colores semánticos son **independientes de la marca**: describen un estado, no la identidad. En particular, el semáforo de prioridad (verde BAJA → ámbar MEDIA → rojo ALTA) no se rebrandea, porque su código cromático es lo que comunica el resultado del análisis.
 ---
 
 # Elevation
@@ -258,25 +259,33 @@ El usuario elige el tema en Ajustes entre tres opciones excluyentes: **Claro**, 
 ## Paleta oscura
 
 Misma identidad de marca que el tema claro, adaptada a fondo oscuro: fondos/textos invertidos (nunca negro
-puro), colores de marca **desaturados ~18%** para calmarlos sobre oscuro, y `secondaryDark` **invertido** a
+puro), colores de marca **aclarados** hasta un tono intermedio, y `secondaryDark` **invertido** a
 un verde claro (en claro es verde oscuro para texto sobre blanco; en oscuro, verde claro para texto sobre
 fondo oscuro). El fondo lleva un ligero tinte azulado de marca.
 
+**Por qué un tono intermedio y no el color de marca tal cual.** `primary`, `secondary` y `tertiary` se usan
+de dos formas opuestas: como **relleno** con texto blanco encima (botones, avatar de inicial) y como
+**texto** sobre el fondo (nombre de la aplicación, mensajes de confirmación). Sobre `#111318` ningún color
+puede cumplir AA en ambos papeles a la vez: leerse como texto exige una luminancia relativa ≥ 0,204 y que el
+blanco encima cumpla AA exige ≤ 0,183, y esos rangos no se solapan. Los valores de abajo son el compromiso:
+**AA como relleno y AA de texto grande como texto**, que es el criterio aplicable porque el nombre de la
+aplicación se pinta a 88sp y los mensajes a 28sp.
+
 ```yaml
 # Primary
-primary: "#42A4E0"        # Azul principal (desaturado)
-primaryPressed: "#317DB3" # Azul pulsado
-onPrimary: "#FFFFFF"      # Texto sobre azul
+primary: "#7378EE"        # Azul violeta principal (aclarado)
+primaryPressed: "#5F63CF" # Azul violeta pulsado
+onPrimary: "#FFFFFF"      # Texto sobre azul violeta
 
 # Secondary
-secondary: "#3EC589"        # Verde (desaturado)
-secondaryPressed: "#2E9366" # Verde pulsado
-secondaryDark: "#64D3A1"    # Verde claro: texto/etiquetas sobre fondo oscuro (ej. prioridad BAJA)
-onSecondary: "#FFFFFF"      # Texto sobre verde
+secondary: "#6362D0"        # Azul marino (aclarado)
+secondaryPressed: "#4B4AA6" # Azul marino pulsado
+secondaryDark: "#64D3A1"    # Verde claro: texto/etiquetas de la prioridad BAJA sobre fondo oscuro. NO deriva de `secondary`; es semántico y por eso permanece verde
+onSecondary: "#FFFFFF"      # Texto sobre azul marino
 
 # Tertiary
-tertiary: "#A575D8"   # Morado (desaturado)
-onTertiary: "#FFFFFF" # Texto sobre morado
+tertiary: "#6362D0"   # Azul marino (aclarado)
+onTertiary: "#FFFFFF" # Texto sobre azul marino
 
 # Background
 background: "#111318" # Fondo principal (oscuro con tinte azulado)
@@ -286,11 +295,11 @@ onSurface: "#A8A8A8"    # Texto secundario/aclaratorio
 hint: "#707070"         # Texto suave: placeholders/hints (más tenue que onSurface)
 
 # Semantic
-success: "#3EC589"      # Verde (coincide con secondary)
+success: "#3EC589"      # Verde de éxito
 warning: "#E59D4B"      # Naranja (desaturado)
 error: "#E14869"        # Rojo principal (desaturado)
 errorPressed: "#B52949" # Rojo pulsado
-info: "#42A4E0"         # Azul (coincide con primary)
+info: "#42A4E0"         # Azul informativo
 ```
 
 ---

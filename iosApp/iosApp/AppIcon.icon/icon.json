@@ -1,8 +1,8 @@
 {
   "fill" : {
     "linear-gradient" : [
-      "srgb:0.64706,0.41569,0.89020,1.00000",
-      "srgb:0.15294,0.65490,0.94118,1.00000"
+      "srgb:1.00000,1.00000,1.00000,1.00000",
+      "srgb:1.00000,1.00000,1.00000,1.00000"
     ],
     "orientation" : {
       "start" : {
@@ -26,7 +26,7 @@
             "scale" : 1,
             "translation-in-points" : [
               0,
-              -7
+              0
             ]
           }
         }
@@ -36,7 +36,7 @@
         "opacity" : 0.5
       },
       "translucency" : {
-        "enabled" : true,
+        "enabled" : false,
         "value" : 0.5
       }
     }

@@ -3,18 +3,21 @@ package dev.lovelace.citovision.ui.theme
 import androidx.compose.ui.graphics.Color
 
 // Primary
-val primary = Color(0xFF2FA7F0)
-val primaryPressed = Color(0xFF227FC0)
+val primary = Color(0xFF4E54EA)
+val primaryPressed = Color(0xFF292FD5)
 val onPrimary = Color(0xFFFFFFFF)
 
 // Secondary
-val secondary = Color(0xFF2FD38A)
-val secondaryPressed = Color(0xFF1E9E67)
+val secondary = Color(0xFF252466)
+val secondaryPressed = Color(0xFF171643)
+
+// Ojo con el nombre: `secondaryDark` NO deriva de `secondary`. Es el verde de la prioridad BAJA, un color
+// semántico del semáforo de revisión, y por eso sigue siendo verde aunque la marca ya no lo sea.
 val secondaryDark = Color(0xFF177552)
 val onSecondary = Color(0xFFFFFFFF)
 
 // Tertiary
-val tertiary = Color(0xFFA56AE3)
+val tertiary = Color(0xFF252466)
 val onTertiary = Color(0xFFFFFFFF)
 
 // Background & Surface
@@ -31,18 +34,24 @@ val error = Color(0xFFF53A63)
 val errorPressed = Color(0xFFC71C43)
 val info = Color(0xFF2FA7F0)
 
-// --- Tema oscuro (ver DESIGN.md "Paleta oscura"): misma identidad, marca desaturada ~18%, fondo azulado y
-// secondaryDark invertido a verde claro (texto sobre fondo oscuro). ---
-val darkPrimary = Color(0xFF42A4E0)
-val darkPrimaryPressed = Color(0xFF317DB3)
+// --- Tema oscuro (ver DESIGN.md "Paleta oscura"): misma identidad, marca aclarada a un tono intermedio,
+// fondo azulado y secondaryDark invertido a verde claro (texto sobre fondo oscuro).
+//
+// El tono intermedio no es un capricho estético. Estos colores se usan a la vez como relleno con texto
+// blanco encima (botones, avatar) y como texto sobre el fondo (nombre de la app, confirmaciones), y sobre
+// #111318 ningún color cumple AA en ambos papeles: como texto exige luminancia >= 0,204 y para que el
+// blanco encima cumpla hace falta <= 0,183. Los rangos no se solapan, así que se busca el compromiso:
+// AA como relleno y AA de texto grande como texto, que es el criterio que aplica (88sp y 28sp). ---
+val darkPrimary = Color(0xFF7378EE)
+val darkPrimaryPressed = Color(0xFF5F63CF)
 val darkOnPrimary = Color(0xFFFFFFFF)
 
-val darkSecondary = Color(0xFF3EC589)
-val darkSecondaryPressed = Color(0xFF2E9366)
+val darkSecondary = Color(0xFF6362D0)
+val darkSecondaryPressed = Color(0xFF4B4AA6)
 val darkSecondaryDark = Color(0xFF64D3A1)
 val darkOnSecondary = Color(0xFFFFFFFF)
 
-val darkTertiary = Color(0xFFA575D8)
+val darkTertiary = Color(0xFF6362D0)
 val darkOnTertiary = Color(0xFFFFFFFF)
 
 val darkBackground = Color(0xFF111318)
