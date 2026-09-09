@@ -73,14 +73,14 @@ el criterio experto; reduce el tiempo hasta que ese criterio se aplica donde má
 
 
 <p align="center">
-  <img src="external/login.png" alt="Login" width="220" hspace="6">
-  <img src="external/analisis.png" alt="Análisis" width="220" hspace="6">
-  <img src="external/muestra.png" alt="Resultado del análisis" width="220" hspace="6">
+  <img src="external/login2.png" alt="Login" width="220" hspace="6">
+  <img src="external/seleccion2.png" alt="Análisis" width="220" hspace="6">
+  <img src="external/muestra2.png" alt="Resultado del análisis" width="220" hspace="6">
 </p>
 <p align="center">
-  <img src="external/historial.png" alt="Historial" width="220" hspace="6">
-  <img src="external/pacientes.png" alt="Pacientes" width="220" hspace="6">
-  <img src="external/settings.png" alt="Ajustes" width="220" hspace="6">
+  <img src="external/historial2.png" alt="Historial" width="220" hspace="6">
+  <img src="external/pacientes2.png" alt="Pacientes" width="220" hspace="6">
+  <img src="external/settings2.png" alt="Ajustes" width="220" hspace="6">
 </p>
 
 ## Funcionalidades
