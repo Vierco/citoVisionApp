@@ -12,6 +12,13 @@ sealed interface PatientsUiEvent {
     /** Carga (o recarga) el listado de códigos de paciente del usuario (RF-4b). */
     data object LoadCodes : PatientsUiEvent
 
+    /**
+     * Se ha entrado en la pestaña Pacientes. Es el disparador de entrada, en lugar de [LoadCodes]:
+     * recarga el listado de códigos y, si hay un paciente abierto, **también sus análisis**, que es lo
+     * que hace falta para que una muestra escaneada mientras tanto aparezca sin pulsar «Actualizar».
+     */
+    data object Entered : PatientsUiEvent
+
     /** Selección de un código del listado: único camino a los resultados (RF-4c). */
     data class SelectCode(
         val code: String,

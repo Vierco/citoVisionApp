@@ -116,6 +116,7 @@
     <string name="patients_list_empty">Todavía no hay pacientes con análisis en la nube.</string>
     <string name="patients_list_no_matches">Ningún código coincide con el filtro.</string>
     <string name="patients_list_error">No se pudo cargar la lista de pacientes.</string>
+    <string name="patients_results_refresh_error">No se pudieron actualizar las muestras.</string>
     <string name="patients_open_code">Ver análisis de %1$s</string>
     <string name="common_back">Volver</string>
     <string name="patients_id_name_label">Código de paciente</string>

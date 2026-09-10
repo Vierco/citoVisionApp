@@ -32,6 +32,7 @@ class PatientsViewModel(
         when (event) {
             is PatientsUiEvent.QueryChanged -> onQueryChanged(event.code)
             PatientsUiEvent.LoadCodes -> loadCodes()
+            PatientsUiEvent.Entered -> onEntered()
             is PatientsUiEvent.SelectCode -> selectCode(event.code)
             PatientsUiEvent.SubmitQuery -> submitQuery()
             PatientsUiEvent.Refresh -> refresh()
@@ -51,19 +52,42 @@ class PatientsViewModel(
         _uiState.update { it.copy(query = sanitizePatientCode(code)) }
     }
 
+    /**
+     * Entrada en la pestaña. Recarga siempre el listado de códigos, porque el análisis guardado mientras
+     * tanto puede estrenar paciente, y **además** los análisis del que se esté viendo: sin esto, volver a
+     * Pacientes tras escanear una muestra de ese mismo paciente seguía mostrando la lista vieja hasta
+     * pulsar «Actualizar». Las dos operaciones ya se protegen solas contra la reentrada.
+     */
+    private fun onEntered() {
+        loadCodes()
+        if (_uiState.value.resultsPatientCode != null) refresh()
+    }
+
     private fun loadCodes() {
         if (_uiState.value.isCodesLoading) return
         viewModelScope.launch {
             _uiState.update { it.copy(isCodesLoading = true, codesErrorVisible = false) }
             when (val result = listPatientCodes()) {
+                // `hasLoadedCodes` solo se marca con una respuesta firme: si la primera carga falla, la
+                // siguiente vuelve a merecer indicador porque todavía no hay nada que enseñar.
                 is PatientCodesResult.Loaded ->
                     _uiState.update {
-                        it.copy(isCodesLoading = false, patientCodes = result.codes, requiresAccount = false)
+                        it.copy(
+                            isCodesLoading = false,
+                            patientCodes = result.codes,
+                            requiresAccount = false,
+                            hasLoadedCodes = true,
+                        )
                     }
 
                 PatientCodesResult.RequiresAccount ->
                     _uiState.update {
-                        it.copy(isCodesLoading = false, patientCodes = emptyList(), requiresAccount = true)
+                        it.copy(
+                            isCodesLoading = false,
+                            patientCodes = emptyList(),
+                            requiresAccount = true,
+                            hasLoadedCodes = true,
+                        )
                     }
 
                 PatientCodesResult.Error ->
@@ -79,7 +103,8 @@ class PatientsViewModel(
     private fun selectCode(code: String) {
         if (_uiState.value.isLoading) return
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, query = code) }
+            // Se limpia el aviso de recarga: pertenecía al paciente anterior, no al que se abre ahora.
+            _uiState.update { it.copy(isLoading = true, query = code, refreshErrorVisible = false) }
             when (val result = search(code)) {
                 is PatientSearchResult.Found ->
                     _uiState.update {
@@ -115,7 +140,7 @@ class PatientsViewModel(
         val code = state.resultsPatientCode ?: return
         if (state.isLoading) return
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true) }
+            _uiState.update { it.copy(isLoading = true, refreshErrorVisible = false) }
             when (val result = search(code)) {
                 is PatientSearchResult.Found ->
                     _uiState.update { it.copy(isLoading = false, results = result.analyses) }
@@ -127,15 +152,19 @@ class PatientsViewModel(
                 PatientSearchResult.RequiresAccount ->
                     _uiState.update { it.copy(isLoading = false, requiresAccount = true) }
 
+                // Aviso en línea y no diálogo: esta recarga también se lanza sola al entrar en la pestaña,
+                // y un popup por un fallo de red que el usuario no ha provocado interrumpe sin motivo.
                 PatientSearchResult.Error ->
-                    _uiState.update { it.copy(isLoading = false, errorVisible = true) }
+                    _uiState.update { it.copy(isLoading = false, refreshErrorVisible = true) }
             }
         }
     }
 
     /** Vuelve al selector limpiando el filtro y recargando el listado (un borrado puede haber vaciado un código). */
     private fun newSearch() {
-        _uiState.update { it.copy(query = "", results = emptyList(), resultsPatientCode = null) }
+        _uiState.update {
+            it.copy(query = "", results = emptyList(), resultsPatientCode = null, refreshErrorVisible = false)
+        }
         loadCodes()
     }
 

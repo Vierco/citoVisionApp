@@ -24,3 +24,6 @@ actual fun appScaffoldContentInsets(): WindowInsets = ScaffoldDefaults.contentWi
 /** La barra ocupa su hueco en el `Scaffold`, así que no hay nada flotante que compensar. */
 @Composable
 actual fun floatingNavigationBarPadding(): Dp = 0.dp
+
+/** Deslizar entre pestañas es lo que se espera de una app Android. */
+actual fun swipeBetweenTabsEnabled(): Boolean = true

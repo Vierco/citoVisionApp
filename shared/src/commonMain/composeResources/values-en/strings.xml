@@ -117,6 +117,7 @@
     <string name="patients_list_empty">No patients with analyses in the cloud yet.</string>
     <string name="patients_list_no_matches">No code matches the filter.</string>
     <string name="patients_list_error">The patient list could not be loaded.</string>
+    <string name="patients_results_refresh_error">The samples could not be updated.</string>
     <string name="patients_open_code">View analyses for %1$s</string>
     <string name="common_back">Back</string>
     <string name="patients_id_name_label">Patient code</string>

@@ -24,3 +24,6 @@ actual fun appScaffoldContentInsets(): WindowInsets = ScaffoldDefaults.contentWi
 /** La barra ocupa su hueco en el `Scaffold`, así que no hay nada flotante que compensar. */
 @Composable
 actual fun floatingNavigationBarPadding(): Dp = 0.dp
+
+/** Desktop hereda el comportamiento de Android; aquí el gesto se hace arrastrando con el ratón. */
+actual fun swipeBetweenTabsEnabled(): Boolean = true

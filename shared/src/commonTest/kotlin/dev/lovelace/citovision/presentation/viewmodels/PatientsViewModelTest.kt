@@ -216,6 +216,111 @@ class PatientsViewModelTest {
             assertEquals("12-34", viewModel.uiState.value.resultsPatientCode)
         }
 
+    /**
+     * El caso que motivó el evento: con un paciente abierto, escanear una muestra suya desde otra pestaña
+     * y volver debía dejar la lista vieja hasta pulsar "Actualizar", porque la entrada solo recargaba el
+     * listado de códigos.
+     */
+    @Test
+    fun `given an open patient when entering the tab then reloads its analyses`() =
+        runTest(dispatcher) {
+            every { authService.currentUser } returns flowOf(account)
+            val second = Analysis("a2", "12-34", Instant.fromEpochMilliseconds(2), "s2", null, emptyList())
+            val fakeRemote = QueueRemote(mutableListOf(listOf(analysis()), listOf(analysis(), second)))
+            val viewModel =
+                PatientsViewModel(
+                    SearchPatientAnalysesUseCase(authService, fakeRemote),
+                    DeleteRemoteAnalysisUseCase(fakeRemote),
+                    ListPatientCodesUseCase(authService, fakeRemote),
+                )
+            viewModel.onEvent(PatientsUiEvent.SelectCode("12-34"))
+            advanceUntilIdle()
+            assertEquals(1, viewModel.uiState.value.results.size)
+
+            viewModel.onEvent(PatientsUiEvent.Entered)
+            advanceUntilIdle()
+
+            assertEquals(2, viewModel.uiState.value.results.size)
+            assertEquals("12-34", viewModel.uiState.value.resultsPatientCode)
+            assertEquals(listOf("12-34"), viewModel.uiState.value.patientCodes)
+        }
+
+    /** Sin paciente abierto la entrada solo toca el listado: no hay resultados que recargar. */
+    @Test
+    fun `given no open patient when entering the tab then only reloads the code list`() =
+        runTest(dispatcher) {
+            every { authService.currentUser } returns flowOf(account)
+            everySuspend { remote.queryPatientCodes("u1") } returns Result.Success(listOf("12-34", "20-26"))
+            val viewModel = buildViewModel()
+
+            viewModel.onEvent(PatientsUiEvent.Entered)
+            advanceUntilIdle()
+
+            assertEquals(listOf("12-34", "20-26"), viewModel.uiState.value.patientCodes)
+            assertEquals(null, viewModel.uiState.value.resultsPatientCode)
+            assertTrue(
+                viewModel.uiState.value.results
+                    .isEmpty(),
+            )
+        }
+
+    /**
+     * El indicador de carga del listado se enseña solo la primera vez: a partir de ahí la recarga es
+     * silenciosa y se sigue viendo la lista anterior.
+     */
+    @Test
+    fun `given a resolved list when entering again then the loading indicator is no longer owed`() =
+        runTest(dispatcher) {
+            every { authService.currentUser } returns flowOf(account)
+            everySuspend { remote.queryPatientCodes("u1") } returns Result.Success(listOf("12-34"))
+            val viewModel = buildViewModel()
+            assertFalse(viewModel.uiState.value.hasLoadedCodes)
+
+            viewModel.onEvent(PatientsUiEvent.Entered)
+            advanceUntilIdle()
+
+            assertTrue(viewModel.uiState.value.hasLoadedCodes)
+        }
+
+    /** Si la primera carga falla no hay nada que enseñar, así que el siguiente intento sí lleva indicador. */
+    @Test
+    fun `given a failed first load when entering then the loading indicator is still owed`() =
+        runTest(dispatcher) {
+            every { authService.currentUser } returns flowOf(account)
+            everySuspend { remote.queryPatientCodes("u1") } returns Result.Failure(RemoteAnalysisError.Network)
+            val viewModel = buildViewModel()
+
+            viewModel.onEvent(PatientsUiEvent.Entered)
+            advanceUntilIdle()
+
+            assertFalse(viewModel.uiState.value.hasLoadedCodes)
+            assertTrue(viewModel.uiState.value.codesErrorVisible)
+        }
+
+    /**
+     * Una recarga que falla no puede comportarse como un error de acción directa: ni saca diálogo ni
+     * retira los análisis que el usuario está mirando. Solo levanta el aviso en línea.
+     */
+    @Test
+    fun `given an open patient when the reload fails then warns inline and keeps the analyses`() =
+        runTest(dispatcher) {
+            every { authService.currentUser } returns flowOf(account)
+            everySuspend { remote.queryPatientCodes("u1") } returns Result.Success(listOf("12-34"))
+            everySuspend { remote.queryByPatient("u1", "12-34") } returns Result.Success(listOf(analysis()))
+            val viewModel = buildViewModel()
+            viewModel.onEvent(PatientsUiEvent.SelectCode("12-34"))
+            advanceUntilIdle()
+
+            everySuspend { remote.queryByPatient("u1", "12-34") } returns
+                Result.Failure(RemoteAnalysisError.Network)
+            viewModel.onEvent(PatientsUiEvent.Entered)
+            advanceUntilIdle()
+
+            assertTrue(viewModel.uiState.value.refreshErrorVisible)
+            assertFalse(viewModel.uiState.value.errorVisible)
+            assertEquals(1, viewModel.uiState.value.results.size)
+        }
+
     /** Fake que devuelve una página de resultados por llamada, para verificar la recarga. */
     private class QueueRemote(
         private val pages: MutableList<List<Analysis>>,

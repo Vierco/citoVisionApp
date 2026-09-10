@@ -56,6 +56,19 @@ expect fun appScaffoldContentInsets(): WindowInsets
 expect fun floatingNavigationBarPadding(): Dp
 
 /**
+ * Si se puede cambiar de pestaña **deslizando el dedo** sobre el contenido, además de tocando la barra.
+ *
+ * Vale `true` en Android y Desktop, y **`false` en iOS a propósito**: deslizar entre pestañas es un
+ * patrón de Material, no de UIKit — un `UITabBarController` no lo hace—, y ADR-0008 fijó que la barra
+ * de iOS fuera nativa. Añadir allí un gesto que el sistema no tiene contradiría esa decisión.
+ *
+ * Gobierna dos cosas en `MainScreen`: si el `HorizontalPager` acepta el arrastre, y si al tocar una
+ * pestaña se anima el paso de página o se salta en seco (en iOS, en seco, para que se vea igual que
+ * antes de existir el pager).
+ */
+expect fun swipeBetweenTabsEnabled(): Boolean
+
+/**
  * Implementación Material 3, compartida por los `actual` de Android y Desktop para no duplicarla en dos
  * *source sets*. Fondo transparente porque el degradado lo pinta la pantalla que la contiene.
  *

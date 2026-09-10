@@ -19,7 +19,7 @@ class NativeTabBarState(
  * Puente con la barra de pestañas nativa, que en iOS dibuja SwiftUI **por encima** de Compose (ADR-0008).
  *
  * Es bidireccional, pero el estado **no se duplica**: la fuente única de verdad sigue siendo el
- * `selectedTabIndex` de `MainScreen`. Swift solo pinta lo que se le publica y avisa de los toques.
+ * `pagerState` de `MainScreen`. Swift solo pinta lo que se le publica y avisa de los toques.
  *
  * Que la barra se vea o no se deduce del ciclo de vida de la composición, así que desaparece sola en
  * Splash, Login y Ajustes sin lógica añadida.

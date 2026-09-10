@@ -5,7 +5,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -15,6 +14,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
@@ -34,12 +34,14 @@ import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -71,6 +73,7 @@ import citovision.shared.generated.resources.patients_refresh
 import citovision.shared.generated.resources.patients_requires_account_desc
 import citovision.shared.generated.resources.patients_requires_account_title
 import citovision.shared.generated.resources.patients_result_header
+import citovision.shared.generated.resources.patients_results_refresh_error
 import citovision.shared.generated.resources.patients_search_desc_default
 import citovision.shared.generated.resources.patients_search_placeholder
 import citovision.shared.generated.resources.patients_search_title
@@ -80,6 +83,7 @@ import dev.lovelace.citovision.presentation.components.AnalysisDetailDialog
 import dev.lovelace.citovision.presentation.components.ModalOverlayEffect
 import dev.lovelace.citovision.presentation.components.dongleIconAlign
 import dev.lovelace.citovision.presentation.components.floatingNavigationBarPadding
+import dev.lovelace.citovision.presentation.components.rememberSanitizedField
 import dev.lovelace.citovision.presentation.events.PatientsUiEvent
 import dev.lovelace.citovision.presentation.format.formatAnalysisDateTime
 import dev.lovelace.citovision.presentation.state.PatientsUiState
@@ -88,13 +92,21 @@ import dev.lovelace.citovision.ui.theme.LocalAppColors
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
+/**
+ * [isCurrentTab] es la pestaña en la que está asentado el pager de `MainScreen`. La recarga se ata a él y
+ * no al ciclo de vida de esta pantalla, porque dentro de un pager las páginas vecinas se componen
+ * **mientras se arrastra**: con un `LaunchedEffect(Unit)` bastaría medio gesto, o uno que se queda a
+ * medias, para lanzar consultas al remoto.
+ */
 @Composable
-fun PatientsScreen() {
+fun PatientsScreen(isCurrentTab: Boolean) {
     val viewModel = koinViewModel<PatientsViewModel>()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    // El ViewModel sobrevive al cambio de pestaña, pero esta pantalla no: el efecto se relanza cada vez
-    // que se entra en Pacientes, así que el listado refleja los análisis creados mientras tanto.
-    LaunchedEffect(Unit) { viewModel.onEvent(PatientsUiEvent.LoadCodes) }
+    // El ViewModel sobrevive al cambio de pestaña: al volver aquí se recargan el listado de códigos y los
+    // análisis del paciente abierto, de modo que aparezca lo escaneado mientras tanto.
+    LaunchedEffect(isCurrentTab) {
+        if (isCurrentTab) viewModel.onEvent(PatientsUiEvent.Entered)
+    }
     PatientsContent(uiState = uiState, onEvent = viewModel::onEvent)
 }
 
@@ -103,6 +115,10 @@ private fun PatientsContent(
     uiState: PatientsUiState,
     onEvent: (PatientsUiEvent) -> Unit,
 ) {
+    // El título ya no vive aquí sino dentro de cada vista, como primer elemento de su lista: así se
+    // desplaza con el contenido en vez de robarle sitio fijo. En una pantalla corta —un iPhone SE, o
+    // cualquiera con el tipo de letra grande— la cabecera se comía más espacio del que le quedaba a la
+    // lista, que llegaba a enseñar una sola fila.
     Column(
         modifier =
             Modifier
@@ -110,18 +126,14 @@ private fun PatientsContent(
                 .padding(start = 24.dp, end = 24.dp, top = 0.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Text(
-            text = stringResource(Res.string.patients_search_title),
-            style = MaterialTheme.typography.headlineLarge,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onBackground,
-            modifier = Modifier.fillMaxWidth(),
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-
         when {
             uiState.resultsPatientCode != null ->
-                ResultsView(code = uiState.resultsPatientCode, results = uiState.results, onEvent = onEvent)
+                ResultsView(
+                    code = uiState.resultsPatientCode,
+                    results = uiState.results,
+                    refreshError = uiState.refreshErrorVisible,
+                    onEvent = onEvent,
+                )
 
             uiState.isLoading ->
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -167,9 +179,25 @@ private fun PatientsContent(
     }
 }
 
+/** Título de la pantalla. Va dentro de la lista de cada vista para que se desplace con el contenido. */
+@Composable
+private fun ScreenTitle() {
+    Text(
+        text = stringResource(Res.string.patients_search_title),
+        style = MaterialTheme.typography.headlineLarge,
+        fontWeight = FontWeight.Bold,
+        color = MaterialTheme.colorScheme.onBackground,
+        modifier = Modifier.fillMaxWidth(),
+    )
+}
+
 /**
  * Selección de paciente (RF-4b/RF-4c): el campo **filtra** el listado de códigos del usuario y solo se
  * llega a los resultados pulsando uno de ellos, de modo que no se puede consultar un código inexistente.
+ *
+ * Toda la vista es **una sola lista desplazable**: título, descripción y campo son sus primeros elementos
+ * y los códigos van detrás. Así la cabecera se aparta al desplazar y el listado dispone de la pantalla
+ * entera, en vez de repartirse lo que sobre de una cabecera fija.
  */
 @Composable
 private fun PatientPicker(
@@ -177,7 +205,31 @@ private fun PatientPicker(
     onEvent: (PatientsUiEvent) -> Unit,
 ) {
     val focusManager = LocalFocusManager.current
-    Column(modifier = Modifier.fillMaxSize()) {
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(bottom = 16.dp + floatingNavigationBarPadding()),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        item {
+            PickerHeader(query = uiState.query, focusManager = focusManager, onEvent = onEvent)
+        }
+        patientCodeItems(uiState = uiState, onEvent = onEvent)
+    }
+}
+
+/** Cabecera del selector: título, explicación y campo de filtro. Es el primer elemento de la lista. */
+@Composable
+private fun PickerHeader(
+    query: String,
+    focusManager: FocusManager,
+    onEvent: (PatientsUiEvent) -> Unit,
+) {
+    // Mismo motivo que en el diálogo del escáner: el texto vuelve saneado y la selección se lleva aquí
+    // para que el cursor no salte (ver `rememberSanitizedField`).
+    val field = rememberSanitizedField(text = query, onTextChange = { onEvent(PatientsUiEvent.QueryChanged(it)) })
+    Column {
+        ScreenTitle()
+        Spacer(modifier = Modifier.height(16.dp))
         Text(
             text = stringResource(Res.string.patients_search_desc_default),
             style = MaterialTheme.typography.bodyMedium,
@@ -192,8 +244,8 @@ private fun PatientPicker(
         )
         Spacer(modifier = Modifier.height(8.dp))
         OutlinedTextField(
-            value = uiState.query,
-            onValueChange = { onEvent(PatientsUiEvent.QueryChanged(it)) },
+            value = field.value,
+            onValueChange = field.onValueChange,
             modifier = Modifier.fillMaxWidth(),
             placeholder = { Text(stringResource(Res.string.patients_search_placeholder)) },
             supportingText = { Text(stringResource(Res.string.analysis_code_dialog_hint)) },
@@ -228,59 +280,110 @@ private fun PatientPicker(
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onBackground,
         )
-        Spacer(modifier = Modifier.height(8.dp))
-        PatientCodeList(uiState = uiState, onEvent = onEvent)
     }
 }
 
-/** Zona del listado: ocupa el espacio restante y resuelve en ella cargando/error/sin-cuenta/vacío. */
+/**
+ * Aviso en línea para una recarga que ha fallado **cuando lo que ya hay en pantalla se sigue pudiendo
+ * usar**. No interrumpe como haría un diálogo, porque estas recargas se lanzan solas al entrar en la
+ * pestaña y el usuario no ha pedido nada: informa en dos líneas como mucho y ofrece reintentar.
+ *
+ * Solo se usa en la vista de un paciente, y la distinción importa: sus cards **se leen sin red** (resumen,
+ * prioridad, fecha, y el diálogo de detalle sale de datos ya cargados), así que conservarlas es útil. El
+ * listado de códigos es el caso contrario —cada elemento es una consulta al remoto— y allí sí se retira,
+ * porque ofrecer una lista que no abre sería prometer algo que no se puede cumplir.
+ *
+ * Los errores nacidos de una acción directa (abrir un paciente, borrar) siguen siendo diálogo.
+ */
 @Composable
-private fun ColumnScope.PatientCodeList(
-    uiState: PatientsUiState,
-    onEvent: (PatientsUiEvent) -> Unit,
+private fun InlineErrorBanner(
+    message: String,
+    onRetry: () -> Unit,
 ) {
-    Box(
+    val errorColor = MaterialTheme.colorScheme.error
+    Row(
         modifier =
             Modifier
                 .fillMaxWidth()
-                .weight(1f),
+                .clip(RoundedCornerShape(12.dp))
+                .background(errorColor.copy(alpha = 0.15f))
+                .padding(start = 12.dp, end = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        when {
-            uiState.isCodesLoading ->
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Text(
+            text = message,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onBackground,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1f),
+        )
+        TextButton(onClick = onRetry) {
+            Text(
+                text = stringResource(Res.string.common_retry),
+                style = MaterialTheme.typography.labelLarge,
+                color = errorColor,
+            )
+        }
+    }
+}
+
+/**
+ * Elementos del listado, que van detrás de la cabecera **dentro de la misma lista**. Resuelve aquí sus
+ * estados: cargando, sin cuenta, error, vacío, sin coincidencias, o los códigos.
+ *
+ * Al ser elementos y no una zona de altura fija, los mensajes se desplazan con el resto: antes, en una
+ * pantalla corta, el botón de reintentar quedaba fuera y no había forma de llegar a él.
+ */
+private fun LazyListScope.patientCodeItems(
+    uiState: PatientsUiState,
+    onEvent: (PatientsUiEvent) -> Unit,
+) {
+    when {
+        // El indicador solo la primera vez. Después se entra en Pacientes constantemente, y sustituir
+        // la lista por un spinner en cada entrada es peor que no avisar: la recarga es silenciosa y el
+        // listado se actualiza al llegar, sin parpadeo, porque la `LazyColumn` no llega a desmontarse.
+        uiState.isCodesLoading && !uiState.hasLoadedCodes ->
+            item {
+                Box(
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 32.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
                     CircularProgressIndicator()
                 }
+            }
 
-            uiState.requiresAccount ->
+        uiState.requiresAccount ->
+            item {
                 CodesMessage(
                     title = stringResource(Res.string.patients_requires_account_title),
                     message = stringResource(Res.string.patients_requires_account_desc),
                 )
+            }
 
-            uiState.codesErrorVisible ->
+        // El error sustituye al listado aunque ya hubiera códigos cargados, y es a propósito: esta
+        // pestaña es enteramente remota (SPEC-0005), así que sin conexión cada código de la lista es
+        // una puerta que no abre — tocarlo solo llevaría al diálogo de error de `selectCode`. Mostrar
+        // una lista intocable sería prometer algo que no se puede cumplir.
+        uiState.codesErrorVisible ->
+            item {
                 CodesMessage(
                     title = stringResource(Res.string.patients_error_title),
                     message = stringResource(Res.string.patients_list_error),
                     onRetry = { onEvent(PatientsUiEvent.LoadCodes) },
                 )
+            }
 
-            uiState.patientCodes.isEmpty() ->
-                CodesMessage(message = stringResource(Res.string.patients_list_empty))
+        uiState.patientCodes.isEmpty() ->
+            item { CodesMessage(message = stringResource(Res.string.patients_list_empty)) }
 
-            uiState.filteredCodes.isEmpty() ->
-                CodesMessage(message = stringResource(Res.string.patients_list_no_matches))
+        uiState.filteredCodes.isEmpty() ->
+            item { CodesMessage(message = stringResource(Res.string.patients_list_no_matches)) }
 
-            else ->
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(bottom = 16.dp + floatingNavigationBarPadding()),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    items(items = uiState.filteredCodes, key = { it }) { code ->
-                        PatientCodeRow(code = code, onClick = { onEvent(PatientsUiEvent.SelectCode(code)) })
-                    }
-                }
-        }
+        else ->
+            items(items = uiState.filteredCodes, key = { it }) { code ->
+                PatientCodeRow(code = code, onClick = { onEvent(PatientsUiEvent.SelectCode(code)) })
+            }
     }
 }
 
@@ -329,13 +432,14 @@ private fun CodesMessage(
     title: String? = null,
     onRetry: (() -> Unit)? = null,
 ) {
+    // Ancho completo y alto según su contenido: vive dentro de una lista, donde el alto es ilimitado y
+    // un `fillMaxSize` no tendría contra qué medirse.
     Column(
         modifier =
             Modifier
-                .fillMaxSize()
-                .padding(horizontal = 16.dp),
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
     ) {
         if (title != null) {
             Text(
@@ -374,60 +478,86 @@ private fun CodesMessage(
 private fun ResultsView(
     code: String,
     results: List<Analysis>,
+    refreshError: Boolean,
     onEvent: (PatientsUiEvent) -> Unit,
 ) {
     val title = stringResource(Res.string.analysis_card_title)
-    Column(modifier = Modifier.fillMaxSize()) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            // Un código largo no debe comerse los botones: la cabecera cede el ancho sobrante al texto,
-            // que se parte en dos líneas como máximo y recorta con puntos suspensivos.
-            Text(
-                text = stringResource(Res.string.patients_result_header, code),
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onBackground,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-                modifier =
-                    Modifier
-                        .weight(1f)
-                        .padding(end = 8.dp),
-            )
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedIconButton(onClick = { onEvent(PatientsUiEvent.NewSearch) }) {
-                    Icon(
-                        imageVector = Icons.Default.Search,
-                        contentDescription = stringResource(Res.string.patients_new_search),
-                    )
-                }
-                OutlinedIconButton(onClick = { onEvent(PatientsUiEvent.Refresh) }) {
-                    Icon(
-                        imageVector = Icons.Default.Refresh,
-                        contentDescription = stringResource(Res.string.patients_refresh),
-                    )
-                }
+    // Misma estructura que el selector: una sola lista, con el título y la cabecera como primer elemento
+    // para que se aparten al desplazar en vez de ocupar sitio fijo en una pantalla corta.
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(bottom = 16.dp + floatingNavigationBarPadding()),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        item {
+            Column {
+                ScreenTitle()
+                Spacer(modifier = Modifier.height(16.dp))
+                ResultsHeader(code = code, onEvent = onEvent)
             }
         }
-        Spacer(modifier = Modifier.height(16.dp))
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(bottom = 16.dp + floatingNavigationBarPadding()),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-            items(results) { analysis ->
-                AnalysisCard(
-                    title = analysis.sampleName ?: title,
-                    date = analysis.performedAt.formatAnalysisDateTime(),
-                    patient = analysis.patient,
-                    description = analysis.summary,
-                    imagePath = analysis.imagePath,
-                    priority = analysis.priority,
-                    onClick = { onEvent(PatientsUiEvent.ShowDetail(analysis)) },
-                    onLongClick = { onEvent(PatientsUiEvent.RequestDelete(analysis)) },
+
+        // Si la recarga de las muestras falla, se avisa sin quitar lo que hay: estas cards se leen sin red.
+        if (refreshError) {
+            item {
+                InlineErrorBanner(
+                    message = stringResource(Res.string.patients_results_refresh_error),
+                    onRetry = { onEvent(PatientsUiEvent.Refresh) },
+                )
+            }
+        }
+
+        items(results) { analysis ->
+            AnalysisCard(
+                title = analysis.sampleName ?: title,
+                date = analysis.performedAt.formatAnalysisDateTime(),
+                patient = analysis.patient,
+                description = analysis.summary,
+                imagePath = analysis.imagePath,
+                priority = analysis.priority,
+                onClick = { onEvent(PatientsUiEvent.ShowDetail(analysis)) },
+                onLongClick = { onEvent(PatientsUiEvent.RequestDelete(analysis)) },
+            )
+        }
+    }
+}
+
+/** Cabecera de la vista de resultados: a qué paciente pertenecen y las acciones sobre ellos. */
+@Composable
+private fun ResultsHeader(
+    code: String,
+    onEvent: (PatientsUiEvent) -> Unit,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        // Un código largo no debe comerse los botones: la cabecera cede el ancho sobrante al texto,
+        // que se parte en dos líneas como máximo y recorta con puntos suspensivos.
+        Text(
+            text = stringResource(Res.string.patients_result_header, code),
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onBackground,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+            modifier =
+                Modifier
+                    .weight(1f)
+                    .padding(end = 8.dp),
+        )
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            OutlinedIconButton(onClick = { onEvent(PatientsUiEvent.NewSearch) }) {
+                Icon(
+                    imageVector = Icons.Default.Search,
+                    contentDescription = stringResource(Res.string.patients_new_search),
+                )
+            }
+            OutlinedIconButton(onClick = { onEvent(PatientsUiEvent.Refresh) }) {
+                Icon(
+                    imageVector = Icons.Default.Refresh,
+                    contentDescription = stringResource(Res.string.patients_refresh),
                 )
             }
         }

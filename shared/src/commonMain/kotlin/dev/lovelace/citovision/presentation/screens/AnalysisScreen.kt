@@ -84,6 +84,7 @@ import coil3.compose.rememberAsyncImagePainter
 import dev.lovelace.citovision.presentation.components.ModalOverlayEffect
 import dev.lovelace.citovision.presentation.components.dongleIconAlign
 import dev.lovelace.citovision.presentation.components.floatingNavigationBarPadding
+import dev.lovelace.citovision.presentation.components.rememberSanitizedField
 import dev.lovelace.citovision.presentation.events.AnalysisUiEvent
 import dev.lovelace.citovision.presentation.state.AnalysisUiState
 import dev.lovelace.citovision.presentation.viewmodels.AnalysisViewModel
@@ -373,13 +374,16 @@ private fun PatientCodeDialog(
     onDismiss: () -> Unit,
 ) {
     ModalOverlayEffect()
+    // El texto vuelve saneado desde el ViewModel, así que la selección se lleva aquí: ver
+    // `rememberSanitizedField`. Sin esto, en iOS el cursor saltaba al escribir el guion.
+    val field = rememberSanitizedField(text = code, onTextChange = onCodeChange)
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(Res.string.analysis_code_dialog_title)) },
         text = {
             OutlinedTextField(
-                value = code,
-                onValueChange = onCodeChange,
+                value = field.value,
+                onValueChange = field.onValueChange,
                 singleLine = true,
                 supportingText = { Text(stringResource(Res.string.analysis_code_dialog_hint)) },
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),

@@ -3,6 +3,8 @@ package dev.lovelace.citovision.presentation.screens
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Person
@@ -17,8 +19,8 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -37,6 +39,8 @@ import citovision.shared.generated.resources.nav_settings
 import dev.lovelace.citovision.presentation.components.AppNavigationBar
 import dev.lovelace.citovision.presentation.components.AppNavigationItem
 import dev.lovelace.citovision.presentation.components.appScaffoldContentInsets
+import dev.lovelace.citovision.presentation.components.swipeBetweenTabsEnabled
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -52,8 +56,20 @@ private enum class MainTab(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(onNavigateToSettings: () -> Unit) {
-    var selectedTabIndex by rememberSaveable { mutableIntStateOf(0) }
-    val selectedTab = MainTab.entries[selectedTabIndex]
+    // Un pager en lugar de un simple índice: en Android y Desktop permite además cambiar de pestaña
+    // deslizando. `rememberPagerState` ya conserva la página al recrear el proceso.
+    val pagerState = rememberPagerState(pageCount = { MainTab.entries.size })
+    val scope = rememberCoroutineScope()
+    val swipeEnabled = swipeBetweenTabsEnabled()
+    val selectedTab = MainTab.entries[pagerState.currentPage]
+
+    // Al tocar una pestaña se anima el paso de página donde el gesto existe; donde no (iOS), se salta en
+    // seco, para que el cambio se vea igual que antes de haber pager, como corresponde a su barra nativa.
+    fun goToTab(index: Int) {
+        scope.launch {
+            if (swipeEnabled) pagerState.animateScrollToPage(index) else pagerState.scrollToPage(index)
+        }
+    }
 
     // Al guardar una muestra con éxito se cambia a la pestaña Historial y se guarda el id de la nueva card
     // para que el Historial espere a que esté en la lista, haga scroll a ella y la destaque una vez. El
@@ -146,22 +162,24 @@ fun MainScreen(onNavigateToSettings: () -> Unit) {
                                     },
                             )
                         },
-                    selectedIndex = selectedTabIndex,
-                    onSelect = { selectedTabIndex = it },
+                    selectedIndex = pagerState.currentPage,
+                    onSelect = { goToTab(it) },
                 )
             },
         ) { innerPadding ->
-            Box(
+            HorizontalPager(
+                state = pagerState,
                 modifier =
                     Modifier
                         .fillMaxSize()
                         .padding(innerPadding),
-            ) {
-                when (selectedTab) {
+                userScrollEnabled = swipeEnabled,
+            ) { page ->
+                when (MainTab.entries[page]) {
                     MainTab.ANALYSIS ->
                         AnalysisScreen(
                             onAnalysisSaved = { analysisId ->
-                                selectedTabIndex = MainTab.HISTORY.ordinal
+                                goToTab(MainTab.HISTORY.ordinal)
                                 pendingFlashAnalysisId = analysisId
                             },
                         )
@@ -172,7 +190,10 @@ fun MainScreen(onNavigateToSettings: () -> Unit) {
                             onFlashConsumed = { pendingFlashAnalysisId = null },
                         )
 
-                    MainTab.PATIENTS -> PatientsScreen()
+                    // Se le dice si es la pestaña asentada, y no si está compuesta: dentro de un pager las
+                    // páginas vecinas se componen mientras se arrastra, y no queremos consultar el remoto
+                    // por medio gesto ni por uno que se queda a medias.
+                    MainTab.PATIENTS -> PatientsScreen(isCurrentTab = page == pagerState.settledPage)
                 }
             }
         }

@@ -69,4 +69,10 @@ actual fun appScaffoldContentInsets(): WindowInsets =
 actual fun floatingNavigationBarPadding(): Dp =
     BAR_HEIGHT + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
 
+/**
+ * **No.** Un `UITabBarController` no cambia de pestaña al deslizar, y esta barra imita a la del sistema
+ * (ADR-0008). Con esto el cambio de pestaña sigue siendo un salto seco, igual que antes del pager.
+ */
+actual fun swipeBetweenTabsEnabled(): Boolean = false
+
 private val BAR_HEIGHT = 64.dp

@@ -212,6 +212,10 @@ extraLarge: 28dp
 - Navigation Rail
 - Tabs
 
+### Gesto de cambio de pestaña
+
+En **Android y Desktop** se puede cambiar de pestaña **deslizando** sobre el contenido, además de tocando la barra. En **iOS no**, y es deliberado: deslizar entre pestañas es un patrón de Material y no de UIKit (un `UITabBarController` no lo hace), mientras que ADR-0008 fijó que la barra de iOS fuera nativa. Allí el cambio de pestaña es un salto seco, sin desplazamiento lateral. No "arreglar" esa diferencia: está buscada.
+
 ---
 
 # Screen States
