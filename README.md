@@ -2,7 +2,7 @@
   <img src="external/citoVision.png" alt="citoVision" width="300">
 </p>
 
-<h1 align="center">🔬 citoVision</h1>
+<h1 align="center">citoVision</h1>
 
 <p align="center">
   <em>Cribado morfológico hematológico asistido por IA: detecta, segmenta y clasifica células
