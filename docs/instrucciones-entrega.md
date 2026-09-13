@@ -3,7 +3,9 @@
 Guía para instalar y ejecutar citoVision a partir de los paquetes de entrega. citoVision se distribuye para
 **macOS** (`.dmg`), **Windows** (`.zip`), **Android** (`.apk`) e **iOS** (por TestFlight).
 
-Los ficheros se descargan de la **[sección *Releases* del repositorio](https://github.com/Vierco/citoVision/releases)**.
+citoVision se distribuye **bajo solicitud**: si tienes este documento es porque has recibido el paquete de tu
+plataforma. Para cualquier duda, o para pedir otra plataforma, escribe a
+**[hola@citovision.app](mailto:hola@citovision.app)**.
 
 > **Nota:** citoVision es un prototipo académico y experimental. Los paquetes **no están firmados con un
 > certificado comercial de tienda**, por lo que el sistema operativo puede mostrar avisos de seguridad al ser
@@ -102,7 +104,8 @@ el canal de betas de Apple. No hacen falta ni Mac ni Xcode.
 ### Pasos
 
 1. Instala la app **TestFlight** desde la App Store.
-2. Abre **[el enlace de la beta](https://testflight.apple.com/join/Q5HKBm6E)** desde el iPhone.
+2. Recibirás una **invitación por correo** en la dirección con la que solicitaste el acceso; ábrela desde el
+   iPhone.
 3. Acepta la invitación e instala citoVision desde TestFlight.
 
 > Dos límites propios del canal de Apple: **las builds caducan a los 90 días** de publicarse, y el grupo de
@@ -118,8 +121,8 @@ el canal de betas de Apple. No hacen falta ni Mac ni Xcode.
 - Iniciar sesión (con Google, o con correo y contraseña) añade la pantalla **Pacientes**, que asocia los
   análisis a un código de paciente y los sincroniza entre dispositivos. Las cuentas de correo y contraseña las
   gestiona **Lovelaced**; si necesitas una, contacta con el equipo.
-- Para probarlo necesitas imágenes de frotis sanguíneo al microscopio, que no son fáciles de conseguir. En el
-  [README](../README.md#para-probar-citovision) hay un conjunto de muestras listo para descargar.
+- Para probarlo necesitas imágenes de frotis sanguíneo al microscopio, que no son fáciles de conseguir. Con
+  el paquete se incluye un conjunto de muestras; si no lo tienes, pídelo al mismo correo.
 - En **Ajustes → Origen de las imágenes** eliges si el selector abre la galería de fotos o el explorador de
   archivos. Si has descargado las muestras como ficheros, cambia esa opción a **Archivos** o el selector
   aparecerá vacío.

@@ -28,8 +28,7 @@
 - [Funcionalidades](#funcionalidades)
 - [Arquitectura](#arquitectura)
 - [Tecnologías](#tecnologías)
-- [Descargar citoVision](#Descargar-citoVision)
-- [Para probar citoVision](#Para-probar-citoVision)
+- [Probar citoVision](#probar-citovision)
 - [El modelo de IA](#el-modelo-de-ia)
 - [Datos: local y remoto](#datos-local-y-remoto)
 - [Seguridad y privacidad](#seguridad-y-privacidad)
@@ -57,7 +56,9 @@ realista y técnicamente sólido.
 > y no es un producto sanitario. Su función es **priorizar** qué muestras conviene revisar antes; la
 > decisión clínica corresponde siempre al profesional.
 
-**[Video: Un recorrido por citoVision](https://drive.google.com/file/d/12zMgc6C16O8i1xfBK5qQKEIHlPTzvPyQ/view?usp=sharing)**
+> 🔒 **Este repositorio no incluye el modelo de IA.** Se publica para mostrar el diseño y la implementación
+> de la aplicación; los pesos del modelo y su proceso de entrenamiento no forman parte de él. Por eso el
+> proyecto **compila pero no analiza**: la aplicación funcional se facilita [bajo solicitud](#probar-citovision).
 
 ## Qué necesidad cubre
 
@@ -101,7 +102,7 @@ el criterio experto; reduce el tiempo hasta que ese criterio se aplica donde má
 > 👤 **Acceso con cuenta.** Por seguridad, el registro está cerrado: los usuarios **no pueden crearse desde
 > la aplicación**. Es **Lovelaced**, desarrolladora de citoVision, quien genera las cuentas a petición. Sin
 > cuenta puedes usar la app en **modo invitado** (análisis e historial locales). Si te interesa probar
-> citoVision con cuenta de usuario, escríbenos a **[citovision.mvp@gmail.com](mailto:citovision.mvp@gmail.com)**
+> citoVision con cuenta de usuario, escríbenos a **[hola@citovision.app](mailto:hola@citovision.app)**
 
 
 ## Arquitectura
@@ -152,50 +153,33 @@ shared/
 
 
 
-## Descargar citoVision
+## Probar citoVision
 
-Los ejecutables se publican en la **[sección *Releases* del repositorio](https://github.com/Vierco/citoVision/releases)**,
-que es la fuente oficial de descarga. La versión actual es
-**[v1.0.0-beta](https://github.com/Vierco/citoVision/releases/tag/v1.0.0-beta)**, con un fichero por plataforma y
-las instrucciones de instalación de cada sistema en la propia página de la release.
+citoVision se distribuye **bajo solicitud**. Los ejecutables llevan el modelo de IA dentro, así que no hay
+descargas abiertas: escribe a **[hola@citovision.app](mailto:hola@citovision.app)** indicando la plataforma y
+recibirás el paquete correspondiente junto con las instrucciones de instalación y un conjunto de imágenes de
+frotis para probarlo. La versión actual es **1.0.0-beta**.
 
-| Plataforma | Descarga | Requisito mínimo |
+| Plataforma | Formato | Requisito mínimo |
 |---|---|---|
-| **Android** (APK) | ➡️ **[citoVision-1.0.0-beta-android.apk](https://github.com/Vierco/citoVision/releases/download/v1.0.0-beta/citoVision-1.0.0-beta-android.apk)** | Android 8.1 (API 27) |
-| **macOS** (DMG) | ➡️ **[citoVision-1.0.0-beta-macos.dmg](https://github.com/Vierco/citoVision/releases/download/v1.0.0-beta/citoVision-1.0.0-beta-macos.dmg)** | macOS (Apple Silicon o Intel) |
-| **Windows** (ZIP ejecutable) | ➡️ **[citoVision-1.0.0-beta-windows-x64.zip](https://github.com/Vierco/citoVision/releases/download/v1.0.0-beta/citoVision-1.0.0-beta-windows-x64.zip)** | Windows 10 o superior (64 bits) |
-| **iOS** | ➡️ **[Unirse a la beta por TestFlight](https://testflight.apple.com/join/Q5HKBm6E)** · plazas limitadas | iPhone con iOS 18.6 |
-
-> 🔬 **También se facilitan imágenes de muestra para probar la aplicación.** citoVision analiza fotografías de
-> frotis sanguíneos al microscopio, que no son fáciles de conseguir: en
-> [Para probar citoVision](#para-probar-citovision) hay un conjunto listo para descargar.
+| **Android** | APK | Android 8.1 (API 27) |
+| **macOS** | DMG | macOS (Apple Silicon o Intel) |
+| **Windows** | ZIP ejecutable (no se instala) | Windows 10 o superior (64 bits) |
+| **iOS** | Invitación a **TestFlight** | iPhone con iOS 18.6 |
 
 > ⚠️ **Android, macOS y Windows muestran un aviso de seguridad la primera vez.** Es lo habitual en software
-> distribuido fuera de la App Store y de Google Play, y no indica ningún problema con la aplicación. La página
-> de la release explica cómo abrirla con normalidad en cada sistema.
-
-> ℹ️ **La versión de Windows no se instala.** Se descomprime el ZIP y se ejecuta `citoVision.exe` desde la
-> carpeta: lleva su propio entorno de ejecución dentro, así que no hace falta instalar Java ni permisos de
-> administrador. La primera vez, Windows puede mostrar el aviso «Windows protegió su PC» porque el ejecutable
-> no está firmado; se abre con **Más información → Ejecutar de todas formas**. El razonamiento completo está
-> en [ADR-0011](docs/adr/0011-soporte-windows-desktop.md).
+> distribuido fuera de la App Store y de Google Play, y no indica ningún problema con la aplicación. Las
+> [instrucciones de instalación](docs/instrucciones-entrega.md) explican cómo abrirla con normalidad en cada
+> sistema.
 
 > ℹ️ **Por qué iOS se reparte de otra forma.** Android, macOS y Windows permiten instalar software fuera de
 > su tienda; iOS no: un iPhone solo ejecuta aplicaciones firmadas por un perfil que lo autorice, así que no
 > existe un equivalente al APK suelto. La versión de iOS se distribuye por **TestFlight**, el canal de betas
-> de Apple: basta con instalar la app TestFlight desde la App Store y abrir el enlace de arriba desde el
-> iPhone, sin necesidad de Mac ni de Xcode. Ten en cuenta dos límites propios del canal: **las builds caducan
-> a los 90 días** de publicarse, y el grupo de pruebas tiene un aforo fijado. El razonamiento completo y las
-> alternativas descartadas están en [ADR-0010](docs/adr/0010-distribucion-ios-testflight.md).
-
-
-## Para probar citoVision
-
-Para probar las funciones de detección, conteo, clasificación y priorización de CitoVision, puedes descargar una selección de imágenes microscópicas de muestra desde el siguiente enlace:
-
-➡️  [**Muestras para probar la aplicación CitoVision**](https://drive.google.com/file/d/1OjNSxrATrKuYkSkE31K0ogvtN6eKJwrJ/view?usp=sharing)
-
-> Estas imágenes se proporcionan exclusivamente con fines académicos y de demostración. Los resultados obtenidos no constituyen un diagnóstico clínico.
+> de Apple, mediante invitación al correo con el que se solicita. Ten en cuenta dos límites propios del canal:
+> **las builds caducan a los 90 días** de publicarse, y el grupo de pruebas tiene un aforo fijado. El
+> razonamiento completo y las alternativas descartadas están en
+> [ADR-0010](docs/adr/0010-distribucion-ios-testflight.md); el de Windows, en
+> [ADR-0011](docs/adr/0011-soporte-windows-desktop.md).
 
 ## El modelo de IA
 
@@ -230,7 +214,11 @@ evalúan con un **umbral de confianza rebajado** para no perder hallazgos débil
 diferenciada y con un efecto **acotado** sobre la prioridad (nunca elevan por sí solos una muestra a
 prioridad alta).
 
-> 📄 **Informe de entrenamiento del modelo:** [entrenamiento del modelo](/external/INFORME_TECNICO_ENTRENAMIENTO_MODELO_CITOVISION.md)
+> 🔒 **Los pesos del modelo y el informe de entrenamiento no se publican en este repositorio.** Lo que sí está
+> es toda la ingeniería que lo rodea: la integración de ONNX Runtime en las cuatro plataformas
+> ([ADR-0003](docs/adr/0003-inferencia-on-device-onnx-runtime.md),
+> [ADR-0007](docs/adr/0007-inferencia-onnx-ios-spm-swift.md)), el pre y posprocesado YOLO, la política de
+> umbrales por clase y la priorización ([SPEC-0006](docs/specs/0006-analisis-celular-modelo-onnx.md)).
 
 
 ## Datos: local y remoto
@@ -276,6 +264,10 @@ Splash → Login → Pantalla principal
 ```
 
 ## Cómo compilar
+
+> 🔒 El proyecto compila sin el modelo, pero **la pantalla de Análisis no puede analizar**: el fichero
+> `.onnx` que carga `CellDetectorModel.kt` no está en el repositorio. El resto de la aplicación (acceso,
+> historial, pacientes, ajustes) funciona con normalidad. Consulta la [licencia](LICENSE) antes de compilar.
 
 **Requisitos**
 
@@ -378,11 +370,15 @@ Desarrollado por **Lovelaced** — Sergio Álvarez.
 
 **citoVision** — Copyright © 2026 Sergio Álvarez. Todos los derechos reservados.
 
-Software **propietario**. Es un prototipo académico y experimental: no está clínicamente validado, no es un
-producto sanitario y no debe utilizarse para emitir diagnósticos ni sustituir el criterio de profesionales
-sanitarios. Para cualquier uso, reutilización o modificación del código, contacta con el autor.
+Software **propietario**: el código se publica para su lectura y evaluación, no para su uso, copia,
+modificación o distribución. Los términos completos están en [`LICENSE`](LICENSE). Es un prototipo académico
+y experimental: no está clínicamente validado, no es un producto sanitario y no debe utilizarse para emitir
+diagnósticos ni sustituir el criterio de profesionales sanitarios. Para cualquier uso, reutilización o
+modificación del código, escribe a **[hola@citovision.app](mailto:hola@citovision.app)**.
 
 **Atribución del dataset** — citoVision utiliza el **UNIVALI Leukocyte Dataset**, disponible en
 [Zenodo](https://zenodo.org/records/17743609) bajo licencia **Creative Commons Attribution 4.0 International
 (CC BY 4.0)**. El conjunto de datos se reorganizó mediante un reparto estratificado y se empleó para ajustar
-un modelo de segmentación. Los autores del dataset no respaldan ni certifican citoVision.
+un modelo de segmentación. Las imágenes de frotis que aparecen en este README proceden de ese dataset y se
+muestran **redimensionadas para su visualización**. Los autores del dataset no respaldan ni certifican
+citoVision.

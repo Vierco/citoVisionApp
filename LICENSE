@@ -1,0 +1,52 @@
+citoVision — Licencia de software propietario
+
+Copyright © 2026 Sergio Álvarez (Lovelaced). Todos los derechos reservados.
+
+1. Objeto
+
+   Este repositorio contiene el código fuente y la documentación de citoVision, una aplicación
+   multiplataforma de apoyo al cribado morfológico hematológico. Se publica con el único fin de
+   permitir su lectura y evaluación como muestra del trabajo de su autor.
+
+2. Lo que se permite
+
+   Consultar, leer y estudiar el código fuente y la documentación de este repositorio.
+
+3. Lo que no se permite sin autorización previa y por escrito del titular
+
+   a) Usar el software, en todo o en parte, con cualquier fin, incluido el académico o el personal.
+   b) Copiar, reproducir, redistribuir o publicar el código fuente o cualquier obra derivada.
+   c) Modificar, traducir, adaptar o crear obras derivadas.
+   d) Compilar, empaquetar o ejecutar el software fuera de la evaluación descrita en el punto 2.
+   e) Explotar comercialmente el software, sus componentes, su documentación o el conocimiento
+      técnico que contienen.
+   f) Utilizar el nombre «citoVision», su logotipo o su identidad visual.
+
+   Cualquier uso no contemplado en el punto 2 requiere licencia expresa. Para solicitarla, escriba a
+   hola@citovision.app.
+
+4. El modelo de inteligencia artificial
+
+   Los pesos del modelo de detección y clasificación celular NO forman parte de este repositorio y no
+   se conceden con esta licencia. El acceso a la aplicación funcional se concede exclusivamente bajo
+   solicitud.
+
+5. Componentes de terceros
+
+   citoVision utiliza bibliotecas y datos de terceros sujetos a sus propias licencias, que prevalecen
+   sobre esta en lo que a esos componentes se refiere. En particular, el UNIVALI Leukocyte Dataset
+   (Zenodo, CC BY 4.0) se ha utilizado con atribución; sus autores no respaldan ni certifican
+   citoVision.
+
+6. Exclusión de garantías y de responsabilidad
+
+   El software se proporciona «TAL CUAL», sin garantía de ningún tipo, expresa o implícita. citoVision
+   es un prototipo académico y experimental: NO está clínicamente validado, NO es un producto sanitario
+   y NO debe utilizarse para emitir diagnósticos ni sustituir el criterio de profesionales sanitarios.
+   En ningún caso el titular será responsable de daño alguno derivado del uso o de la imposibilidad de
+   uso del software.
+
+7. Vigencia
+
+   Esta licencia se aplica desde la publicación del repositorio y a todas las versiones que en él se
+   publiquen, salvo que se indique expresamente otra cosa.
