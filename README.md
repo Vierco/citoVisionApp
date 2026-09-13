@@ -48,9 +48,8 @@ frotis sanguíneo y, sobre cada muestra, **detecta y clasifica las células**, l
 calcula una **prioridad de revisión** según los hallazgos morfológicos encontrados. La inferencia se
 ejecuta **en el propio dispositivo** (on-device), sin enviar la imagen a ningún servidor para analizarla.
 
-Es el Trabajo Fin de Máster que desarrolla el **primer módulo** de una plataforma modular de análisis
-microscópico asistido por IA. Está concebido como un **MVP** (producto mínimo viable) con un alcance
-realista y técnicamente sólido.
+Es un **MVP en desarrollo** que inició su vida como Trabajo Fin de Máster: el **primer módulo** de una
+plataforma modular de análisis microscópico asistido por IA, con un alcance realista y técnicamente sólido.
 
 > ⚠️ **citoVision no diagnostica.** Es un prototipo académico y experimental, no está clínicamente validado
 > y no es un producto sanitario. Su función es **priorizar** qué muestras conviene revisar antes; la
@@ -87,8 +86,8 @@ el criterio experto; reduce el tiempo hasta que ese criterio se aplica donde má
 ## Funcionalidades
 
 - **Splash** e identidad visual propia.
-- **Acceso**: correo y contraseña, Google Sign-In (Android) y **modo invitado** local. Las cuentas **no se
-  crean desde la aplicación**: las genera **Lovelaced**, desarrolladora de citoVision, a petición.
+- **Acceso**: correo y contraseña, Google Sign-In y **modo invitado** local. Las cuentas **no se crean
+  desde la aplicación**: las genera la desarrolladora a petición.
 - **Navegación inferior** con tres pestañas: Análisis, Historial y Pacientes.
 - **Análisis de una muestra**: selección de imagen, **inferencia on-device**, conteo y clasificación por
   tipo celular, y **badge de prioridad** (baja / media / alta) con aviso no diagnóstico.
@@ -96,11 +95,12 @@ el criterio experto; reduce el tiempo hasta que ese criterio se aplica donde má
 - **Historial local** de análisis con visor de imagen a pantalla completa.
 - **Consulta por paciente**: listado filtrable de los códigos de paciente del usuario y sus análisis
   almacenados en la nube.
-- **Ajustes**: identidad de la cuenta, tema claro/oscuro/sistema, envío de feedback, borrado de datos
-  locales, información de licencia y atribuciones.
+- **Ajustes**: identidad de la cuenta, **origen de las imágenes** (galería de fotos o explorador de
+  archivos, según el flujo de trabajo del laboratorio), tema claro/oscuro/sistema, envío de feedback,
+  borrado de datos locales, información de licencia y atribuciones.
 
 > 👤 **Acceso con cuenta.** Por seguridad, el registro está cerrado: los usuarios **no pueden crearse desde
-> la aplicación**. Es **Lovelaced**, desarrolladora de citoVision, quien genera las cuentas a petición. Sin
+> la aplicación**. Es la desarrolladora quien genera las cuentas a petición. Sin
 > cuenta puedes usar la app en **modo invitado** (análisis e historial locales). Si te interesa probar
 > citoVision con cuenta de usuario, escríbenos a **[hola@citovision.app](mailto:hola@citovision.app)**
 
@@ -154,9 +154,8 @@ shared/
 
 ## Probar citoVision
 
-citoVision se distribuye **bajo solicitud**. Los ejecutables llevan el modelo de IA dentro, así que no hay
-descargas abiertas: escribe a **[hola@citovision.app](mailto:hola@citovision.app)** indicando la plataforma y
-recibirás el paquete correspondiente junto con las instrucciones de instalación y un conjunto de imágenes de
+citoVision se distribuye **bajo solicitud**: escribe a **[hola@citovision.app](mailto:hola@citovision.app)**
+indicando la plataforma y recibirás el paquete correspondiente junto con las instrucciones de instalación y un conjunto de imágenes de
 frotis para probarlo. La versión actual es **1.0.0-beta**.
 
 | Plataforma | Formato | Requisito mínimo |
@@ -182,9 +181,9 @@ frotis para probarlo. La versión actual es **1.0.0-beta**.
 
 ## El modelo de IA
 
-citoVision incorpora un **modelo propio de detección y clasificación celular**, entrenado sobre el
-**UNIVALI Leukocyte Dataset** y ejecutado **en el propio dispositivo**: la imagen no sale de él para ser
-analizada.
+citoVision **no entrena desde cero**: parte de un **modelo preentrenado** y lo especializa mediante
+**Transfer Learning (fine-tuning)** sobre datasets de imágenes de células sanguíneas. El modelo resultante se
+ejecuta **en el propio dispositivo**: la imagen no sale de él para ser analizada.
 
 El modelo reconoce **14 clases** (12 tipos celulares + 2 no celulares). Cada tipo aporta un **peso de
 relevancia morfológica**: cuanto mayor es la presencia de células inmaduras o atípicas, mayor es la
@@ -338,7 +337,7 @@ registradas como **ADR** (Architecture Decision Records) y **RFC**. Esta documen
 repositorio y es la fuente de verdad del proyecto — este README se ha redactado a partir de ella:
 
 - `docs/specs/` — especificaciones funcionales (autenticación, imagen, historial, base remota, inferencia…)
-- `docs/adr/` — decisiones de arquitectura (Firestore REST, auth Desktop, inferencia ONNX…)
+- `docs/adr/` — decisiones de arquitectura (base de datos remota, autenticación, inferencia, distribución…)
 - `docs/rfc/` — propuestas técnicas
 - `AGENTS.md`, `ARCHITECTURE.md`, `DESIGN.md`, `RULES.md`, `TESTING.md`, `SECURITY_MOBILE.md` — normas
   transversales del proyecto
@@ -350,7 +349,7 @@ repositorio y es la fuente de verdad del proyecto — este README se ha redactad
 - [x] Autenticación (Firebase / Identity Toolkit REST)
 - [x] Análisis de imagen e **inferencia on-device (ONNX)**
 - [x] Modelo entrenado y validado para el MVP
-- [x] Historial local (Room) y análisis por paciente (Firestore + Storage)
+- [x] Historial local y análisis por paciente en la nube
 - [x] Reglas de seguridad cerradas (autorización en servidor)
 - [x] Tema claro/oscuro y pulido de UI
 - [x] Entregables firmados: **APK + AAB** (Android) y **DMG** (macOS)
@@ -363,8 +362,6 @@ repositorio y es la fuente de verdad del proyecto — este README se ha redactad
 - [x] Documentación final del TFM
 
 ## Licencia y atribución
-
-Desarrollado por **Lovelaced** — Sergio Álvarez.
 
 **citoVision** — Copyright © 2026 Sergio Álvarez. Todos los derechos reservados.
 

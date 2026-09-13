@@ -120,7 +120,7 @@ el canal de betas de Apple. No hacen falta ni Mac ni Xcode.
 - Puedes entrar en **modo invitado** para probar la aplicación sin cuenta.
 - Iniciar sesión (con Google, o con correo y contraseña) añade la pantalla **Pacientes**, que asocia los
   análisis a un código de paciente y los sincroniza entre dispositivos. Las cuentas de correo y contraseña las
-  gestiona **Lovelaced**; si necesitas una, contacta con el equipo.
+  gestiona la desarrolladora; si necesitas una, escribe al mismo correo.
 - Para probarlo necesitas imágenes de frotis sanguíneo al microscopio, que no son fáciles de conseguir. Con
   el paquete se incluye un conjunto de muestras; si no lo tienes, pídelo al mismo correo.
 - En **Ajustes → Origen de las imágenes** eliges si el selector abre la galería de fotos o el explorador de
