@@ -13,7 +13,7 @@
   <img alt="Kotlin" src="https://img.shields.io/badge/Kotlin-2.2-7F52FF?logo=kotlin&logoColor=white">
   <img alt="Compose Multiplatform" src="https://img.shields.io/badge/Compose%20Multiplatform-1.10-4285F4?logo=jetpackcompose&logoColor=white">
   <img alt="Plataformas" src="https://img.shields.io/badge/Plataformas-Android%20%7C%20macOS-3DDC84?logo=android&logoColor=white">
-  <img alt="IA" src="https://img.shields.io/badge/IA-YOLO11s--seg%20%2B%20ONNX%20Runtime-00A3E0">
+  <img alt="IA" src="https://img.shields.io/badge/IA-Detecci%C3%B3n%20celular%20on--device-00A3E0">
   <img alt="Licencia" src="https://img.shields.io/badge/Licencia-Propietaria-lightgrey">
   <img alt="Estado" src="https://img.shields.io/badge/Estado-MVP%201.0--beta-orange">
 </p>
@@ -141,7 +141,6 @@ shared/
 | Imágenes | Coil 3 |
 | Logging | Napier |
 | IA (inferencia) | ONNX Runtime 1.22 (on-device, Android + iOS + Desktop) |
-| IA (entrenamiento) | Python · Ultralytics YOLO11 · Transfer Learning (fine-tuning) |
 | Backend | Firebase Authentication · Cloud Firestore · Firebase Storage (vía API REST) |
 | Cobertura de tests | Kover |
 
@@ -183,10 +182,9 @@ frotis para probarlo. La versión actual es **1.0.0-beta**.
 
 ## El modelo de IA
 
-citoVision **no entrena desde cero**: parte de **YOLO11s-seg** y lo especializa mediante **Transfer
-Learning (fine-tuning)** sobre el **UNIVALI Leukocyte Dataset**, reorganizado con un **reparto
-estratificado** por clase. En la aplicación se ejecuta exportado a **ONNX** y corriendo **on-device** con
-ONNX Runtime; se usa la rama de detección del modelo (las máscaras de segmentación no se explotan en el MVP).
+citoVision incorpora un **modelo propio de detección y clasificación celular**, entrenado sobre el
+**UNIVALI Leukocyte Dataset** y ejecutado **en el propio dispositivo**: la imagen no sale de él para ser
+analizada.
 
 El modelo reconoce **14 clases** (12 tipos celulares + 2 no celulares). Cada tipo aporta un **peso de
 relevancia morfológica**: cuanto mayor es la presencia de células inmaduras o atípicas, mayor es la
@@ -214,37 +212,37 @@ evalúan con un **umbral de confianza rebajado** para no perder hallazgos débil
 diferenciada y con un efecto **acotado** sobre la prioridad (nunca elevan por sí solos una muestra a
 prioridad alta).
 
-> 🔒 **Los pesos del modelo y el informe de entrenamiento no se publican en este repositorio.** Lo que sí está
-> es toda la ingeniería que lo rodea: la integración de ONNX Runtime en las cuatro plataformas
+> 🔒 **Ni el modelo ni su proceso de entrenamiento forman parte de este repositorio.** Sí está la
+> integración del motor de inferencia en las cuatro plataformas y la lógica de priorización
 > ([ADR-0003](docs/adr/0003-inferencia-on-device-onnx-runtime.md),
-> [ADR-0007](docs/adr/0007-inferencia-onnx-ios-spm-swift.md)), el pre y posprocesado YOLO, la política de
-> umbrales por clase y la priorización ([SPEC-0006](docs/specs/0006-analisis-celular-modelo-onnx.md)).
+> [ADR-0007](docs/adr/0007-inferencia-onnx-ios-spm-swift.md),
+> [SPEC-0006](docs/specs/0006-analisis-celular-modelo-onnx.md)).
 
 
 ## Datos: local y remoto
 
 citoVision maneja **dos almacenes independientes**, por diseño:
 
-- **Muestras locales** (Room): cada análisis realizado se guarda en el dispositivo (imagen, conteo,
+- **Muestras locales**: cada análisis realizado se guarda en el dispositivo (imagen, conteo,
   prioridad, fecha) y se muestra en el **Historial**. Funciona también en **modo invitado**, sin cuenta.
-- **Análisis por paciente** (Firestore + Storage): con la sesión de una cuenta iniciada, los análisis se
+- **Análisis por paciente**: con la sesión de una cuenta iniciada, los análisis se
   **sincronizan a la nube** asociados a un **código de paciente** seudonimizado. La pestaña **Pacientes**
   consulta ese almacén remoto, acotado a los datos del propio usuario.
 
 Ambos son independientes: borrar una muestra del Historial local no afecta al análisis remoto, y viceversa.
-La sincronización a la nube es **asíncrona y duradera** (patrón *outbox*): la muestra local se guarda al
-instante y el envío remoto se reintenta hasta completarse.
+La sincronización a la nube es **asíncrona y duradera**: la muestra local se guarda al instante y el envío
+remoto se reintenta hasta completarse, aunque se pierda la conexión.
 
 ## Seguridad y privacidad
 
-- **Autorización en el servidor.** Las reglas de Firestore y Storage exigen sesión autenticada y **acotan
-  cada dato a su propietario** (`ownerUid`); no es una restricción solo de interfaz.
-- **ID token en cada petición.** Las llamadas REST a Firebase viajan con el token del usuario; el cliente
-  sin credenciales queda reservado al inicio de sesión.
+- **Autorización en el servidor.** El acceso a los datos exige sesión autenticada y **cada dato queda
+  acotado a su propietario**; no es una restricción solo de interfaz.
+- **Sesión verificada en cada petición.** Toda llamada al servidor viaja identificada con la sesión del
+  usuario.
 - **Inferencia on-device.** La imagen se analiza en el dispositivo; no se envía a un servicio externo para
   su análisis.
-- **Sin secretos en el repositorio.** Las claves de configuración se aportan por build (`local.properties`
-  / variables de entorno), fuera del control de versiones.
+- **Sin secretos en el repositorio.** Las claves de configuración se aportan en el momento de compilar,
+  fuera del control de versiones.
 
 ## Flujos
 
